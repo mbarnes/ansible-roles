@@ -1,0 +1,41 @@
+---
+- name: Add corresponding packages for our dotfiles
+  apt:
+    name:
+    - bash
+    - rsync
+    - tmux
+    - vim-nox
+  become: true
+
+- name: Create config directories
+  file:
+    path: "{{ ansible_user_dir }}/.config/{{ item }}"
+    state: directory
+  loop:
+  - bash_aliases
+  - bash_profile
+  - tmux
+
+- name: Source additional bash configurations
+  blockinfile:
+    path: "{{ ansible_user_dir }}/.profile"
+    marker: "# [{{ role_name }}] {mark} ANSIBLE MANAGED BLOCK"
+    block: |
+      if [ -n "$BASH_VERSION" ]; then
+          if [ -d ~/.config/bash_profile ]; then
+              pushd ~/.config/bash_profile > /dev/null
+              for file in $(ls); do
+                  if [ -r $file ]; then
+                     . $file
+                  fi
+              done
+              popd > /dev/null
+          fi
+      fi
+
+- name: Copy dotfiles to home directory
+  copy:
+    src: "{{ item }}"
+    dest: "{{ ansible_user_dir }}/.{{ item | basename }}"
+  with_fileglob: "dotfiles/*"

@@ -1,0 +1,15 @@
+---
+- name: Add lvm2 package
+  apt:
+    name: lvm2
+  register: lvm2_install
+  become: yes
+
+- name: Gather ansible_lvm facts
+  setup:
+  when: lvm2_install.changed
+  become: yes
+
+- name: Ensure we have ansible_lvm facts
+  assert:
+    that: ansible_lvm is defined

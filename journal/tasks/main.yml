@@ -1,0 +1,8 @@
+---
+- name: Limit journal disk usage
+  lineinfile:
+    path: /etc/systemd/journald.conf
+    regexp: "^#?SystemMaxUser="
+    line: "SystemMaxUse={{ journal_max_disk_usage }}"
+  become: yes
+  notify: Restart journald

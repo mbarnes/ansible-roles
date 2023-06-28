@@ -1,0 +1,22 @@
+:scriptencoding utf-8
+
+" Load plugin and indent files for specific file types
+filetype plugin indent on
+
+" Set backspace behavior
+set backspace=indent,eol,start
+
+" Use UTF-8 encoding
+set encoding=utf-8
+
+" Do not expand tab characters into spaces
+set noexpandtab
+
+" Highlight search pattern matches
+set hlsearch
+
+" Show tabs, trailing whitespace, and continued lines visually
+set list listchars=tab:»·,trail:·,extends:…
+
+" Show line numbers
+set number

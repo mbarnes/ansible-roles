@@ -1,0 +1,23 @@
+{
+	"default_top_theme": "powerline",
+	"ext": {
+		"ipython": {
+			"colorscheme": "solarized"
+		},
+		"pdb": {
+			"colorscheme": "solarized"
+		},
+		"shell": {
+			"colorscheme": "solarized"
+		},
+		"tmux": {
+			"colorscheme": "solarized"
+		},
+		"vim": {
+			"colorscheme": "solarized"
+		},
+		"wm": {
+			"colorscheme": "solarized"
+		}
+	}
+}

@@ -1,0 +1,18 @@
+# Force tmux to assume the terminal supports 256 colors.
+alias tmux="tmux -2"
+
+# Make rsync work sanely with whitespace in paths.
+alias rsync="rsync --protect-args"
+
+export EDITOR=vim
+export PAGER=less
+
+if [ -d ~/.config/bash_aliases ]; then
+    pushd ~/.config/bash_aliases > /dev/null
+    for file in $(ls); do
+        if [ -r $file ]; then
+            . $file
+        fi
+    done
+    popd > /dev/null
+fi
