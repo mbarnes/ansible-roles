@@ -1,0 +1,6 @@
+---
+- name: Copy advancedsettings.xml for Kodi
+  template:
+    src: "advancedsettings.xml.j2"
+    dest: "{{ kodi_userdata_path }}/advancedsettings.xml"
+  notify: Restart Kodi

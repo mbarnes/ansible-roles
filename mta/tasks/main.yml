@@ -1,0 +1,25 @@
+---
+- name: Begin MTA configuration
+  become: yes
+  block:
+
+  - name: Add msmtp-mta package
+    apt:
+      name: msmtp-mta
+
+  - name: Add msmtp configuration
+    copy:
+      src: msmtprc.vault
+      dest: /etc/msmtprc
+      mode: u=rw,g=,o=
+      owner: root
+      group: root
+    no_log: True
+
+  - name: Extract default address from msmtp
+    shell: "msmtp --pretend < /dev/null | grep ^from | awk '{ print $3 }'"
+    register: msmtp_from
+
+  - name: Set mta_destination_address
+    set_fact:
+      mta_destination_address: "{{ msmtp_from.stdout }}"

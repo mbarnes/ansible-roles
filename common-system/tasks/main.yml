@@ -1,0 +1,41 @@
+---
+- name: Begin system configuration
+  become: yes
+  block:
+
+  - name: Set hostname to match inventory
+    hostname:
+      name: "{{ inventory_hostname }}"
+      use: systemd
+
+  - name: Update 127.0.1.1 hosts entry
+    lineinfile:
+      path: /etc/hosts
+      regexp: '^127\.0\.1\.1'
+      line: "127.0.1.1\t{{ inventory_hostname }}"
+
+  - name: Set backports repository name
+    set_fact:
+      backports_apt_repository_name: "{{ ansible_lsb.codename }}-backports"
+
+  - name: Add backports repository
+    apt_repository:
+      repo: "deb http://deb.debian.org/debian {{ backports_apt_repository_name }} main"
+      filename: "{{ backports_apt_repository_name }}"
+
+  - name: Add basic CLI tools
+    apt:
+      name:
+      - apt-file
+      - bash-completion
+      - bind9-dnsutils
+      - command-not-found
+      - htop
+      - lsof
+      - man-db
+      - rsync
+      - tmux
+      - usbutils
+
+  - name: Update the command-not-found cache
+    command: /usr/sbin/update-command-not-found

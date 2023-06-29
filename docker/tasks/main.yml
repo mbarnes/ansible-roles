@@ -1,0 +1,43 @@
+---
+- name: Begin Docker configuration
+  become: yes
+  block:
+
+  - name: Add packages to set up Docker's repository
+    apt:
+      name:
+      - apt-transport-https
+      - ca-certificates
+      - gnupg-agent
+
+  - name: Add Docker's official GPG key
+    apt_key:
+      url: https://download.docker.com/linux/debian/gpg
+
+  - name: Add apt repository for Docker
+    apt_repository:
+      repo: "deb https://download.docker.com/linux/debian {{ ansible_lsb.codename }} stable"
+
+  # XXX Workaround for Docker on Debian Bullseye
+  #     https://github.com/moby/libnetwork/issues/2331
+  - name: Link iptables to iptables-legacy
+    command: update-alternatives --set iptables /usr/sbin/iptables-legacy
+
+  - name: Add docker-ce packages
+    apt:
+      name:
+      - docker-ce
+      - docker-ce-cli
+      - python3-docker  # for Ansible docker modules
+
+  - name: Add user to "docker" group
+    user:
+      name: "{{ ansible_ssh_user }}"
+      groups: docker
+      append: yes
+
+  - name: Enable and start docker.service
+    systemd:
+      name: docker.service
+      enabled: yes
+      state: started

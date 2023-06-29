@@ -1,0 +1,160 @@
+---
+- name: Begin storage configuration
+  become: yes
+  block:
+
+  # XXX Installing mdadm on a Vero 4K without a mdadm.conf file present
+  #     results in the root partition somehow being re-mounted as read-
+  #     only, which breaks the system.  Upload a mdadm.conf file before
+  #     installing the mdadm package to prevent this.
+
+  - name: Add directory for mdadm configuration
+    file:
+      path: /etc/mdadm
+      state: directory
+
+  - name: Add a mdadm configuration
+    template:
+      src: mdadm.conf.j2
+      dest: /etc/mdadm/mdadm.conf
+      mode: u=rw,g=r,o=r
+      owner: root
+      group: root
+      force: no
+
+  - name: Add mdadm package
+    apt:
+      name: mdadm
+    register: mdadm_install
+
+  - name: Reboot to create RAID device
+    shell: sleep 2 && systemctl reboot
+    async: 1
+    poll: 0
+    when: mdadm_install.changed
+    ignore_errors: true
+
+  - name: Wait for host to become reachable
+    wait_for_connection:
+      delay: 10
+      timeout: 600
+    when: mdadm_install.changed
+
+  - name: Scan for software RAID devices
+    command: /sbin/mdadm --detail --scan
+    register: mdadm_scan
+
+  - set_fact:
+      raid_device_present: "{{ mdadm_scan.stdout_lines | length | bool }}"
+
+  - name: Configure software RAID device
+    when: raid_device_present
+    block:
+
+    - name: Add scan results to configuration
+      lineinfile:
+        path: /etc/mdadm/mdadm.conf
+        regexp: "^ARRAY "
+        line: "{{ mdadm_scan.stdout_lines[0] }}"
+      notify: Restart mdmonitor
+
+    - name: Find the canonical RAID device path
+      command: "realpath {{ mdadm_scan.stdout_lines[0].split()[1] }}"
+      register: raid_device
+
+    - name: Identify LVM volume group for RAID device
+      set_fact:
+        raid_device_vg: "{{ item.value.vg }}"
+      when:
+      - item.key == raid_device.stdout
+      - item.value.vg is defined
+      loop: "{{ ansible_lvm.pvs | dict2items }}"
+
+    - name: Ensure RAID device has a volume group
+      assert:
+        that: raid_device_vg is defined
+        success_msg: "volume group is {{ raid_device_vg }}"
+
+    - name: Identify LVM logical volume for RAID device
+      set_fact:
+        raid_device_lv: "{{ item.key }}"
+      when: item.value.vg == raid_device_vg
+      loop: "{{ ansible_lvm.lvs | dict2items }}"
+
+    - name: Set device path for mass-storage volume
+      set_fact:
+        storage_device: "{{ '/dev/%s/%s' % (raid_device_vg, raid_device_lv) }}"
+
+    - name: Add fstab entry and mount
+      mount:
+        src: "{{ storage_device }}"
+        path: "{{ storage_path }}"
+        fstype: "{{ storage_fstype }}"
+        opts: "{{ storage_options }}"
+        passno: "2"
+        state: mounted
+
+    - name: Enable mdmonitor
+      systemd:
+        name: mdmonitor.service
+        enabled: yes
+        state: started
+
+    - name: Add nfs-kernel-server package
+      apt:
+        name: nfs-kernel-server
+
+    - name: Add NFS exports
+      template:
+        src: exports.j2
+        dest: /etc/exports
+        mode: u=rwx,g=rx,o=rx
+        owner: root
+        group: root
+      notify: Reload NFS
+
+  - name: Add curlftpfs package
+    apt:
+      name: curlftpfs
+
+  - name: Add .netrc file
+    copy:
+      content: !vault |
+        $ANSIBLE_VAULT;1.1;AES256
+        66343036353631613132303062353435613162373463313533366234396433643266393934636536
+        6563656336303066353535336437666564336139333961640a316431333537326464633161333361
+        36616236306663383863303730343239393063323438303464306462396333353934323533376330
+        3463393539383937350a666561373033383136323061336662346530313065643135383363633765
+        30646535343462306466356637353762333930383664363034383435326665636535333861306661
+        62383439653138333635333531343339626464616230303534326163303031353666663535306639
+        37383130663464633936383832663331633566313266653636613661323534633166336539613265
+        37653439623335643230
+      dest: /root/.netrc
+      mode: u=rw,g=,o=
+      owner: root
+      group: root
+    no_log: True
+
+  - name: Create a mount point for the router's FTP server
+    file:
+      path: /mnt/router
+      state: directory
+
+  # The ASUS router has two USB ports that I occasionally
+  # use to transfer files from the storage array to a USB
+  # thumb drive. The router only activates the FTP server
+  # when a storage device is plugged into a USB port, and
+  # therefore the FTP file system can not stay mounted at
+  # all times.  Hence the "noauto" option.
+  - name: Define the router's FTP server as a file system
+    mount:
+      src: curlftpfs#router.asus.com
+      path: /mnt/router
+      fstype: fuse
+      opts: "noauto,allow_other,uid={{ ssh_user_uid }},gid={{ ssh_user_gid }}"
+      state: present
+
+- name: Copy helpful mdadm notes
+  copy:
+    src: mdadm.notes
+    dest: "{{ ansible_user_dir }}/mdadm.notes"

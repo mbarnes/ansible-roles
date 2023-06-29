@@ -1,0 +1,33 @@
+mdadm notes
+===========
+
+Growing a RAID array (with notes on LVM):
+https://raid.wiki.kernel.org/index.php/Growing
+
+
+If RAID-5 growth reshaping does not resume
+after reboot (as indicated by /proc/mdstat):
+
+1. Stop systemd services:
+   # systemctl stop nzbget.service sonarr.service radarr.service
+
+2. Unmount filesystem:
+   # umount /mnt/storage
+
+3. Deactivate volume group:
+    # vgchange --activate n storage
+
+4. Stop the RAID array:
+   # mdadm --stop /dev/md/osmc-storage-array1
+
+5. Reassemble the RAID array:
+   # mdadm --assemble --scan --name osmc-storage-array1
+
+6. Verify reshaping has resumed:
+   # watch cat /proc/mdstat
+
+7. Reverse steps 3, 2, and 1.
+
+
+This article saved the array after foolishly running "lvremove" / "vgremove".
+https://www.spheron1.uk/2011/03/20/recovering-logical-volumes-deleted-with-lvremove/

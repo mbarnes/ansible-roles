@@ -1,0 +1,10 @@
+---
+- name: Restart mdmonitor
+  systemd:
+    name: mdmonitor.service
+    state: restarted
+  become: yes
+
+- name: Reload NFS
+  command: /usr/sbin/exportfs -ra
+  become: yes

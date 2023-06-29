@@ -1,0 +1,53 @@
+---
+- name: Begin UPS configuration
+  become: yes
+  block:
+
+  - name: Add apcupsd package
+    apt:
+      name: apcupsd
+
+  - name: Customize apcupsd configuration
+    lineinfile:
+      path: /etc/apcupsd/apcupsd.conf
+      regexp: "^#?({{ item.key }})"
+      line: "\\1 {{ item.value }}"
+      backrefs: yes
+    loop:
+    # XXX There are two UPSNAME lines in apcupsd.conf.
+    #     We want the first match but lineinfile picks
+    #     the last match.
+    #- key: UPSNAME
+    #  value: "{{ inventory_hostname }}"
+    - key: UPSCABLE
+      value: usb
+    - key: UPSTYPE
+      value: usb
+    - key: DEVICE
+      value: ""
+    notify: Restart apcupsd
+
+  - name: Set email address for power events
+    lineinfile:
+      path: /etc/apcupsd/apccontrol
+      regexp: "^export SYSADMIN="
+      line: "export SYSADMIN={{ mta_destination_address }}"
+    notify: Restart apcupsd
+
+  - name: Add custom power handling scripts
+    template:
+      src: "{{ item }}.j2"
+      dest: "/etc/apcupsd/{{ item }}"
+      mode: u=rwx,g=rx,o=rx
+      owner: root
+      group: root
+    loop:
+    - onbattery
+    - offbattery
+    notify: Restart apcupsd
+
+  - name: Enable apcupsd
+    systemd:
+      name: apcupsd.service
+      enabled: yes
+      state: started

@@ -1,0 +1,14 @@
+---
+- name: Add user to "input" group
+  user:
+    name: "{{ ansible_user_id }}"
+    groups: input
+    append: yes
+  become: yes
+
+# XXX Use my own fork of retrOSMCmk2 until this is merged:
+#     https://github.com/hissingshark/retrOSMCmk2/pull/22
+- name: Clone retrOSMCmk2 repo for RetroPie installer
+  git:
+    repo: https://github.com/mbarnes/retrOSMCmk2.git
+    dest: "{{ ansible_user_dir }}/retrOSMCmk2"

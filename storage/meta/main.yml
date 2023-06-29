@@ -1,0 +1,4 @@
+---
+dependencies:
+- role: ansible_lvm
+- role: mta  # for mta_destination_address

@@ -1,0 +1,34 @@
+<advancedsettings>
+  <videodatabase>
+    <type>mysql</type>
+    <host>{{ mysql_host }}</host>
+    <port>{{ mysql_port }}</port>
+    <user>{{ mysql_user }}</user>
+    <pass>{{ mysql_pass }}</pass>
+  </videodatabase>
+  <musicdatabase>
+    <type>mysql</type>
+    <host>{{ mysql_host }}</host>
+    <port>{{ mysql_port }}</port>
+    <user>{{ mysql_user }}</user>
+    <pass>{{ mysql_pass }}</pass>
+  </musicdatabase>
+  <videolibrary>
+    <importwatchedstate>true</importwatchedstate>
+    <importresumepoint>true</importresumepoint>
+  </videolibrary>
+  <pathsubstitution>
+    <substitute>
+      <from>special://profile/favourites.xml</from>
+      <to>nfs://{{ nfs_host }}{{ kodi_userdata_path }}/favourites.xml</to>
+    </substitute>
+    <substitute>
+      <from>special://profile/playlists/</from>
+      <to>nfs://{{ nfs_host }}{{ kodi_userdata_path }}/playlists/</to>
+    </substitute>
+    <substitute>
+      <from>special://profile/sources.xml</from>
+      <to>nfs://{{ nfs_host }}{{ kodi_userdata_path }}/sources.xml</to>
+    </substitute>
+  </pathsubstitution>
+</advancedsettings>
