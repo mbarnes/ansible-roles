@@ -1,0 +1,4 @@
+---
+- name: Update GRUB configuration
+  command: /usr/sbin/update-grub2
+  become: yes

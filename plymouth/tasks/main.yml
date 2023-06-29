@@ -1,0 +1,24 @@
+---
+- name: Begin Plymouth configuration
+  become: yes
+  block:
+
+  # Based on https://wiki.debian.org/plymouth
+
+  - name: Add plymouth package
+    apt:
+      name:
+      - plymouth
+      - plymouth-x11
+
+  - name: Tweak GRUB configuration
+    lineinfile:
+      path: /etc/default/grub
+      regexp: "#?{{ item.key }}="
+      line: "{{ item.key }}={{ item.value }}"
+    loop:
+    - key: GRUB_CMDLINE_LINUX_DEFAULT
+      value: "\"quiet splash\""
+    - key: GRUB_GFXMODE
+      value: "{{ grub_gfxmode }}"
+    notify: Update GRUB configuration
