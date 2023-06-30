@@ -1,0 +1,25 @@
+---
+- name: Begin LightDM configuration
+  become: yes
+  block:
+
+  - name: Add lightdm and related packages
+    apt:
+      name:
+      - lightdm
+      - lightdm-gtk-greeter
+      - light-locker
+
+  - name: Tweak lightdm configuration
+    lineinfile:
+      path: /etc/lightdm/lightdm.conf
+      regexp: "#?{{ item.key }}="
+      line: "{{ item.key }}={{ item.value }}"
+    loop:
+    - key: greeter-hide-users
+      value: "false"
+
+- name: Download a face image for login screen
+  get_url:
+    url: "{{ lightdm_face_url }}"
+    dest: "{{ ansible_user_dir }}/.face"
