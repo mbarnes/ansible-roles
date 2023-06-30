@@ -1,0 +1,22 @@
+---
+- name: Begin Google Chrome configuration
+  become: yes
+  block:
+
+  # See https://www.google.com/linuxrepositories/
+  - name: Add Google's official GPG key
+    get_url:
+      url: https://dl.google.com/linux/linux_signing_key.pub
+      dest: /etc/apt/trusted.gpg.d/google-chrome.asc
+
+  - name: Add apt repository for Google Chrome
+    apt_repository:
+      # FIXME Determine the architecture programatically.
+      #       One possibility is using the package_facts module.
+      repo: "deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main"
+      filename: google-chrome
+
+  - name: Add google-chrome-stable package
+    apt:
+      name:
+      - google-chrome-stable
