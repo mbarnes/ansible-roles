@@ -16,7 +16,7 @@
 
   - name: Set backports repository name
     set_fact:
-      backports_apt_repository_name: "{{ ansible_lsb.codename }}-backports"
+      backports_apt_repository_name: "{{ ansible_distribution_release }}-backports"
 
   - name: Add backports repository
     apt_repository:
