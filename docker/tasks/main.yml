@@ -30,7 +30,6 @@
       name:
       - docker-ce
       - docker-ce-cli
-      - python3-docker  # for Ansible docker modules
 
   - name: Add user to "docker" group
     user:
