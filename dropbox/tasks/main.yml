@@ -1,0 +1,26 @@
+---
+- name: Begin Dropbox configuration
+  become: yes
+  block:
+
+  # See https://help.dropbox.com/installs/linux-commands
+  # It describes different methods for obtaining the signing
+  # key for Debian and Fedora repositories but it's the same
+  # key, and with apt-key(8) being deprecated it's easier to
+  # just grab the Fedora one.
+  - name: Add Dropbox's official GPG key
+    get_url:
+      url: https://linux.dropbox.com/fedora/rpm-public-key.asc
+      dest: /etc/apt/trusted.gpg.d/dropbox.asc
+
+  - name: Add apt repository for Dropbox
+    apt_repository:
+      # FIXME Determine the architecture programatically.
+      #       One possibility is using the package_facts module.
+      repo: "deb [arch=amd64] https://linux.dropbox.com/debian {{ ansible_distribution_release }} main"
+      filename: dropbox
+
+  - name: Add dropbox package
+    apt:
+      name:
+      - dropbox
