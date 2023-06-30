@@ -3,13 +3,6 @@
   become: yes
   block:
 
-  - name: Add packages to set up Docker's repository
-    apt:
-      name:
-      - apt-transport-https
-      - ca-certificates
-      - gnupg-agent
-
   - name: Add Docker's official GPG key
     get_url:
       url: https://download.docker.com/linux/debian/gpg
