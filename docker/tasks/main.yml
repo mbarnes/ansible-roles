@@ -14,7 +14,13 @@
       filename: docker
 
   # XXX Workaround for Docker on Debian Bullseye
+  #     (Is this still needed on Debian Bookworm?)
   #     https://github.com/moby/libnetwork/issues/2331
+  - name: Add iptables package
+    apt:
+      name:
+      - iptables
+
   - name: Link iptables to iptables-legacy
     command: update-alternatives --set iptables /usr/sbin/iptables-legacy
 
