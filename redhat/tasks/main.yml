@@ -1,0 +1,77 @@
+---
+- name: Begin Red Hat configuration
+  become: yes
+  block:
+
+  # ca-certificates to ensure /etc/ssl/certs/ exists
+  # krb5-user for /usr/bin/kinit and /usr/bin/klist
+  # kstart for /usr/bin/krenew
+  - name: Add necessary packages
+    apt:
+      name:
+      - ca-certificates
+      - krb5-user
+      - kstart
+      - network-manager-openvpn
+
+  # Root CA and openvpn profiles copied from:
+  # https://gitlab.consulting.redhat.com/ckuperst/debian-ubuntu-popos-redhat-internal-vpn/
+
+  - name: Add Red Hat IT Root Certificate Authority
+    copy:
+      src: 2015-RH-IT-Root-CA.pem
+      dest: /etc/ssl/certs
+      mode: u=rw,g=r,o=r
+      owner: root
+      group: root
+
+  - name: Add Red Hat VPN system connections
+    copy:
+      src: "{{ item }}"
+      dest: /etc/NetworkManager/system-connections/
+      mode: u=rw,g=,o=
+      owner: root
+      group: root
+    with_fileglob: "openvpn/*"
+    notify: Reload NetworkManager connection files
+
+  - name: Add directory for Kerberos configuration
+    file:
+      path: /etc/krb5.conf.d
+      state: directory
+
+  # From https://gitlab.corp.redhat.com/it-iam/system-configs/-/raw/master/krb5/idm/linux-krb5.conf
+  # With these modifications:
+  # - Add renew_lifetime = 7d
+  # - Use default credentials cache (FILE:/tmp/krb5cc_%{uid})
+  - name: Add Red Hat Kerberos configuration
+    copy:
+      src: krb5.conf
+      dest: /etc/
+      mode: u=rw,g=r,o=r
+      owner: root
+      group: root
+
+  - name: Add Red Hat Kerberos policy for Google Chrome
+    copy:
+      src: chrome/redhat-corp.json
+      dest: /etc/opt/chrome/policies/managed/
+      mode: u=rw,g=r,o=r
+      owner: root
+      group: root
+
+- name: Add systemd units for automatic Kerberos renewal
+  copy:
+    src: "{{ item }}"
+    dest: "{{ ansible_user_dir }}/.config/systemd/user/"
+  loop:
+  - krenew.path
+  - krenew.service
+
+- name: Start automatic Kerberos renewal
+  systemd:
+    name: krenew.path
+    daemon_reload: yes
+    enabled: yes
+    state: started
+    scope: user

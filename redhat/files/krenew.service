@@ -1,0 +1,11 @@
+[Unit]
+Description=Automatically renew a Kerberos ticket
+Documentation=man:krenew(1)
+
+[Service]
+ExecCondition=/usr/bin/klist -s
+ExecStart=/usr/bin/krenew -K 60 -v
+Restart=always
+
+[Install]
+WantedBy=default.target

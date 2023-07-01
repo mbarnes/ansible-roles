@@ -1,0 +1,9 @@
+[Unit]
+Description=Automatically renew a Kerberos ticket
+Documentation=man:krenew(1)
+
+[Path]
+PathModified=/tmp/krb5cc_%U
+
+[Install]
+WantedBy=default.target
