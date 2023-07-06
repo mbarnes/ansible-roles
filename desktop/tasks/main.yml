@@ -1,0 +1,75 @@
+---
+- name: Add base desktop packages
+  apt:
+    name:
+    - xfce4
+    - xfce4-whiskermenu-plugin
+    - krb5-auth-dialog
+    - fonts-hack
+    - gvfs-backends
+    - menulibre
+    - mugshot
+    - needrestart
+    - network-manager-openvpn-gnome
+  become: yes
+
+- name: Add desktop application packages
+  apt:
+    name:
+    - file-roller
+    - evince
+    - gnome-calculator
+    - gucharmap
+    - seahorse
+    - vlc
+  become: yes
+
+- name: Remove unwanted packages
+  apt:
+    name:
+    - atril      # replaced by evince
+    - parole     # replaced by vlc
+    - xarchiver  # replaced by file-roller
+    - xsane
+    - xterm      # replaced by xfce4-terminal
+    autoremove: yes
+    purge: yes
+    state: absent
+  become: yes
+
+- name: xfce4-terminal - Tweak settings
+  community.general.ini_file:
+    path: "{{ ansible_user_dir }}/.config/xfce4/terminal/terminalrc"
+    section: Configuration
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    no_extra_spaces: true
+  loop:
+  - option: CommandLoginShell
+    value: "TRUE"
+  - option: FontName
+    value: "Hack 10"
+  - option: MiscAlwaysShowTabs
+    value: "TRUE"
+  - option: MiscDefaultGeometry
+    value: "80x43"
+  - option: ShortcutsNoHelpkey
+    value: "TRUE"
+  - option: ShortcutsNoMenukey
+    value: "TRUE"
+  # Color codes copied from:
+  # /usr/share/xfce4/terminal/colorschemes/solarized-dark.theme
+  - option: ColorForeground
+    value: "#839496"
+  - option: ColorBackground
+    value: "#002b36"
+  - option: ColorCursor
+    value: "#93a1a1"
+  - option: TabActivityColor
+    value: "#dc322f"
+  - option: ColorPalette
+    value: "#073642;#dc322f;#859900;#b58900;#268bd2;#d33682;#2aa198;#eee8d5;#002b36;#cb4b16;#586e75;#657b83;#839496;#6c71c4;#93a1a1;#fdf6e3"
+  - option: ColorBold
+    value: "#93a1a1"
+  - option: ColorBoldUseDefault
+    value: "FALSE"
