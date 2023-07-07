@@ -1,0 +1,5 @@
+---
+- name: Add Minecraft Launcher
+  apt:
+    deb: https://launcher.mojang.com/download/Minecraft.deb
+  become: yes
