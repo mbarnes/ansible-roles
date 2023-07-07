@@ -1,0 +1,27 @@
+---
+- name: Add the default Go toolchain
+  apt:
+    name:
+    - golang-go
+  become: true
+
+- name: Create GOPATH directory
+  file:
+    path: "{{ golang_path }}"
+    state: directory
+
+# Do not overwrite the file since GOROOT may have been
+# manually changed to a different Go toolchain version.
+- name: Add GOPATH and GOROOT environment variables
+  template:
+    src: golang.j2
+    dest: "{{ ansible_user_dir }}/.config/bash_aliases/golang"
+    force: no
+
+- name: Clone vim-go as a vim package
+  git:
+    repo: https://github.com/fatih/vim-go.git
+    dest: "{{ ansible_user_dir }}/.vim/pack/plugins/start/vim-go"
+
+- name: Install additional Go binaries to support vim-go
+  command: vim -e "+GoInstallBinaries" "+q"
