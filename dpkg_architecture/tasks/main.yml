@@ -1,0 +1,9 @@
+---
+- name: Get architecture of packages dpkg installs
+  command: dpkg --print-architecture
+  register: dpkg_result
+  changed_when: False
+
+- name: Set dpkg_architecture fact
+  set_fact:
+    dpkg_architecture: "{{ dpkg_result.stdout }}"
