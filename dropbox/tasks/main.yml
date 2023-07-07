@@ -15,9 +15,7 @@
 
   - name: Add apt repository for Dropbox
     apt_repository:
-      # FIXME Determine the architecture programatically.
-      #       One possibility is using the package_facts module.
-      repo: "deb [arch=amd64] https://linux.dropbox.com/debian {{ ansible_distribution_release }} main"
+      repo: "deb [arch={{ dpkg_architecture }}] https://linux.dropbox.com/debian {{ ansible_distribution_release }} main"
       filename: dropbox
 
   - name: Add dropbox package
