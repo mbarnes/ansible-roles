@@ -1,0 +1,29 @@
+---
+- name: Export the public key
+  command: "gpg --export --armor {{ item.keyid }}"
+  register: gpg_public_key
+  delegate_to: localhost
+  changed_when: False
+  run_once: True
+
+# Uses a multiple task retry loop I learned from:
+# https://dev.to/nodeselector/retrying-groups-of-tightly-coupled-tasks-in-ansible-579d
+- name: Try exporting the secret key
+  include_tasks: export_secret_key.yml
+
+- name: Import the public key
+  command:
+    cmd: "gpg2 --import"
+    stdin: "{{ gpg_public_key.stdout }}"
+
+- name: Import the secret key
+  command:
+    argv:
+      - gpg2
+      - --import
+      - --batch
+      - --pinentry-mode
+      - loopback
+      - --passphrase
+      - "{{ gpg_secret_key_passphrase.user_input }}"
+    stdin: "{{ gpg_secret_key.stdout }}"
