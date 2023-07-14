@@ -7,6 +7,7 @@
     - krb5-auth-dialog
     - fonts-hack
     - gvfs-backends
+    - libglib2.0-bin  # for /usr/bin/gsettings
     - menulibre
     - mugshot
     - needrestart
@@ -36,6 +37,16 @@
     purge: yes
     state: absent
   become: yes
+
+- name: Tweak GSettings
+  command: "gsettings set {{ item.schema }} {{ item.key }} {{ item.value }}"
+  loop:
+  # Either "recent" or "cwd"; controls whether the file chooser starts up
+  # showing the list of recently-used files, or the contents of the current
+  # working directory.
+  - schema: "org.gtk.Settings.FileChooser"
+    key: "startup-mode"
+    value: "cwd"
 
 - name: xfce4-terminal - Tweak settings
   community.general.ini_file:
