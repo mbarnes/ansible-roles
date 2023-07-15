@@ -3,16 +3,19 @@
   become: yes
   block:
 
-  - name: Set hostname to match inventory
-    hostname:
-      name: "{{ inventory_hostname }}"
-      use: systemd
-
-  - name: Update 127.0.1.1 hosts entry
+  - name: Update 127.0.1.1 hosts entry (w/ FQDN)
     lineinfile:
       path: /etc/hosts
       regexp: '^127\.0\.1\.1'
-      line: "127.0.1.1\t{{ inventory_hostname }}"
+      line: "127.0.1.1\t{{ ansible_fqdn }} {{ ansible_hostname }}"
+    when: ansible_fqdn != ansible_hostname
+
+  - name: Update 127.0.1.1 hosts entry (w/o FQDN)
+    lineinfile:
+      path: /etc/hosts
+      regexp: '^127\.0\.1\.1'
+      line: "127.0.1.1\t{{ ansible_fqdn }}"
+    when: ansible_fqdn == ansible_hostname
 
   - name: Set backports repository name
     set_fact:
