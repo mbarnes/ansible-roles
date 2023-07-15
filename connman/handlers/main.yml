@@ -1,0 +1,6 @@
+---
+- name: Restart connman
+  systemd:
+    name: connman.service
+    state: restarted
+  become: yes
