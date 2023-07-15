@@ -38,6 +38,11 @@
     state: absent
   become: yes
 
+- name: Use gcr-ssh-agent.socket if available
+  copy:
+    src: gcr-ssh-agent
+    dest: "{{ ansible_user_dir }}/.config/bash_aliases/gcr-ssh-agent"
+
 - name: Tweak GSettings
   command: "gsettings set {{ item.schema }} {{ item.key }} {{ item.value }}"
   loop:

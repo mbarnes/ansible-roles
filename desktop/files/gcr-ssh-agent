@@ -1,0 +1,4 @@
+if $(systemctl --user --quiet is-active gcr-ssh-agent.socket)
+then
+    export SSH_AUTH_SOCK=$XDG_RUNTIME_DIR/gcr/ssh
+fi
