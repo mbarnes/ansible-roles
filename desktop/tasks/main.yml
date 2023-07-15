@@ -38,6 +38,14 @@
     state: absent
   become: yes
 
+- name: Add user to more groups
+  user:
+    name: "{{ ansible_user_id }}"
+    groups:
+    - systemd-journal
+    append: yes
+  become: yes
+
 - name: Use gcr-ssh-agent.socket if available
   copy:
     src: gcr-ssh-agent
