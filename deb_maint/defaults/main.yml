@@ -1,0 +1,3 @@
+---
+deb_fullname: "{{ ansible_user_gecos | split(',') | first }}"
+deb_email: "{{ ansible_user_id }}@{{ ansible_domain }}"

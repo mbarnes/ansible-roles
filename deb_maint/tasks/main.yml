@@ -1,0 +1,27 @@
+---
+# Note: I am not a Debian maintainer, but I have occasionally needed to
+#       patch and rebuild existing packages for myself.  This role aims
+#       to set up the required tools and configuration.
+
+- name: Add Debian packaging tools
+  apt:
+    name:
+    - packaging-dev
+    - dh-make
+  become: true
+
+- name: Add dh_make configuration
+  template:
+    src: dh_make.j2
+    dest: "{{ ansible_user_dir }}/.config/bash_aliases/dh_make"
+
+- name: Add dquilt configuration
+  copy:
+    src: dquilt
+    dest: "{{ ansible_user_dir }}/.config/bash_aliases/"
+
+- name: Copy dotfiles to home directory
+  copy:
+    src: "{{ item }}"
+    dest: "{{ ansible_user_dir }}/.{{ item | basename }}"
+  with_fileglob: "dotfiles/*"
