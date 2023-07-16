@@ -11,7 +11,7 @@ if [ -d ~/.config/bash_aliases ]; then
     pushd ~/.config/bash_aliases > /dev/null
     for file in $(ls); do
         if [ -r $file ]; then
-            . $file
+            . ./$file
         fi
     done
     popd > /dev/null

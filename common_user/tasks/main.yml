@@ -27,7 +27,7 @@
               pushd ~/.config/bash_profile > /dev/null
               for file in $(ls); do
                   if [ -r $file ]; then
-                     . $file
+                     . ./$file
                   fi
               done
               popd > /dev/null
