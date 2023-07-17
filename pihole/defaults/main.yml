@@ -1,0 +1,4 @@
+---
+pihole_memory_limit: 100m
+pihole_host_dns_port: 53
+pihole_host_http_port: 80

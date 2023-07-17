@@ -1,0 +1,26 @@
+[Unit]
+Description=Pi-hole (container)
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+RestartSec=30
+
+ExecStart=/usr/bin/docker run --rm \
+                              --name=pihole \
+                              --memory={{ pihole_memory_limit }} \
+                              --publish={{ pihole_host_dns_port }}:53/tcp \
+                              --publish={{ pihole_host_dns_port }}:53/udp \
+                              --publish={{ pihole_host_http_port }}:80 \
+                              --volume=/etc/pihole:/etc/pihole \
+                              --volume=/etc/dnsmasq.d:/etc/dnsmasq.d \
+                              --dns=127.0.0.1 \
+                              --dns=1.1.1.1 \
+                              --env=TZ={{ timezone }} \
+                              {{ pihole_image_name }}
+
+ExecStop=/usr/bin/docker stop pihole
+
+[Install]
+WantedBy=multi-user.target
