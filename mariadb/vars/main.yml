@@ -1,0 +1,3 @@
+---
+mariadb_image_name: ghcr.io/linuxserver/mariadb
+mariadb_config_dir: /var/lib/mariadb
