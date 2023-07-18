@@ -12,8 +12,8 @@
     file:
       path: "{{ mariadb_config_dir }}"
       mode: u=rwx,g=rx,o=rx
-      owner: "{{ ansible_env.SUDO_UID }}"
-      group: "{{ ansible_env.SUDO_GID }}"
+      owner: "{{ ansible_user_uid }}"
+      group: "{{ ansible_user_gid }}"
       state: directory
 
   - name: Add service file for docker image

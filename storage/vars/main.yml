@@ -3,7 +3,3 @@
 storage_path: /mnt/storage
 storage_fstype: ext4
 storage_options: auto
-
-# For system-level tasks that need the non-root user
-ssh_user_uid: "{{ ansible_env.SUDO_UID }}"
-ssh_user_gid: "{{ ansible_env.SUDO_GID }}"

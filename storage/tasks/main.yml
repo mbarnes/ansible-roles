@@ -151,7 +151,7 @@
       src: curlftpfs#router.asus.com
       path: /mnt/router
       fstype: fuse
-      opts: "noauto,allow_other,uid={{ ssh_user_uid }},gid={{ ssh_user_gid }}"
+      opts: "noauto,allow_other,uid={{ ansible_user_uid }},gid={{ ansible_user_gid }}"
       state: present
 
 - name: Copy helpful mdadm notes

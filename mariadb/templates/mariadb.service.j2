@@ -12,8 +12,8 @@ ExecStart=/usr/bin/docker run --rm \
                               --memory={{ mariadb_memory_limit }} \
                               --publish={{ mariadb_host_port }}:3306 \
                               --volume={{ mariadb_config_dir }}:/config \
-                              --env=PUID={{ osmc_user_uid }} \
-                              --env=PGID={{ osmc_user_gid }} \
+                              --env=PUID={{ ansible_user_uid }} \
+                              --env=PGID={{ ansible_user_gid }} \
                               --env=TZ={{ timezone }} \
                               {{ mariadb_image_name }}
 
