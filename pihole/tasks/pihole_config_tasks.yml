@@ -1,0 +1,6 @@
+---
+- name: "pihole : Add configuration file"
+  copy:
+    src: setupVars.conf
+    dest: /etc/pihole/
+  become: true

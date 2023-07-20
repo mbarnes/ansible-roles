@@ -1,50 +1,25 @@
 ---
-- name: Begin MariaDB configuration
-  become: yes
-  block:
+- import_role:
+    name: docker_service
+  vars:
+    docker_service_name: mariadb
+    docker_service_image_name: "{{ mariadb_image_name }}"
+    docker_service_mount_points:
+    - path: "{{ mariadb_config_dir }}"
 
-  - name: Pull docker image
-    docker_image:
-      name: "{{ mariadb_image_name }}"
-      source: pull
-
-  - name: Create volume mount point
-    file:
-      path: "{{ mariadb_config_dir }}"
-      mode: u=rwx,g=rx,o=rx
-      owner: "{{ ansible_user_uid }}"
-      group: "{{ ansible_user_gid }}"
-      state: directory
-
-  - name: Add service file for docker image
-    template:
-      src: mariadb.service.j2
-      dest: /etc/systemd/system/mariadb.service
-      mode: u=rw,g=r,o=r
-      owner: root
-      group: root
-    register: mariadb_service
-
-  - name: Enable and start mariadb.service
-    systemd:
-      name: mariadb.service
-      enabled: yes
-      state: "{{ mariadb_service.changed | ternary('restarted', 'started') }}"
-      daemon_reload: "{{ mariadb_service.changed }}"
-
-  # Kodi database does not need to be secure.
-  - name: Create a MariaDB user for Kodi
-    mysql_user:
-      name: kodi
-      host: '%'
-      password: kodi
-      priv: '*.*:ALL'
-      check_implicit_admin: yes
-    # XXX Client connections are flaky immediately after a restart.
-    #     Perhaps an issue with the linuxserver/mariadb image?
-    #     Tried waiting for the host port to open, but still flaky.
-    #     So resorting to delayed retries.  Seems to work.
-    retries: 3
-    delay: 3
-    register: mariadb_user
-    until: mariadb_user is not failed
+# Kodi database does not need to be secure.
+- name: Create a MariaDB user for Kodi
+  mysql_user:
+    name: kodi
+    host: '%'
+    password: kodi
+    priv: '*.*:ALL'
+    check_implicit_admin: yes
+  # XXX Client connections are flaky immediately after a restart.
+  #     Perhaps an issue with the linuxserver/mariadb image?
+  #     Tried waiting for the host port to open, but still flaky.
+  #     So resorting to delayed retries.  Seems to work.
+  retries: 3
+  delay: 3
+  register: mariadb_user
+  until: mariadb_user is not failed

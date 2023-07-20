@@ -1,21 +1,10 @@
 ---
-- name: Begin Pi-hole configuration
-  become: yes
-  block:
-
-  - name: Pull docker image
-    docker_image:
-      name: "{{ pihole_image_name }}"
-      source: pull
-
-  - name: Create volume mount points
-    file:
-      path: "{{ item.path }}"
-      mode: u=rwx,g=rx,o=rx
-      owner: "{{ item.owner }}"
-      group: "{{ item.group }}"
-      state: directory
-    loop:
+- import_role:
+    name: docker_service
+  vars:
+    docker_service_name: pihole
+    docker_service_image_name: "{{ pihole_image_name }}"
+    docker_service_mount_points:
     - path: /etc/pihole
       # These are the UID and GID used in the container.
       # Consider overriding with PIHOLE_UID and PIHOLE_GID?
@@ -24,24 +13,4 @@
     - path: /etc/dnsmasq.d
       owner: root
       group: root
-
-  - name: Add configuration file
-    copy:
-      src: setupVars.conf
-      dest: /etc/pihole/
-
-  - name: Add service file for docker image
-    template:
-      src: pihole.service.j2
-      dest: /etc/systemd/system/pihole.service
-      mode: u=rw,g=r,o=r
-      owner: root
-      group: root
-    register: pihole_service
-
-  - name: Enable and start pihole.service
-    systemd:
-      name: pihole.service
-      enabled: yes
-      state: "{{ pihole_service.changed | ternary('restarted', 'started') }}"
-      daemon_reload: "{{ pihole_service.changed }}"
+    docker_service_config_tasks: "../pihole/tasks/pihole_config_tasks.yml"
