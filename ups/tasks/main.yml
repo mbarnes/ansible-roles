@@ -5,7 +5,9 @@
 
   - name: Add apcupsd package
     apt:
-      name: apcupsd
+      name:
+      - apcupsd
+      - bsd-mailx  # provides /usr/bin/mail for APCUPSD_MAIL
 
   - name: Customize apcupsd configuration
     lineinfile:
