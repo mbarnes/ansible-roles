@@ -1,0 +1,3 @@
+---
+radarr_image_name: ghcr.io/linuxserver/radarr
+radarr_config_dir: /var/lib/radarr

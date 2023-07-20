@@ -1,0 +1,11 @@
+---
+nzbget_image_name: ghcr.io/linuxserver/nzbget
+nzbget_config_dir: /var/lib/nzbget
+
+newshosting:
+  host: news.newshosting.com
+  port: 563
+  username: mbarnes@fastmail.com
+  encryption: "yes"
+  connections: 60
+  retention_days: 4689

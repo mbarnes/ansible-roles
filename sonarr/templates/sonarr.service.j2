@@ -1,0 +1,24 @@
+[Unit]
+Description=Sonarr (container)
+Requires=nzbget.service
+After=nzbget.service
+
+[Service]
+Restart=always
+RestartSec=30
+
+ExecStart=/usr/bin/docker run --rm \
+                              --name=sonarr \
+                              --memory={{ sonarr_memory_limit }} \
+                              --publish={{ sonarr_host_port }}:8989 \
+                              --volume={{ sonarr_config_dir }}:/config \
+                              --volume={{ storage_path }}:{{ storage_path }} \
+                              --env=PUID={{ ansible_user_uid }} \
+                              --env=PGID={{ ansible_user_gid }} \
+                              --env=TZ={{ timezone }} \
+                              {{ sonarr_image_name }}
+
+ExecStop=/usr/bin/docker stop sonarr
+
+[Install]
+WantedBy=multi-user.target

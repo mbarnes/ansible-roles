@@ -1,0 +1,8 @@
+---
+- import_role:
+    name: docker_service
+  vars:
+    docker_service_name: radarr
+    docker_service_image_name: "{{ radarr_image_name }}"
+    docker_service_mount_points:
+    - path: "{{ radarr_config_dir }}"

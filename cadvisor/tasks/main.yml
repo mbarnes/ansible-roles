@@ -1,0 +1,6 @@
+---
+- import_role:
+    name: docker_service
+  vars:
+    docker_service_name: cadvisor
+    docker_service_image_name: "{{ cadvisor_image_name }}"

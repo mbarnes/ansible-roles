@@ -1,0 +1,54 @@
+---
+- name: "nzbget : Download default configuration"
+  get_url:
+    url: https://raw.githubusercontent.com/nzbget/nzbget/develop/nzbget.conf
+    dest: "{{ nzbget_config_dir }}/nzbget.conf"
+    mode: u=rw,g=r,o=r
+    owner: "{{ ansible_user_uid }}"
+    group: "{{ ansible_user_gid }}"
+    force: no
+
+- name: "nzbget : Customize configuration"
+  lineinfile:
+    path: "{{ nzbget_config_dir }}/nzbget.conf"
+    regexp: "^({{ item.key }})="
+    line: "\\1={{ item.value }}"
+    backrefs: yes
+  no_log: True
+  loop:
+  - key: MainDir
+    value: "{{ storage_path }}/Downloads"
+  - key: DestDir
+    value: ${MainDir}/completed
+  - key: InterDir
+    value: ${MainDir}/intermediate
+  - key: WebDir
+    value: ${AppDir}/webui
+  - key: ConfigTemplate
+    value: ${AppDir}/webui/nzbget.conf.template
+  - key: Server1.Name
+    value: Newshosting
+  - key: Server1.Host
+    value: "{{ newshosting.host }}"
+  - key: Server1.Port
+    value: "{{ newshosting.port }}"
+  - key: Server1.Username
+    value: "{{ newshosting.username }}"
+  - key: Server1.Password
+    value: !vault |
+      $ANSIBLE_VAULT;1.1;AES256
+      64363732636163313835383539646663396133623664383331633665306339633634623636323731
+      6139393066396538633232613733356133303565366339330a393461313731386262613264376161
+      37336537336561356230623432663365633235393237373131623030376561623734663462656666
+      3434616461303430310a356335393133373835333539306635306438616561313664393739366630
+      33646561636136393535386436376164383365656633316662373131363139396630
+  - key: Server1.Encryption
+    value: "{{ newshosting.encryption }}"
+  - key: Server1.Connections
+    value: "{{ newshosting.connections }}"
+  - key: Server1.Retention
+    value: "{{ newshosting.retention_days }}"
+  - key: ControlUsername
+    value: ""
+  - key: ControlPassword
+    value: ""

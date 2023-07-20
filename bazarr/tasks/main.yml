@@ -1,0 +1,8 @@
+---
+- import_role:
+    name: docker_service
+  vars:
+    docker_service_name: bazarr
+    docker_service_image_name: "{{ bazarr_image_name }}"
+    docker_service_mount_points:
+    - path: "{{ bazarr_config_dir }}"

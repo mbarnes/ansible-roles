@@ -1,0 +1,9 @@
+---
+- import_role:
+    name: docker_service
+  vars:
+    docker_service_name: nzbget
+    docker_service_image_name: "{{ nzbget_image_name }}"
+    docker_service_mount_points:
+    - path: "{{ nzbget_config_dir }}"
+    docker_service_config_tasks: "../nzbget/tasks/nzbget_config_tasks.yml"

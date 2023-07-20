@@ -1,0 +1,8 @@
+---
+- import_role:
+    name: docker_service
+  vars:
+    docker_service_name: sonarr
+    docker_service_image_name: "{{ sonarr_image_name }}"
+    docker_service_mount_points:
+    - path: "{{ sonarr_config_dir }}"

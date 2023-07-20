@@ -1,0 +1,3 @@
+---
+sonarr_memory_limit: 250m
+sonarr_host_port: 8989
