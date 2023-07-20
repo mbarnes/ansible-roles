@@ -1,0 +1,12 @@
+---
+common_system_base_packages:
+- apt-file
+- bash-completion
+- bind9-dnsutils
+- command-not-found
+- htop
+- lsof
+- man-db
+- rsync
+- tmux
+- usbutils

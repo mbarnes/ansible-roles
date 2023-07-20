@@ -28,17 +28,7 @@
 
   - name: Add basic CLI tools
     apt:
-      name:
-      - apt-file
-      - bash-completion
-      - bind9-dnsutils
-      - command-not-found
-      - htop
-      - lsof
-      - man-db
-      - rsync
-      - tmux
-      - usbutils
+      name: "{{ common_system_base_packages + common_system_extra_packages }}"
 
   - name: Update the command-not-found cache
     command: /usr/sbin/update-command-not-found
