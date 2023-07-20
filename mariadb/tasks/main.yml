@@ -1,4 +1,8 @@
 ---
+- name: Add python3-pymysql package
+  apt:
+    name: python3-pymysql  # for mysql_user module
+
 - import_role:
     name: docker_service
   vars:
