@@ -1,0 +1,5 @@
+# Ensure DISPLAY is set when a desktop session is active.
+if [ -v XDG_CURRENT_DESKTOP ] && [ ! -v DISPLAY ]
+then
+    export DISPLAY=":0.0"
+fi
