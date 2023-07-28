@@ -1,0 +1,4 @@
+---
+dependencies:
+- role: dpkg_architecture
+- role: golang

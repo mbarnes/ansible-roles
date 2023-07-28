@@ -1,0 +1,28 @@
+---
+- name: Begin Red Hat ARO configuration
+  become: yes
+  block:
+
+  # See https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
+  - name: Add Microsoft's official GPG key
+    get_url:
+      url: https://packages.microsoft.com/keys/microsoft.asc
+      dest: /etc/apt/trusted.gpg.d/azure-cli.asc
+
+  - name: Add apt repository for Azure CLI
+    apt_repository:
+      repo: "deb [arch={{ dpkg_architecture }}] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_distribution_release }} main"
+      filename: azure-cli
+
+  - name: Add packages for ARO development
+    apt:
+      name:
+      - azure-cli
+      - curl
+      - jq
+      - libgpgme-dev
+      - make
+      - openvpn
+      - podman
+      - python3-venv
+      - yamllint
