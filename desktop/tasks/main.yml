@@ -65,6 +65,16 @@
     key: "startup-mode"
     value: "cwd"
 
+- name: Tweak GTK settings
+  community.general.ini_file:
+    path: "{{ ansible_user_dir }}/.config/gtk-3.0/settings.ini"
+    section: Settings
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  loop:
+  - option: gtk-primary-button-warps-slider
+    value: "false"
+
 - name: xfce4-terminal - Tweak settings
   community.general.ini_file:
     path: "{{ ansible_user_dir }}/.config/xfce4/terminal/terminalrc"
