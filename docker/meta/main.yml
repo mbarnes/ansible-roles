@@ -1,0 +1,3 @@
+---
+dependencies:
+- role: dpkg_architecture
