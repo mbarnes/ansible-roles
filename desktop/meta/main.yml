@@ -1,3 +1,4 @@
 ---
 dependencies:
+- role: kernel_modules
 - role: powerline

@@ -14,6 +14,18 @@
     - network-manager-openvpn-gnome
   become: yes
 
+- name: Check for Bluetooth support
+  set_fact:
+    bluetooth_module_loaded: "{{ kernel_modules | selectattr('module', 'eq', 'bluetooth') | length | bool }}"
+
+- name: Add Bluetooth packages
+  apt:
+    name:
+    - blueman
+    - pulseaudio-module-bluetooth
+  become: yes
+  when: bluetooth_module_loaded
+
 - name: Add desktop application packages
   apt:
     name:
