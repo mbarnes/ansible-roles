@@ -1,0 +1,15 @@
+---
+- name: Add jc package
+  apt:
+    name:
+    - jc
+  become: yes
+
+- name: Run lsmod
+  command: jc lsmod
+  register: lsmod_result
+  changed_when: False
+
+- name: Set kernel_modules fact
+  set_fact:
+    kernel_modules: "{{ lsmod_result.stdout | from_json }}"
