@@ -4,6 +4,9 @@ alias tmux="tmux -2"
 # Make rsync work sanely with whitespace in paths.
 alias rsync="rsync --protect-args"
 
+# https://unix.stackexchange.com/questions/79684/fix-terminal-after-displaying-a-binary-file
+alias reset='/usr/bin/reset; stty sane; tput rs1; clear; echo -e "\033c"'
+
 export EDITOR=vim
 export PAGER=less
 
