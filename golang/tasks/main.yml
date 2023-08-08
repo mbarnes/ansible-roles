@@ -3,6 +3,7 @@
   apt:
     name:
     - golang-go
+    - go-bindata
   become: true
 
 - name: Create GOPATH directory
