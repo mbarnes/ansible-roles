@@ -27,3 +27,6 @@
       - podman-docker
       - python3-venv
       - yamllint
+      # ARO-RP test dependencies
+      - libbtrfs-dev
+      - libdevmapper-dev
