@@ -24,5 +24,6 @@
       - make
       - openvpn
       - podman
+      - podman-docker
       - python3-venv
       - yamllint
