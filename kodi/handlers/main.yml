@@ -1,6 +1,6 @@
 ---
 - name: Restart Kodi
   systemd:
-    name: mediaserver.service
+    name: mediacenter.service
     state: restarted
   become: yes
