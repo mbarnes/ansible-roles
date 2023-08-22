@@ -1,0 +1,24 @@
+---
+- name: Query latest release assets
+  uri:
+    url: "https://api.github.com/repos/balena-io/etcher/releases/latest"
+    headers:
+      Accept: "application/vnd.github+json"
+  register: balena_etcher_latest_release
+
+- name: Find deb package amongst release assets
+  set_fact:
+    balena_etcher_release_asset: "{{ item }}"
+  when: item.name.endswith(dpkg_architecture + ".deb")
+  loop: "{{ balena_etcher_latest_release.json.assets }}"
+  no_log: true  # Avoid spewing a bunch of JSON
+
+- assert:
+    that: balena_etcher_release_asset is defined
+    success_msg: "Installing {{ balena_etcher_release_asset.name }}"
+    fail_msg: "No {{ dpkg_architecture }} package available for Balena Etcher"
+
+- name: Install deb package
+  apt:
+    deb: "{{ balena_etcher_release_asset.browser_download_url }}"
+  become: yes
