@@ -64,3 +64,8 @@
       name: openvpn.service
       enabled: yes
       state: started
+
+- name: Add bash aliases
+  copy:
+    src: bash_aliases
+    dest: "{{ ansible_user_dir }}/.config/bash_aliases/{{ role_name }}_aliases"

@@ -1,0 +1,1 @@
+alias watch-storage="if [[ -v TMUX ]]; then tmux rename-window storage; fi; watch --interval 5 \"cat /proc/mdstat; echo; sudo mdadm --detail \$(ls /dev/disk/by-id/md-* | head --lines 1)\""

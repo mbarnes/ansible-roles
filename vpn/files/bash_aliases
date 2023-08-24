@@ -1,0 +1,1 @@
+alias restart-vpn="sudo systemctl restart openvpn@default.service"

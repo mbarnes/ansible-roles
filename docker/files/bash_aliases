@@ -1,0 +1,1 @@
+alias pull-images="for repository in \$(docker image ls --format \"{{.Repository}}\" | sort | uniq); do docker pull \$repository:latest; done"
