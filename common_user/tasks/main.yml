@@ -10,12 +10,12 @@
 
 - name: Create config directories
   file:
-    path: "{{ ansible_user_dir }}/.config/{{ item }}"
+    path: "{{ item }}"
     state: directory
   loop:
-  - bash_aliases
-  - bash_profile
-  - tmux
+  - "{{ bash_aliases_dir }}"
+  - "{{ bash_profile_dir }}"
+  - "{{ tmux_config_dir }}"
 
 - name: Source additional bash configurations
   blockinfile:

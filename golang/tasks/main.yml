@@ -16,7 +16,7 @@
 - name: Add GOPATH and GOROOT environment variables
   template:
     src: golang.j2
-    dest: "{{ ansible_user_dir }}/.config/bash_aliases/golang"
+    dest: "{{ bash_aliases_dir }}/golang"
     force: no
 
 - name: Clone vim-go as a vim package

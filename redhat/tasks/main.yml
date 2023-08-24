@@ -79,4 +79,4 @@
 - name: Add helpful Kerberos shell aliases
   copy:
     src: kerberos
-    dest: "{{ ansible_user_dir }}/.config/bash_aliases/"
+    dest: "{{ bash_aliases_dir }}/"

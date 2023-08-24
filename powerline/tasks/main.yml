@@ -25,7 +25,7 @@
 - name: Configure bash for powerline
   copy:
     src: powerline.sh
-    dest: "{{ ansible_user_dir }}/.config/bash_profile/powerline.sh"
+    dest: "{{ bash_profile_dir }}/powerline.sh"
     mode: u=rw,g=r,o=r
 
 - name: Configure tmux for powerline
