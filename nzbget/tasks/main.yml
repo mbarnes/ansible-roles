@@ -7,3 +7,5 @@
     docker_service_mount_points:
     - path: "{{ nzbget_config_dir }}"
     docker_service_config_tasks: "../nzbget/tasks/nzbget_config_tasks.yml"
+    docker_service_environment: |
+      CONTAINER_MEMORY_LIMIT={{ nzbget_memory_limit }}

@@ -4,12 +4,13 @@ Requires=nzbget.service
 After=nzbget.service
 
 [Service]
+EnvironmentFile=/etc/default/radarr
 Restart=always
 RestartSec=30
 
 ExecStart=/usr/bin/docker run --rm \
                               --name=radarr \
-                              --memory={{ radarr_memory_limit }} \
+                              --memory=${CONTAINER_MEMORY_LIMIT} \
                               --publish={{ radarr_host_port }}:7878 \
                               --volume={{ radarr_config_dir }}:/config \
                               --volume={{ storage_path }}:{{ storage_path }} \

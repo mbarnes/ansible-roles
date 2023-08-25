@@ -4,12 +4,13 @@ Requires=docker.service
 After=docker.service
 
 [Service]
+EnvironmentFile=/etc/default/cadvisor
 Restart=always
 RestartSec=30
 
 ExecStart=/usr/bin/docker run --rm \
                               --name=cadvisor \
-                              --memory={{ cadvisor_memory_limit }} \
+                              --memory=${CONTAINER_MEMORY_LIMIT} \
                               --publish={{ cadvisor_host_port }}:8080 \
                               --volume=/:/rootfs:ro \
                               --volume=/var/run:/var/run:ro \

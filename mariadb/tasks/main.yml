@@ -10,6 +10,8 @@
     docker_service_image_name: "{{ mariadb_image_name }}"
     docker_service_mount_points:
     - path: "{{ mariadb_config_dir }}"
+    docker_service_environment: |
+      CONTAINER_MEMORY_LIMIT={{ mariadb_memory_limit }}
 
 # Kodi database does not need to be secure.
 - name: Create a MariaDB user for Kodi

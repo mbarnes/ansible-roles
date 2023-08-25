@@ -21,6 +21,18 @@
     include_tasks: "{{ docker_service_config_tasks }}"
     when: docker_service_config_tasks
 
+  # Do not replace existing environment files since their
+  # purpose is to adjust container limits post-installation.
+  - name: "{{ docker_service_name }} : Add environment file"
+    copy:
+      content: "{{ docker_service_environment }}"
+      dest: "/etc/default/{{ docker_service_name }}"
+      mode: u=rw,g=r,o=r
+      owner: root
+      group: root
+      force: false
+    when: docker_service_environment is defined
+
   - name: "{{ docker_service_name }} : Add service file for docker image"
     template:
       src: "{{ docker_service_name }}.service.j2"

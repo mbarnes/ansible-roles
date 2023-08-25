@@ -14,3 +14,5 @@
       owner: root
       group: root
     docker_service_config_tasks: "../pihole/tasks/pihole_config_tasks.yml"
+    docker_service_environment: |
+      CONTAINER_MEMORY_LIMIT={{ pihole_memory_limit }}

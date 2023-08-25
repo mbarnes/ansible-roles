@@ -4,3 +4,5 @@
   vars:
     docker_service_name: cadvisor
     docker_service_image_name: "{{ cadvisor_image_name }}"
+    docker_service_environment: |
+      CONTAINER_MEMORY_LIMIT={{ cadvisor_memory_limit }}

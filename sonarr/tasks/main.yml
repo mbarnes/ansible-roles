@@ -6,3 +6,5 @@
     docker_service_image_name: "{{ sonarr_image_name }}"
     docker_service_mount_points:
     - path: "{{ sonarr_config_dir }}"
+    docker_service_environment:
+      CONTAINER_MEMORY_LIMIT={{ sonarr_memory_limit }}
