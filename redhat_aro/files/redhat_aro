@@ -1,0 +1,3 @@
+alias aro-rp-admin-update='curl --request PATCH --insecure "https://localhost:8443/subscriptions/$AZURE_SUBSCRIPTION_ID/resourceGroups/$RESOURCEGROUP/providers/Microsoft.RedHatOpenShift/openShiftClusters/$CLUSTER?api-version=admin" --header "Content-Type: application/json" --data "{}"'
+alias aro-rp-logs='journalctl _COMM=aro --output json --since '\''15 min ago'\'' --follow | jq --raw-output '\''select (.COMPONENT != null and (.COMPONENT | contains("access")) | not) | .MESSAGE'\'''
+alias aro-rp-version='echo $(curl --silent https://arorpversion.blob.core.windows.net/rpversion/${LOCATION:-eastus})'

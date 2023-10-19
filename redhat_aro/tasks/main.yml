@@ -30,3 +30,8 @@
       # ARO-RP test dependencies
       - libbtrfs-dev
       - libdevmapper-dev
+
+- name: Add bash aliases
+  copy:
+    src: redhat_aro
+    dest: "{{ bash_aliases_dir }}/"
