@@ -1,0 +1,10 @@
+---
+- import_role:
+    name: docker_service
+  vars:
+    docker_service_name: nginx
+    docker_service_image_name: "{{ nginx_image_name }}"
+    docker_service_mount_points:
+    - path: "{{ nginx_config_dir }}"
+    docker_service_environment: |
+      CONTAINER_MEMORY_LIMIT={{ nginx_memory_limit }}
