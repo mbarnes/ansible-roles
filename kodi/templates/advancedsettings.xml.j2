@@ -1,4 +1,10 @@
 <advancedsettings>
+  <services>
+    <webserver>{{ kodi_webserver }}</webserver>
+    <webserverport>{{ kodi_webserver_port }}</webserverport>
+    <webserverauthentication>false</webserverauthentication>
+    <webserverssl>false</webserverssl>
+  </services>
   <videodatabase>
     <type>mysql</type>
     <host>{{ mysql_host }}</host>

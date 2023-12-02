@@ -1,4 +1,7 @@
 ---
+kodi_webserver: true
+kodi_webserver_port: 80
+
 mysql_host: "{{ ansible_default_ipv4.address }}"
 mysql_port: 3306
 mysql_user: kodi
