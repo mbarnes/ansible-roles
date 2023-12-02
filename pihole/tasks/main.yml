@@ -16,3 +16,10 @@
     docker_service_config_tasks: "../pihole/tasks/pihole_config_tasks.yml"
     docker_service_environment: |
       CONTAINER_MEMORY_LIMIT={{ pihole_memory_limit }}
+
+- import_role:
+    name: nginx_revproxy
+  vars:
+    nginx_revproxy_name: pihole
+    nginx_revproxy_port: "{{ pihole_host_http_port }}"
+  when: pihole_host_http_port != 80

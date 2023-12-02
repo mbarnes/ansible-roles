@@ -8,3 +8,9 @@
     - path: "{{ sonarr_config_dir }}"
     docker_service_environment:
       CONTAINER_MEMORY_LIMIT={{ sonarr_memory_limit }}
+
+- import_role:
+    name: nginx_revproxy
+  vars:
+    nginx_revproxy_name: series
+    nginx_revproxy_port: "{{ sonarr_host_port }}"

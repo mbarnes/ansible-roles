@@ -9,3 +9,9 @@
     docker_service_config_tasks: "../nzbget/tasks/nzbget_config_tasks.yml"
     docker_service_environment: |
       CONTAINER_MEMORY_LIMIT={{ nzbget_memory_limit }}
+
+- import_role:
+    name: nginx_revproxy
+  vars:
+    nginx_revproxy_name: nzbget
+    nginx_revproxy_port: "{{ nzbget_host_port }}"
