@@ -1,5 +1,5 @@
 ---
-nzbget_image_name: ghcr.io/linuxserver/nzbget
+nzbget_image_name: lscr.io/linuxserver/nzbget
 nzbget_config_dir: /var/lib/nzbget
 
 newshosting:
