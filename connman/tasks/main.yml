@@ -19,6 +19,6 @@
 
   - name: Set DNS proxy preference
     lineinfile:
-      path: /etc/connman.prefs
+      path: /etc/osmc/prefs.d/connman
       regexp: "^#?dnsproxy="
       line: "dnsproxy={{ connman_enable_dns_proxy | ternary('yes', 'no') }}"
