@@ -17,6 +17,7 @@ ExecStart=/usr/bin/docker run --rm \
                               --env=PUID={{ ansible_user_uid }} \
                               --env=PGID={{ ansible_user_gid }} \
                               --env=TZ={{ timezone }} \
+                              --env=DOCKER_MODS=linuxserver/mods:swag-auto-reload \
                               --add-host=host.docker.internal:host-gateway \
                               {{ nginx_image_name }}
 
