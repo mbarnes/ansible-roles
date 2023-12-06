@@ -19,6 +19,7 @@ ExecStart=/usr/bin/docker run --rm \
                               --dns=127.0.0.1 \
                               --dns=1.1.1.1 \
                               --env=TZ={{ timezone }} \
+                              --env=VIRTUAL_HOST=pihole.{{ local_domain_name }} \
                               {{ pihole_image_name }}
 
 ExecStop=/usr/bin/docker stop pihole
