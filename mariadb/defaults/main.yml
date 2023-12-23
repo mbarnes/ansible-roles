@@ -1,3 +1,0 @@
----
-mariadb_memory_limit: 150m
-mariadb_host_port: 3306
