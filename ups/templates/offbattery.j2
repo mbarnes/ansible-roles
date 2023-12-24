@@ -19,7 +19,6 @@ MSG="$HOSTNAME UPS $1 Power has returned"
 mount {{ storage_path }}
 systemctl start mediacenter.service \
                 nzbget.service \
-                sonarr.service \
-                radarr.service
+                sonarr.service
 
 exit 0

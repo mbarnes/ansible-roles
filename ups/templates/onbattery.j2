@@ -18,7 +18,6 @@ MSG="$HOSTNAME UPS $1 Power Failure !!!"
 # Stop media services and unmount storage array
 systemctl stop mediacenter.service \
                sonarr.service \
-               radarr.service \
                nzbget.service
 umount {{ storage_path }}
 

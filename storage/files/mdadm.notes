@@ -9,7 +9,7 @@ If RAID-5 growth reshaping does not resume
 after reboot (as indicated by /proc/mdstat):
 
 1. Stop systemd services:
-   # systemctl stop nzbget.service sonarr.service radarr.service
+   # systemctl stop nzbget.service sonarr.service
 
 2. Unmount filesystem:
    # umount /mnt/storage
