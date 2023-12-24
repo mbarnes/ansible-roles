@@ -1,3 +1,0 @@
----
-sonarr_image_name: lscr.io/linuxserver/sonarr
-sonarr_config_dir: /var/lib/sonarr
