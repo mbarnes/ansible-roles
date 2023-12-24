@@ -1,3 +1,0 @@
----
-bazarr_image_name: lscr.io/linuxserver/bazarr
-bazarr_config_dir: /var/lib/bazarr
