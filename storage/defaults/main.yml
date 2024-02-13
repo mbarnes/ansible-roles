@@ -1,4 +1,0 @@
----
-# For /etc/exports
-nfs_exports_rw: "{{ ansible_default_ipv4.address }}"
-nfs_exports_ro: "{{ (ansible_default_ipv4.network + '/' + ansible_default_ipv4.netmask) | ansible.utils.ipaddr('net') }}"

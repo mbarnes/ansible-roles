@@ -104,15 +104,6 @@
       apt:
         name: nfs-kernel-server
 
-    - name: Add NFS exports
-      template:
-        src: exports.j2
-        dest: /etc/exports
-        mode: u=rwx,g=rx,o=rx
-        owner: root
-        group: root
-      notify: Reload NFS
-
   - name: Add curlftpfs package
     apt:
       name: curlftpfs
