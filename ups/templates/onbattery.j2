@@ -16,7 +16,7 @@ MSG="$HOSTNAME UPS $1 Power Failure !!!"
 ) | $APCUPSD_MAIL -s "$MSG" $SYSADMIN
 
 # Stop media services and unmount storage array
-systemctl stop mediacenter.service
+systemctl stop mediacenter.service nfs-server.service
 umount {{ storage_path }}
 
 exit 0
