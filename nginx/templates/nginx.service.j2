@@ -21,7 +21,7 @@ ExecStart=/usr/bin/docker run --rm \
                               --add-host=host.docker.internal:host-gateway \
                               {{ nginx_image_name }}
 
-ExecStop=/usr/bin/docker stop nzbget
+ExecStop=/usr/bin/docker stop nginx
 
 [Install]
 WantedBy=multi-user.target
