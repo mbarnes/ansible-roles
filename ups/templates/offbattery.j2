@@ -17,7 +17,6 @@ MSG="$HOSTNAME UPS $1 Power has returned"
 
 # Mount storage array and restart media services
 mount {{ storage_path }}
-systemctl start mediacenter.service \
-                nzbget.service
+systemctl start mediacenter.service
 
 exit 0

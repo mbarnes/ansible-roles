@@ -8,8 +8,8 @@ https://raid.wiki.kernel.org/index.php/Growing
 If RAID-5 growth reshaping does not resume
 after reboot (as indicated by /proc/mdstat):
 
-1. Stop systemd services:
-   # systemctl stop nzbget.service
+1. Stop NFS service:
+   # systemctl stop nfs-server.service
 
 2. Unmount filesystem:
    # umount /mnt/storage
