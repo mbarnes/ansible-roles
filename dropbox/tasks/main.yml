@@ -15,7 +15,7 @@
 
   - name: Add apt repository for Dropbox
     apt_repository:
-      repo: "deb [arch={{ dpkg_architecture }}] https://linux.dropbox.com/debian {{ ansible_distribution_release }} main"
+      repo: "deb [arch={{ dpkg_architecture }}] https://linux.dropbox.com/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} main"
       filename: dropbox
 
   - name: Add dropbox package

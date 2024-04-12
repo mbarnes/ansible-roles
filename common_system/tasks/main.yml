@@ -17,14 +17,17 @@
       line: "127.0.1.1\t{{ ansible_fqdn }}"
     when: ansible_fqdn == ansible_hostname
 
-  - name: Set backports repository name
-    set_fact:
-      backports_apt_repository_name: "{{ ansible_distribution_release }}-backports"
+  - when: ansible_distribution in ["Debian", "OSMC"]
+    block:
 
-  - name: Add backports repository
-    apt_repository:
-      repo: "deb http://deb.debian.org/debian {{ backports_apt_repository_name }} main"
-      filename: "{{ backports_apt_repository_name }}"
+    - name: Set Debian backports repository name
+      set_fact:
+        backports_apt_repository_name: "{{ ansible_distribution_release }}-backports"
+
+    - name: Add Debian backports repository
+      apt_repository:
+        repo: "deb http://deb.debian.org/debian {{ backports_apt_repository_name }} main"
+        filename: "{{ backports_apt_repository_name }}"
 
   - name: Add basic CLI tools
     apt:
@@ -32,3 +35,5 @@
 
   - name: Update the command-not-found cache
     command: /usr/sbin/update-command-not-found
+    # Command is not present on Ubuntu distribution
+    when: ansible_distribution in ["Debian", "OSMC"]

@@ -18,6 +18,7 @@
     loop:
     - key: greeter-hide-users
       value: "false"
+    when: ansible_distribution == "Debian"
 
 - name: Download a face image for login screen
   get_url:
