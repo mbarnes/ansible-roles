@@ -80,3 +80,9 @@
   copy:
     src: kerberos
     dest: "{{ bash_aliases_dir }}/"
+
+- name: Add helpful Kerberos shell scripts
+  copy:
+    src: krenew-redhat
+    dest: "{{ ansible_user_dir }}/.local/bin/"
+    mode: u=rwx,g=rx,o=rx
