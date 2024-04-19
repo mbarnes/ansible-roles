@@ -1,3 +1,0 @@
----
-# Screen resolution for Plymouth boot splash
-grub_gfxmode: 1024x768

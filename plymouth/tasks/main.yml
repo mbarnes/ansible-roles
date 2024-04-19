@@ -19,6 +19,4 @@
     loop:
     - key: GRUB_CMDLINE_LINUX_DEFAULT
       value: "\"quiet splash\""
-    - key: GRUB_GFXMODE
-      value: "{{ grub_gfxmode }}"
     notify: Update GRUB configuration
