@@ -35,3 +35,7 @@
   copy:
     src: redhat_aro
     dest: "{{ bash_aliases_dir }}/"
+
+- name: Configure host for Microsoft Intune
+  include_tasks: microsoft_intune.yml
+  when: enable_microsoft_intune | default(False)
