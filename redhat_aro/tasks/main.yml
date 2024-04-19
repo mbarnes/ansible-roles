@@ -7,11 +7,11 @@
   - name: Add Microsoft's official GPG key
     get_url:
       url: https://packages.microsoft.com/keys/microsoft.asc
-      dest: /etc/apt/trusted.gpg.d/azure-cli.asc
+      dest: "{{ microsoft_signing_key_path }}"
 
   - name: Add apt repository for Azure CLI
     apt_repository:
-      repo: "deb [arch={{ dpkg_architecture }}] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_distribution_release }} main"
+      repo: "deb [arch={{ dpkg_architecture }} signed-by={{ microsoft_signing_key_path }}] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_distribution_release }} main"
       filename: azure-cli
 
   - name: Add packages for ARO development
