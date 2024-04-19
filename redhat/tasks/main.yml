@@ -86,3 +86,9 @@
     src: kinit-redhat
     dest: "{{ ansible_user_dir }}/.local/bin/"
     mode: u=rwx,g=rx,o=rx
+
+- name: Add daily Kerberos ticket cron job
+  cron:
+    name: Acquire Kerberos ticket when a VPN connection is active
+    special_time: daily
+    job: "{{ ansible_user_dir }}/.local/bin/kinit-redhat > /dev/null"
