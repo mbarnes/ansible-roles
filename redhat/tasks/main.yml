@@ -83,6 +83,6 @@
 
 - name: Add helpful Kerberos shell scripts
   copy:
-    src: krenew-redhat
+    src: kinit-redhat
     dest: "{{ ansible_user_dir }}/.local/bin/"
     mode: u=rwx,g=rx,o=rx
