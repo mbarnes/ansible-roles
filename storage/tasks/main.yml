@@ -62,6 +62,10 @@
       command: "realpath {{ mdadm_scan.stdout_lines[0].split()[1] }}"
       register: raid_device
 
+    - name: Activate RAID array
+      command: "/sbin/mdadm --activate {{ raid_device }}"
+      when: mdadm_scan.stdout_lines[0] is match("INACTIVE-ARRAY")
+
     - name: Identify LVM volume group for RAID device
       set_fact:
         raid_device_vg: "{{ item.value.vg }}"
