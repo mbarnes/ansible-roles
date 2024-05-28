@@ -1,7 +1,6 @@
 ---
 - name: Restart smartd
-  service:
-    name: "{{ smartd_service_name }}"
+  systemd_service:
+    name: smartd.service
+    enabled: true
     state: restarted
-    enabled: yes
-...
