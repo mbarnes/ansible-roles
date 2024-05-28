@@ -1,6 +1,6 @@
 ---
 - name: Restart apcupsd
-  systemd:
+  systemd_service:
     name: apcupsd.service
     state: restarted
   become: yes

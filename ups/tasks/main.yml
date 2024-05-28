@@ -49,7 +49,7 @@
     notify: Restart apcupsd
 
   - name: Enable apcupsd
-    systemd:
+    systemd_service:
       name: apcupsd.service
-      enabled: yes
+      enabled: true
       state: started

@@ -43,8 +43,8 @@
     register: docker_service_file
 
   - name: "{{ docker_service_name }} : Enable and start service"
-    systemd:
+    systemd_service:
       name: "{{ docker_service_name }}.service"
-      enabled: yes
+      enabled: true
       state: "{{ docker_service_file.changed | ternary('restarted', 'started') }}"
       daemon_reload: "{{ docker_service_file.changed }}"

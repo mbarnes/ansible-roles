@@ -99,9 +99,9 @@
         state: mounted
 
     - name: Enable mdmonitor
-      systemd:
+      systemd_service:
         name: mdmonitor.service
-        enabled: yes
+        enabled: true
         state: started
 
     - name: Add nfs-kernel-server package

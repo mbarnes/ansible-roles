@@ -60,9 +60,9 @@
     notify: Restart openvpn
 
   - name: Enable openvpn
-    systemd:
+    systemd_service:
       name: openvpn.service
-      enabled: yes
+      enabled: true
       state: started
 
 - name: Add bash aliases

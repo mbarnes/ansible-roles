@@ -64,9 +64,9 @@
       append: yes
 
   - name: Enable and start docker.service
-    systemd:
+    systemd_service:
       name: docker.service
-      enabled: yes
+      enabled: true
       state: started
 
 - name: Add bash aliases

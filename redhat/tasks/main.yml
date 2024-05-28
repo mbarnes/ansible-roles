@@ -69,10 +69,10 @@
   - krenew.service
 
 - name: Start automatic Kerberos renewal
-  systemd:
+  systemd_service:
     name: krenew.path
-    daemon_reload: yes
-    enabled: yes
+    daemon_reload: true
+    enabled: true
     state: started
     scope: user
 

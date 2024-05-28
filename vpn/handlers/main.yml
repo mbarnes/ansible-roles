@@ -1,5 +1,5 @@
 ---
 - name: Restart openvpn
-  systemd:
+  systemd_service:
     name: openvpn.service
     state: restarted
