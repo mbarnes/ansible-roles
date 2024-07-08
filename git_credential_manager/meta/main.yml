@@ -1,0 +1,5 @@
+---
+dependencies:
+- role: common_user
+- role: dpkg_architecture
+- role: git_dev
