@@ -50,3 +50,7 @@
       mode: u=rw,g=r,o=r
       owner: root
       group: root
+
+  - name: Install git-credential-manager
+    include_role:
+      name: git_credential_manager
