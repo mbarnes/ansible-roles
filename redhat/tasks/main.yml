@@ -19,7 +19,7 @@
 
   - name: Add Red Hat IT Root Certificate Authority
     copy:
-      src: 2015-RH-IT-Root-CA.pem
+      src: 2022-IT-Root-CA.pem
       dest: /etc/ssl/certs
       mode: u=rw,g=r,o=r
       owner: root
