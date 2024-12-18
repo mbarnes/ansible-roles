@@ -1,0 +1,32 @@
+- name: "{{ github_release_repo }} : Query latest release asset"
+  uri:
+    url: "https://api.github.com/repos/{{ github_release_owner }}/{{ github_release_repo }}/releases/latest"
+    headers:
+      Accept: "application/vnd.github+json"
+  register: github_release_assets
+
+- name: "{{ github_release_repo }} : Find arch-specific deb package amongst release assets"
+  set_fact:
+    github_release_deb_asset: "{{ item }}"
+  when: item.name.endswith(dpkg_architecture + ".deb")
+  loop: "{{ github_release_assets.json.assets }}"
+  no_log: true  # Avoid spewing a bunch of JSON
+
+- name: "{{ github_release_repo }} : Find any deb package amongst release assets"
+  set_fact:
+    github_release_deb_asset: "{{ item }}"
+  when:
+  - github_release_deb_asset is not defined
+  - item.name.endswith(".deb")
+  loop: "{{ github_release_assets.json.assets }}"
+  no_log: true  # Avoid spewing a bunch of JSON
+
+- assert:
+    that: github_release_deb_asset is defined
+    success_msg: "Installing {{ github_release_deb_asset.name }}"
+    fail_msg: "No package available for {{ github_release_name | default(github_release_repo) }}"
+
+- name: "{{ github_release_repo }} : Install deb package"
+  apt:
+    deb: "{{ github_release_deb_asset.browser_download_url }}"
+  become: yes

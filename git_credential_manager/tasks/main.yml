@@ -1,27 +1,10 @@
 ---
-- name: Query latest release assets
-  uri:
-    url: "https://api.github.com/repos/git-ecosystem/git-credential-manager/releases/latest"
-    headers:
-      Accept: "application/vnd.github+json"
-  register: git_credential_manager_latest_release
-
-- name: Find deb package amongst release assets
-  set_fact:
-    git_credential_manager_release_asset: "{{ item }}"
-  when: item.name.endswith(".deb")
-  loop: "{{ git_credential_manager_latest_release.json.assets }}"
-  no_log: true  # Avoid spewing a bunch of JSON
-
-- assert:
-    that: git_credential_manager_release_asset is defined
-    success_msg: "Installing {{ git_credential_manager_release_asset.name }}"
-    fail_msg: "No package available for Git Credential Manager"
-
-- name: Install deb package
-  apt:
-    deb: "{{ git_credential_manager_release_asset.browser_download_url }}"
-  become: yes
+- import_role:
+    name: github_release
+  vars:
+    github_release_name: Git Credential Manager
+    github_release_owner: git-ecosystem
+    github_release_repo: git-credential-manager
 
 - name: Add bash configuration
   copy:
