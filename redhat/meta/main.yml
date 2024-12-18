@@ -2,4 +2,5 @@
 dependencies:
 - role: common_user
 - role: google_chrome
+- role: mozilla_firefox
 - role: secrets

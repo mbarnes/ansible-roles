@@ -1,0 +1,35 @@
+---
+- name: Begin Mozilla Firefox configuration
+  become: yes
+  block:
+
+  # See https://support.mozilla.org/en-US/kb/install-firefox-linux
+  - name: Add Mozilla's official GPG key
+    get_url:
+      url: https://packages.mozilla.org/apt/repo-signing-key.gpg
+      dest: /etc/apt/trusted.gpg.d/mozilla.asc
+
+  - name: Add apt repository for Mozilla Firefox
+    apt_repository:
+      repo: "deb [arch={{ dpkg_architecture}}] https://packages.mozilla.org/apt mozilla main"
+      filename: mozilla
+
+  - name: Configure apt to prioritize Mozilla packages
+    copy:
+      content: |
+        Package: *
+        Pin: origin packages.mozilla.org
+        Pin-Priority: 1000
+      dest: /etc/apt/preferences.d/mozilla
+
+  - name: Add firefox package
+    apt:
+      name:
+      - firefox
+
+  - name: Remove firefox-esr package
+    apt:
+      name:
+      - firefox-esr
+      state: absent
+
