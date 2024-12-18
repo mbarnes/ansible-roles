@@ -24,7 +24,6 @@
       - make
       - openvpn
       - podman
-      - podman-docker
       - python3-venv
       - yamllint
       # ARO-RP test dependencies
