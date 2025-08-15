@@ -1,0 +1,3 @@
+export ARO_HCP_IMAGE_REGISTRY=quay.io/mbarnes2084
+export OPERATORS_UAMIS_SUFFIX=persist
+export PERSIST=true

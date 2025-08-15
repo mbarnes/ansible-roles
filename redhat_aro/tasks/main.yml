@@ -32,8 +32,11 @@
 
 - name: Add bash aliases
   copy:
-    src: redhat_aro
+    src: "{{ item }}"
     dest: "{{ bash_aliases_dir }}/"
+  loop:
+  - redhat_aro
+  - aro_hcp
 
 - name: Configure host for Microsoft Intune
   include_tasks: microsoft_intune.yml
