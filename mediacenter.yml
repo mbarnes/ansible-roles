@@ -1,0 +1,169 @@
+#!/usr/bin/ansible-playbook
+---
+#
+# Configures hosts in an inventory group named "mediacenter_group"
+# consisting of pre-installed OSMC devices with networking and SSH
+# service available.
+#
+# Usage: ./mediacenter.yml --ask-vault-pass
+#
+# Available tags:
+# - system        : Run all system-level tasks (as root)
+# - user          : Run all user-level tasks
+# - common_system : (system) Common System Configuration
+# - journal       : (system) Journal Configuration
+# - connman       : (system) ConnMan Configuration
+# - mta           : (system) Mail Transport Agent (MTA) Configuration
+# - ups           : (system) Uninterruptible Power Supply (UPS) Configuration
+# - storage       : (system) Storage Configuration
+# - common_user   : (user) Common User Configuration
+# - powerline     : (user) Powerline Configuration
+# - retropie      : (user) RetroPie Configuration
+#
+
+- hosts: mediacenter_group
+  remote_user: osmc
+
+  vars:
+
+    network_cidr: "{{ (local_area_network + '/' + local_area_netmask) | ansible.utils.ipaddr('net') }}"
+    host_ip_addr: "{{ ansible_all_ipv4_addresses | ansible.utils.ipaddr(network_cidr) | first }}"
+    ansible_fqdn: "{{ lookup('community.general.dig', host_ip_addr + '/PTR') }}"
+
+    # Host services are determined by DNS aliases
+    host_provides_nfs: "{{ lookup('community.general.dig', 'nfs' ) == host_ip_addr }}"
+
+  pre_tasks:
+
+  - name: Check Ansible version
+    assert:
+      that: "ansible_version.full is version('2.9', '>=')"
+      msg: "This playbook requires Ansible 2.9 or later"
+    tags:
+    - always
+
+  - name: Check for necessary inventory variables
+    assert:
+      that: "item is defined"
+      msg: "Missing required variable \"{{ item }}\". Please add this to your inventory."
+    loop:
+    - local_area_network
+    - local_area_netmask
+    tags:
+    - always
+
+  - name: Verify vault secret
+    set_fact:
+      vault_test: !vault |
+        $ANSIBLE_VAULT;1.1;AES256
+        37393232346234616538646162396633353964346536303438363862383035643166343438663836
+        3830353761366261363430336430653836616233366239640a653134326561306261643436303539
+        66393361353064353139626632366562363337333063663865353333333230383336363436626563
+        3236356330363838620a306332613635313765393939306265636465313830666637613433386465
+        63306364396263333965613739613663323331333733316438383165636230396366
+    tags:
+    - always
+
+  roles:
+
+  #-----------------------------
+  # Common System Configuration
+  #-----------------------------
+
+  - role: common_system
+    vars:
+      common_system_extra_packages:
+      - python3-netaddr  # for ipaddr filter
+    tags:
+    - common_system
+    - system
+
+  #-----------------------
+  # Journal Configuration
+  #-----------------------
+
+  - role: journal
+    tags:
+    - journal
+    - system
+
+  #-----------------------
+  # ConnMan Configuration
+  #-----------------------
+
+  - role: connman
+    tags:
+    - connman
+    - system
+
+  #------------------------------------------
+  # Mail Transport Agent (MTA) Configuration
+  #------------------------------------------
+
+  - role: mta
+    when: host_provides_nfs
+    tags:
+    - mta
+    - system
+
+  #--------------------------------------------------
+  # Uninterruptible Power Supply (UPS) Configuration
+  # For an APC Back-UPS CS 350
+  #--------------------------------------------------
+
+  - role: ups
+    when: host_provides_nfs
+    tags:
+    - ups
+    - system
+
+  #-----------------------
+  # Storage Configuration
+  #-----------------------
+
+  - role: storage
+    when: host_provides_nfs
+    tags:
+    - storage
+    - system
+
+  - role: smartd
+    vars:
+      smartd_devices:
+        DEVICESCAN:
+          type: removable
+          nocheck: standby
+          mail_recipients:
+          - "{{ mta_destination_address }}"
+          mail_script: /usr/share/smartmontools/smartd-runner
+    when: host_provides_nfs
+    tags:
+    - storage
+    - system
+
+  #---------------------------
+  # Common User Configuration
+  #---------------------------
+
+  - role: common_user
+    tags:
+    - common_user
+    - user
+
+  #-------------------------
+  # Powerline Configuration
+  #-------------------------
+
+  - role: powerline
+    tags:
+    - powerline
+    - user
+
+  #------------------------
+  # RetroPie Configuration
+  #------------------------
+
+  - role: retropie
+    tags:
+    - retropie
+    - user
