@@ -1,0 +1,192 @@
+#!/usr/bin/ansible-playbook
+---
+#
+# Configures hosts in an inventory group named "development_group"
+# consisting of pre-installed Debian GNU/Linux hosts with networking
+# and SSH service available, and the remote user in the "sudo" group.
+#
+# Usage: ./development.yml --ask-become-pass
+#
+# Available tags:
+# - system        : Run all system-level tasks (as root)
+# - user          : Run all user-level tasks
+# - common_system : (system) Common System Configuration
+# - boot          : (system) Boot and Login Configuration
+# - dropbox       : (system) Dropbox Configuration
+# - google_chrome : (system) Google Chrome Configuration
+# - redhat        : (system) Red Hat Configuration
+# - lightdm       : (system,boot) Configure LightDM
+# - plymouth      : (system,boot) Configure Plymouth
+# - common_user   : (user) Common User Configuration
+# - deb_maint     : (user) Debian Maintainer Configuration
+# - desktop       : (user) Desktop Configuration
+# - powerline     : (user) Powerline Configuration
+# - golang        : (user) Golang Configuration
+# - secrets       : (user) Transfer User Secrets
+#
+
+- hosts: development_group
+
+  vars:
+    network_cidr: "{{ (local_area_network + '/' + local_area_netmask) | ansible.utils.ipaddr('net') }}"
+    host_ip_addr: "{{ ansible_all_ipv4_addresses | ansible.utils.ipaddr(network_cidr) | first }}"
+    ansible_fqdn: "{{ lookup('community.general.dig', host_ip_addr + '/PTR') }}"
+
+    git_config_user_email: mbarnes@fedorapeople.org
+    git_config_user_signingkey: 612E87B275813A59
+
+  pre_tasks:
+
+  - name: Check for necessary inventory variables
+    assert:
+      that: "item is defined"
+      msg: "Missing required variable \"{{ item }}\". Please add this to your inventory."
+    loop:
+    - local_area_network
+    - local_area_netmask
+    tags:
+    - always
+
+  tasks:
+
+  #-----------------------------
+  # Common System Configuration
+  #-----------------------------
+
+  - import_role:
+      name: common_system
+    tags:
+    - common_system
+    - system
+
+  #------------------------------
+  # Boot and Login Configuration
+  #------------------------------
+
+  - import_role:
+      name: plymouth
+    tags:
+    - boot
+    - plymouth
+    - system
+
+  - import_role:
+      name: lightdm
+    tags:
+    - lightdm
+    - system
+
+  #-----------------------
+  # Dropbox Configuration
+  #-----------------------
+
+  - import_role:
+      name: dropbox
+    tags:
+    - dropbox
+    - system
+
+  #-----------------------------
+  # Google Chrome Configuration
+  #-----------------------------
+
+  - import_role:
+      name: google_chrome
+    tags:
+    - google_chrome
+    - system
+
+  #-----------------------
+  # Red Hat Configuration
+  #-----------------------
+
+  - import_role:
+      name: redhat
+    tags:
+    - redhat
+    - system
+
+  - import_role:
+      name: redhat_aro
+    tags:
+    - redhat
+    - system
+
+  #---------------------------
+  # Common User Configuration
+  #---------------------------
+
+  - import_role:
+      name: common_user
+    tags:
+    - common_user
+    - user
+
+  #---------------------------------
+  # Debian Maintainer Configuration
+  #---------------------------------
+
+  - import_role:
+      name: deb_maint
+    vars:
+      deb_email: mbarnes@fastmail.com
+    tags:
+    - deb_maint
+    - user
+
+  #-----------------------
+  # Desktop Configuration
+  #-----------------------
+
+  - import_role:
+      name: desktop
+    tags:
+    - desktop
+    - user
+
+  - import_role:
+      name: balena_etcher
+    tags:
+    - desktop
+    - user
+
+  #-------------------------
+  # Powerline Configuration
+  #-------------------------
+
+  - import_role:
+      name: powerline
+    tags:
+    - powerline
+    - user
+
+  #----------------------
+  # Golang Configuration
+  #----------------------
+
+  - import_role:
+      name: golang
+    tags:
+    - golang
+    - user
+
+  #-----------------------
+  # Transfer User Secrets
+  #-----------------------
+
+  - import_role:
+      name: secrets
+    tags:
+    - secrets
+    - user
+
+  - pause:
+      prompt: |
+
+        Additional tasks out of scope for this playbook:
+
+          [ ] Sign in to Firefox account
+
+      seconds: 1
+    tags:
+    - user
