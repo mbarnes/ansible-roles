@@ -19,12 +19,6 @@
     dest: "{{ bash_aliases_dir }}/golang"
     force: no
 
-- import_role:
-    name: github_release
-  vars:
-    github_release_owner: golangci
-    github_release_repo: golangci-lint
-
 - name: Clone vim-go as a vim package
   git:
     repo: https://github.com/fatih/vim-go.git
