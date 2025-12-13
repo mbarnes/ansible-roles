@@ -28,10 +28,6 @@
 - hosts: development_group
 
   vars:
-    network_cidr: "{{ (local_area_network + '/' + local_area_netmask) | ansible.utils.ipaddr('net') }}"
-    host_ip_addr: "{{ ansible_all_ipv4_addresses | ansible.utils.ipaddr(network_cidr) | first }}"
-    ansible_fqdn: "{{ lookup('community.general.dig', host_ip_addr + '/PTR') }}"
-
     git_config_user_email: mbarnes@fedorapeople.org
     git_config_user_signingkey: 612E87B275813A59
 

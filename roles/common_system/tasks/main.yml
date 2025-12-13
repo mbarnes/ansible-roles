@@ -7,15 +7,15 @@
     lineinfile:
       path: /etc/hosts
       regexp: '^127\.0\.1\.1'
-      line: "127.0.1.1\t{{ ansible_fqdn }} {{ ansible_hostname }}"
-    when: ansible_fqdn != ansible_hostname
+      line: "127.0.1.1\t{{ common_system_fqdn }} {{ ansible_hostname }}"
+    when: common_system_fqdn != ansible_hostname
 
   - name: Update 127.0.1.1 hosts entry (w/o FQDN)
     lineinfile:
       path: /etc/hosts
       regexp: '^127\.0\.1\.1'
-      line: "127.0.1.1\t{{ ansible_fqdn }}"
-    when: ansible_fqdn == ansible_hostname
+      line: "127.0.1.1\t{{ common_system_fqdn }}"
+    when: common_system_fqdn == ansible_hostname
 
   - when: ansible_distribution in ["Debian", "OSMC"]
     block:

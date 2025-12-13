@@ -25,13 +25,8 @@
   remote_user: osmc
 
   vars:
-
-    network_cidr: "{{ (local_area_network + '/' + local_area_netmask) | ansible.utils.ipaddr('net') }}"
-    host_ip_addr: "{{ ansible_all_ipv4_addresses | ansible.utils.ipaddr(network_cidr) | first }}"
-    ansible_fqdn: "{{ lookup('community.general.dig', host_ip_addr + '/PTR') }}"
-
     # Host services are determined by DNS aliases
-    host_provides_nfs: "{{ lookup('community.general.dig', 'nfs' ) == host_ip_addr }}"
+    host_provides_nfs: "{{ lookup('community.general.dig', 'nfs' ) == ansible_default_ipv4.address }}"
 
   pre_tasks:
 

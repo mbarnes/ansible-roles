@@ -1,4 +1,8 @@
 ---
+# ansible_fqdn relies on /etc/hosts, which is what this role configures.
+# Instead do a reverse lookup of local network DNS records.
+common_system_fqdn: "{{ lookup('community.general.dig', ansible_default_ipv4.address + '/PTR') }}"
+
 common_system_base_packages:
 - apt-file
 - bash-completion
