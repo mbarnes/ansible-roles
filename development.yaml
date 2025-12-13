@@ -11,18 +11,13 @@
 # - system        : Run all system-level tasks (as root)
 # - user          : Run all user-level tasks
 # - common_system : (system) Common System Configuration
-# - boot          : (system) Boot and Login Configuration
 # - dropbox       : (system) Dropbox Configuration
 # - google_chrome : (system) Google Chrome Configuration
 # - redhat        : (system) Red Hat Configuration
-# - lightdm       : (system,boot) Configure LightDM
-# - plymouth      : (system,boot) Configure Plymouth
 # - common_user   : (user) Common User Configuration
 # - deb_maint     : (user) Debian Maintainer Configuration
-# - desktop       : (user) Desktop Configuration
 # - powerline     : (user) Powerline Configuration
 # - golang        : (user) Golang Configuration
-# - secrets       : (user) Transfer User Secrets
 #
 
 - hosts: development_group
@@ -51,46 +46,35 @@
 
   - import_role:
       name: common_system
+    vars:
+      common_system_extra_packages:
+      - systemd-resolved
     tags:
     - common_system
-    - system
-
-  #------------------------------
-  # Boot and Login Configuration
-  #------------------------------
-
-  - import_role:
-      name: plymouth
-    tags:
-    - boot
-    - plymouth
-    - system
-
-  - import_role:
-      name: lightdm
-    tags:
-    - lightdm
     - system
 
   #-----------------------
   # Dropbox Configuration
   #-----------------------
 
-  - import_role:
-      name: dropbox
-    tags:
-    - dropbox
-    - system
+  # FIXME Package is obsolete; re-evaluate whether to keep.
+  #- import_role:
+  #    name: dropbox
+  #  tags:
+  #  - dropbox
+  #  - system
 
   #-----------------------------
   # Google Chrome Configuration
   #-----------------------------
 
-  - import_role:
-      name: google_chrome
-    tags:
-    - google_chrome
-    - system
+  # FIXME Re-evaluate whether Google Meet works well on Firefox.
+  #       If it does, maybe we don't need Chrome?
+  #- import_role:
+  #    name: google_chrome
+  #  tags:
+  #  - google_chrome
+  #  - system
 
   #-----------------------
   # Red Hat Configuration
@@ -130,22 +114,6 @@
     - deb_maint
     - user
 
-  #-----------------------
-  # Desktop Configuration
-  #-----------------------
-
-  - import_role:
-      name: desktop
-    tags:
-    - desktop
-    - user
-
-  - import_role:
-      name: balena_etcher
-    tags:
-    - desktop
-    - user
-
   #-------------------------
   # Powerline Configuration
   #-------------------------
@@ -166,23 +134,3 @@
     - golang
     - user
 
-  #-----------------------
-  # Transfer User Secrets
-  #-----------------------
-
-  - import_role:
-      name: secrets
-    tags:
-    - secrets
-    - user
-
-  - pause:
-      prompt: |
-
-        Additional tasks out of scope for this playbook:
-
-          [ ] Sign in to Firefox account
-
-      seconds: 1
-    tags:
-    - user

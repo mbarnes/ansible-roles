@@ -1,0 +1,116 @@
+#!/usr/bin/ansible-playbook
+#---
+#
+# Configures hosts in an inventory group named "desktop_group"
+# consisting of pre-installed Debian GNU/Linux hoss with networking
+# and SSH service available, and the remote user in the "sudo" group.
+#
+# Usage: ./desktop.yml --ask-become-pass
+#
+# Available tags:
+# - system        : Run all system-level tasks (as root)
+# - user          : Run all user-level tasks
+# - common_system : (system) Common System Configuration
+# - boot          : (system) Boot and Login Configuration
+# - lightdm       : (system,boot) Configure LightDM
+# - plymouth      : (system,boot) Configure Plymouth
+# - common_user   : (user) Common User Configuration
+# - desktop       : (user) Desktop Configuration
+# - secrets       : (user) Transfer User Secrets
+#
+
+- hosts: desktop_group
+
+  pre_tasks:
+
+  - name: Check for necessary inventory variables
+    assert:
+      that: "item is defined"
+      msg: "Missing required variables \"{{ item }}\". Please add this to your inventory."
+    loop:
+    - local_area_network
+    - local_area_netmask
+    tags:
+    - always
+
+  tasks:
+
+  #-----------------------------
+  # Common System Configuration
+  #-----------------------------
+
+  - import_role:
+      name: common_system
+    vars:
+      common_system_extra_packages:
+      - flatpak
+    tags:
+    - common_system
+    - system
+
+  #------------------------------
+  # Boot and Login Configuration
+  #------------------------------
+
+  - import_role:
+      name: plymouth
+    tags:
+    - boot
+    - plymouth
+    - system
+
+  - import_role:
+      name: lightdm
+    tags:
+    - lightdm
+    - system
+
+  #---------------------------
+  # Common User Configuration
+  #---------------------------
+
+  - import_role:
+      name: common_user
+    tags:
+    - common_user
+    - user
+
+  #-----------------------
+  # Desktop Configuration
+  #-----------------------
+
+  - import_role:
+      name: desktop
+    tags:
+    - desktop
+    - user
+
+  # XXX Disabled until a package dependency bug is fixed:
+  #     https://github.com/balena-io/etcher/issues/4543
+  #- import_role:
+  #    name: balena_etcher
+  #  tags:
+  #  - desktop
+  #  - user
+
+  #-----------------------
+  # Transfer User Secrets
+  #-----------------------
+
+  - import_role:
+      name: secrets
+    tags:
+    - secrets
+    - user
+
+  - pause:
+      prompt: |
+
+        Additional tasks out of scope for this playbook:
+
+          [ ] Sign in to Firefox account
+
+      seconds: 1
+    tags:
+    - user
+

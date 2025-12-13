@@ -52,13 +52,15 @@
       owner: root
       group: root
 
-  - name: Add Red Hat Kerberos policy for Google Chrome
-    copy:
-      src: chrome/redhat-corp.json
-      dest: /etc/opt/chrome/policies/managed/
-      mode: u=rw,g=r,o=r
-      owner: root
-      group: root
+  # FIXME Re-evaluate whether Google Meet works well on Firefox.
+  #       If it does, maybe we don't need Chrome?
+  #- name: Add Red Hat Kerberos policy for Google Chrome
+  #  copy:
+  #    src: chrome/redhat-corp.json
+  #    dest: /etc/opt/chrome/policies/managed/
+  #    mode: u=rw,g=r,o=r
+  #    owner: root
+  #    group: root
 
 - name: Add systemd units for automatic Kerberos renewal
   copy:
