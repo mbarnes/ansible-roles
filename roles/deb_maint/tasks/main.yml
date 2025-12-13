@@ -6,8 +6,10 @@
 - name: Add Debian packaging tools
   apt:
     name:
-    - packaging-dev
-    - dh-make
+    - build-essential
+    - devscripts
+    - debhelper
+    - quilt
   become: true
 
 - name: Add dh_make configuration
