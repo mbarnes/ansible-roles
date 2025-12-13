@@ -11,7 +11,9 @@
 
   - name: Add apt repository for Azure CLI
     apt_repository:
-      repo: "deb [arch={{ dpkg_architecture }} signed-by={{ microsoft_signing_key_path }}] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_distribution_release }} main"
+      #repo: "deb [arch={{ dpkg_architecture }} signed-by={{ microsoft_signing_key_path }}] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_distribution_release }} main"
+      # FIXME Repository does not yet support Debian Trixie.
+      repo: "deb [arch={{ dpkg_architecture }} signed-by={{ microsoft_signing_key_path }}] https://packages.microsoft.com/repos/azure-cli/ bookworm main"
       filename: azure-cli
 
   - name: Add packages for ARO development
