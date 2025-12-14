@@ -26,30 +26,44 @@
   become: yes
   when: bluetooth_module_loaded
 
-- name: Add desktop application packages
-  apt:
-    name:
-    - file-roller
-    - evince
-    - gnome-calculator
-    - gthumb
-    - gucharmap
-    - seahorse
-    - vlc
-  become: yes
-
 - name: Remove unwanted packages
   apt:
     name:
-    - atril      # replaced by evince
-    - parole     # replaced by vlc
-    - xarchiver  # replaced by file-roller
+    - atril      # replaced by org.gnome.Evince
+    - parole     # replaced by org.videolan.VLC
+    - xarchiver  # replaced by org.gnome.FileRoller
     - xsane
     - xterm      # replaced by xfce4-terminal
     autoremove: yes
     purge: yes
     state: absent
   become: yes
+
+- name: Add Flathub remote
+  community.general.flatpak_remote:
+    name: flathub
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+    method: user
+
+- name: Install flatpak applications
+  community.general.flatpak:
+    name:
+    - io.github.nokse22.inspector
+    - org.gnome.Calculator
+    - org.gnome.Characters
+    - org.gnome.Evince
+    - org.gnome.FileRoller
+    - org.gnome.Firmware
+    - org.gnome.SimpleScan
+    - org.gnome.gThumb
+    - org.gnome.gedit
+    - org.gnome.meld
+    - org.gnome.seahorse.Application
+    - org.gnumeric.Gnumeric
+    - org.mozilla.Thunderbird
+    - org.musicbrainz.Picard
+    - org.videolan.VLC
+    method: user
 
 - name: Add user to more groups
   user:
