@@ -20,6 +20,14 @@
       value: "false"
     when: ansible_distribution == "Debian"
 
+- name: Give lightdm user access to user directory
+  ansible.posix.acl:
+    path: "{{ ansible_user_dir }}"
+    entity: lightdm
+    etype: user
+    permissions: x
+    state: present
+
 - name: Download a face image for login screen
   get_url:
     url: "{{ lightdm_face_url }}"
