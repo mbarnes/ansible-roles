@@ -76,11 +76,6 @@
     state: started
     scope: user
 
-- name: Add helpful Kerberos shell aliases
-  copy:
-    src: kerberos
-    dest: "{{ bash_aliases_dir }}/"
-
 - name: Add helpful Kerberos shell scripts
   copy:
     src: kinit-redhat
@@ -92,3 +87,11 @@
     name: Acquire Kerberos ticket when a VPN connection is active
     special_time: daily
     job: "{{ ansible_user_dir }}/.local/bin/kinit-redhat > /dev/null"
+
+- name: Add helpful shell aliases
+  copy:
+    src: "{{ item }}"
+    dest: "{{ bash_aliases_dir }}/"
+  loop:
+  - kerberos
+  - tmux-sessions

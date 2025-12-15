@@ -1,0 +1,2 @@
+alias tmux-home='tmux new-session -A -s home'
+alias tmux-work='tmux new-session -A -s work -c /home/mbarnes/git/github.com/mbarnes/ARO-HCP'
