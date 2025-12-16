@@ -21,12 +21,84 @@
   loop: "{{ github_release_assets.json.assets }}"
   no_log: true  # Avoid spewing a bunch of JSON
 
-- assert:
-    that: github_release_deb_asset is defined
-    success_msg: "Installing {{ github_release_deb_asset.name }}"
-    fail_msg: "No package available for {{ github_release_name | default(github_release_repo) }}"
+- name: "{{ github_release_repo }} : Find arch-specific zip file amongst release assets"
+  set_fact:
+    github_release_zip_asset: "{{ item }}"
+  when:
+  # zip file is a fallback when there is no deb
+  - github_release_deb_asset is not defined
+  - item.name.endswith("linux-" + dpkg_architecture + ".zip")
+  loop: "{{ github_release_assets.json.assets }}"
+  no_log: true  # Avoid spewing a bunch of JSON
 
-- name: "{{ github_release_repo }} : Install deb package"
-  apt:
-    deb: "{{ github_release_deb_asset.browser_download_url }}"
-  become: yes
+- name: "{{ github_release_repo }} : Find arch-specific binary file amongst release assets"
+  set_fact:
+    github_release_bin_asset: "{{ item }}"
+  when:
+  # binary file is a fallback when there is no deb or zip file
+  - github_release_deb_asset is not defined
+  - github_release_zip_asset is not defined
+  - item.name.endswith("linux-" + dpkg_architecture)
+  loop: "{{ github_release_assets.json.assets }}"
+  no_log: true  # Avoid spewing a bunch of JSON
+
+- assert:
+    that: github_release_deb_asset is defined or github_release_zip_asset is defined or github_release_bin_asset is defined
+    fail_msg: "No deb package or zip file or binary file available for {{ github_release_name | default(github_release_repo) }}"
+
+- when: github_release_deb_asset is defined
+  block:
+
+  - name: "{{ github_release_repo }} : Create a temporary directory"
+    tempfile:
+      state: directory
+    register: github_release_temp_dir
+
+  - name: "{{ github_release_repo }} : Download deb package"
+    get_url:
+      url: "{{ github_release_deb_asset.browser_download_url }}"
+      checksum: "{{ github_release_deb_asset.digest }}"
+      dest: "{{ github_relese_temp_dir.path }}"
+
+  - name: "{{ github_release_repo }} : Install deb package"
+    apt:
+      deb: "{{ github_release_temp_dir.path }}/{{ github_release_deb_asset.browser_download_url | basename }}"
+    become: yes
+
+- when: github_release_zip_asset is defined
+  block:
+
+  - assert:
+      that: github_release_zip_binary_path is defined
+      fail_msg: "Need github_release_zip_binary_path var to install from a zip file"
+
+  - name: "{{ github_release_repo }} : Create a temporary directory"
+    tempfile:
+      state: directory
+    register: github_release_temp_dir
+
+  - name: "{{ github_release_repo }} : Download zip file"
+    get_url:
+      url: "{{ github_release_zip_asset.browser_download_url }}"
+      checksum: "{{ github_release_zip_asset.digest }}"
+      dest: "{{ github_release_temp_dir.path }}"
+
+  - name: "{{ github_release_repo }} : Unpack zip file"
+    unarchive:
+      src: "{{ github_release_temp_dir.path }}/{{ github_release_zip_asset.browser_download_url | basename }}"
+      dest: "{{ github_release_temp_dir.path }}"
+      remote_src: yes
+
+  - name: "{{ github_release_repo }} : Copy binary from zip file"
+    copy:
+      src: "{{ github_release_temp_dir.path }}/{{ github_release_zip_binary_path }}"
+      dest: "{{ ansible_user_dir }}/.local/bin/{{ github_release_binary_name }}"
+      mode: u=rwx,g=rx,o=rx
+
+- name: "{{ github_release_repo }} : Install binary file"
+  get_url:
+    url: "{{ github_release_bin_asset.browser_download_url }}"
+    checksum: "{{ github_release_bin_asset.digest }}"
+    dest: "{{ ansible_user_dir }}/.local/bin/{{ github_release_binary_name | default(github_release_repo) }}"
+    mode: u=rwx,g=rx,o=rx
+  when: github_release_bin_asset is defined
