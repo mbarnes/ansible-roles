@@ -22,23 +22,45 @@
       - azure-cli
       - curl
       - jq
-      - libgpgme-dev
       - make
-      - openvpn
+      - npm
       - podman
-      - python3-venv
-      - yamllint
-      # ARO-RP test dependencies
-      - libbtrfs-dev
-      - libdevmapper-dev
+      - promtool
+      - virt-viewer
 
 - name: Add bash aliases
   copy:
     src: "{{ item }}"
     dest: "{{ bash_aliases_dir }}/"
   loop:
-  - redhat_aro
   - aro_hcp
+  - aro_hcp_testing
+
+- name: Install Azure Bicep CLI
+  command:
+    cmd: az bicep install
+    creates: "{{ ansible_user_dir }}/.azure/bin/bicep"
+  register: azure_bicep_installed
+
+- name: Update Azure Bicep CLI
+  command:
+    cmd: az bicep upgrade
+  when: not azure_bicep_installed.changed
+
+- name: Install kubectl
+  command:
+    cmd: >
+      az aks install-cli
+      --install-location {{ ansible_user_dir }}/.local/bin/kubectl
+      --kubelogin-install-location {{ ansible_user_dir }}/.local/bin/kubelogin
+    creates: "{{ ansible_user_dir }}/.local/bin/kubectl"
+
+- import_role:
+    name: github_release
+  vars:
+    github_release_owner: openshift-online
+    github_release_repo: ocm-cli
+    github_release_binary_name: ocm
 
 - name: Configure host for Microsoft Intune
   include_tasks: microsoft_intune.yml

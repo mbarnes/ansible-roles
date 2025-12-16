@@ -1,0 +1,394 @@
+#!/bin/bash
+#
+# Helper functions for testing the ARO-HCP resource provider.
+#
+# These assume the RP is running locally or using port forwarding.
+#
+
+RESOURCE_GROUP=${RESOURCE_GROUP:-${USER}-net-rg-03}
+CLUSTER=${CLUSTER:-${USER}}
+NODE_POOL=${NODE_POOL:-np-1}
+EXTERNAL_AUTH=${EXTERNAL_AUTH:-auth-1}
+API_VERSION=${API_VERSION:-2025-12-23-preview}
+
+function aro_hcp_environment_e2e {
+  # These variables are required to run aro-hcp-tests.
+  export CUSTOMER_SUBSCRIPTION=$(az account show --output tsv --query "name")
+  if [ -v DEPLOY_ENV ]
+  then
+    # Use port-forwarding to RP.
+    export AROHCP_ENV=development
+    export LOCATION=$(az config get defaults.location --output json 2> /dev/null | jq -r '.value')
+  else
+    # Options as of Nov 2025:
+    #   australiaeast
+    #   brazilsouth
+    #   canadacentral
+    #   centralindia
+    #   eastus2
+    #   switzerlandnorth
+    #   uksouth
+    export LOCATION=uksouth
+    unset AROHCP_ENV
+  fi
+}
+
+function aro_hcp_environment_pers {
+  export DEPLOY_ENV=pers
+  unset AZURE_CONFIG_DIR
+  local pattern="${HOME}/.kube/hcp-underlay-pers-*-svc.kubeconfig"
+  if compgen -G "${pattern}" > /dev/null
+  then
+    KUBECONFIG=$(ls ${pattern} | head --lines=1)
+    export KUBECONFIG
+  else
+    unset KUBECONFIG
+  fi
+}
+
+function aro_hcp_environment_dev {
+  export DEPLOY_ENV=dev
+  unset AZURE_CONFIG_DIR
+  az config set defaults.location=westus3 2> /dev/null
+  KUBECONFIG=${HOME}/.kube/hcp-underlay-dev-westus3-svc.kubeconfig
+  if [ -f "$KUBECONFIG" ]
+  then
+    export KUBECONFIG
+  else
+    unset KUBECONFIG
+  fi
+}
+
+function aro_hcp_environment_int {
+  unset DEPLOY_ENV
+  export AZURE_CONFIG_DIR="${HOME}/.azure/aro-hcp/int"
+  mkdir --parents ${AZURE_CONFIG_DIR}
+  az config set defaults.location=uksouth 2> /dev/null
+  KUBECONFIG=${HOME}/.kube/hcp-underlay-int-uksouth-svc.kubeconfig
+  if [ -f "$KUBECONFIG" ]
+  then
+    export KUBECONFIG
+  else
+    unset KUBECONFIG
+  fi
+}
+
+function aro_hcp_environment_stg {
+  unset DEPLOY_ENV
+  export AZURE_CONFIG_DIR="${HOME}/.azure/aro-hcp/stg"
+  mkdir --parents ${AZURE_CONFIG_DIR}
+  az config set defaults.location=uksouth 2> /dev/null
+  unset KUBECONFIG
+}
+
+# Try to guess the right environment based
+# on the current default Azure subscription.
+case $(az account show --output tsv --query "id") in
+  "5299e6b7-b23b-46c8-8277-dc1147807117")
+    aro_hcp_environment_int
+    ;;
+  *)
+    aro_hcp_environment_pers
+    ;;
+esac
+
+function aro_hcp_pers_standup {
+  aro_hcp_environment_pers
+  pushd $(git rev-parse --show-toplevel)
+  trap popd RETURN
+  make personal-dev-env
+}
+
+function aro_hcp_pers_teardown {
+  aro_hcp_environment_pers
+  pushd $(git rev-parse --show-toplevel)
+  trap popd RETURN
+  make cleanup-entrypoint/Region CLEANUP_DRY_RUN=false CLEANUP_WAIT=true
+}
+
+export ARO_HCP_HOST="http://localhost:8443"
+
+# For interacting with AKS
+alias k=kubectl
+
+# Log into OpenShift Cluster Manager
+alias ocm_login="ocm login --use-auth-code"
+alias ocm_login_remote="ocm login --use-device-code"
+
+# Watch pods in aro-hcp namespace
+alias aro_hcp_pods="watch kubectl get pods --namespace aro-hcp --output wide"
+
+# List image digests in aro-hcp namespace
+alias aro_hcp_images="kubectl get pods --namespace aro-hcp --output json | jq -r '.items[].spec.containers[].image' | sort | uniq"
+
+# Scale aro-hcp-frontend/backend to one replica
+alias aro_hcp_frontend_scale="kubectl scale --replicas 1 --namespace aro-hcp deployment/aro-hcp-frontend"
+alias aro_hcp_backend_scale="kubectl scale --replicas 1 --namespace aro-hcp deployment/aro-hcp-backend"
+
+# Follow Resource Provider pod logs
+alias aro_hcp_frontend_logs="kubectl logs --follow --namespace aro-hcp --selector app=aro-hcp-frontend | jq 'select(.request_path != \"/healthz\")'"
+alias aro_hcp_backend_logs="kubectl logs --follow --namespace aro-hcp --selector app=aro-hcp-backend | jq '.'"
+
+# Follow clusters-service pod logs
+alias clusters_service_logs="kubectl logs --follow --namespace clusters-service --selector app=clusters-service"
+
+# Port-forward to aro-hcp-frontend or clusters-service
+alias aro_hcp_frontend_port_forward="kubectl port-forward --namespace aro-hcp svc/aro-hcp-frontend 8443"
+alias clusters_service_port_forward="kubectl port-forward --namespace clusters-service svc/clusters-service 8000"
+
+
+function aro_hcp_operation_status() {
+  # Arguments:
+  # $1 = URL
+  # $2 = Headers
+  OUTPUT=$(echo "${2}" | curl --silent --header @- ${1})
+  STATUS=$(echo ${OUTPUT} | jq -r '.status')
+  echo "${OUTPUT}"
+  case ${STATUS} in
+    Succeeded | Failed | Canceled)
+      return 1
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+}
+
+# Export the function so "watch" can see it.
+export -f aro_hcp_operation_status
+
+function ms_arm_resource_system_data_header {
+  echo "X-Ms-Arm-Resource-System-Data: {\"createdBy\": \"${USER}\", \"createdByType\": \"User\", \"createdAt\": \"$(date --iso-8601=seconds)\"}"
+}
+
+function ms_identity_url_header {
+  echo "X-Ms-Identity-Url: https://dummyhost.identity.azure.net"
+}
+
+function aro_hcp_request {
+  # Arguments:
+  # $1 = HTTP method
+  # $2 = URL
+  # $3 = Headers
+  # $4 = (optional) JSON body
+  case ${1} in
+    GET)
+      CMD="curl --silent --show-error --header @- ${2}"
+      ;;
+    PATCH | POST | PUT)
+      CMD="curl --silent --show-error --include --header @- --request ${1} ${2}"
+      if [ $# -ge 4 ]
+      then
+        CMD+=" --json '${4}'"
+      else
+        CMD+=" --json ''"
+      fi
+      ;;
+    *)
+      CMD="curl --silent --show-error --include --header @- --request ${1} ${2}"
+      ;;
+  esac
+  echo ${CMD}
+  OUTPUT=$(echo "${3}" | eval ${CMD} | tr -d '\r')
+  ASYNC_STATUS_ENDPOINT=$(echo "${OUTPUT}" | awk 'tolower($1) ~ /^azure-asyncoperation:/ {print $2}')
+  ASYNC_RESULT_ENDPOINT=$(echo "${OUTPUT}" | awk 'tolower($1) ~ /^location:/ {print $2}')
+
+  # If a status endpoint header is present, watch the
+  # endpoint until the status reaches a terminal state.
+  if [ -n "${ASYNC_STATUS_ENDPOINT}" ]; then
+    watch --errexit --exec bash -c "aro_hcp_operation_status \"${ASYNC_STATUS_ENDPOINT}\" \"${3}\" 2> /dev/null" || true
+    if [ -n "${ASYNC_RESULT_ENDPOINT}" ]; then
+      FULL_RESULT=$(echo "${3}" | curl --silent --show-error --include --header @- "${ASYNC_RESULT_ENDPOINT}")
+      JSON_RESULT=$(echo "${FULL_RESULT}" | tr -d '\r' | jq -Rs 'split("\n\n")[1] | fromjson?')
+
+      # If the response body is JSON, try to extract and write a kubeconfig file.
+      KUBECONFIG=$(echo "${JSON_RESULT}" | jq -r '.kubeconfig')
+      if [ -n "$KUBECONFIG" ] && [ "$KUBECONFIG" != "null" ]; then
+        echo "${KUBECONFIG}" > kubeconfig
+        echo "Write kubeconfig"
+      else
+        echo "${FULL_RESULT}"
+      fi
+    else
+      echo "${OUTPUT}"
+    fi
+  else
+    echo "${OUTPUT}"
+  fi
+}
+
+function aro_hcp_get_request {
+  # Arguments:
+  # $1 = Request URL path
+  # $2 = (optional) API version
+  URL="${ARO_HCP_HOST}${1}?api-version=${2:-${API_VERSION}}"
+  HEADERS=""
+  aro_hcp_request GET "${URL}" "${HEADERS}"
+}
+
+function aro_hcp_put_request {
+  # Arguments:
+  # $1 = Request URL path
+  # $2 = Request JSON body
+  # $3 = (optional) API version
+  URL="${ARO_HCP_HOST}${1}?api-version=${3:-${API_VERSION}}"
+  HEADERS=$(ms_arm_resource_system_data_header; ms_identity_url_header)
+  aro_hcp_request PUT "${URL}" "${HEADERS}" "${2}"
+}
+
+function aro_hcp_patch_request {
+  # Arguments:
+  # $1 = Request URL path
+  # $2 = Request JSON body
+  # $3 = (optional) API version
+  URL="${ARO_HCP_HOST}${1}?api-version=${3:-${API_VERSION}}"
+  HEADERS=$(ms_arm_resource_system_data_header)
+  aro_hcp_request PATCH "${URL}" "${HEADERS}" "${2}"
+}
+
+function aro_hcp_delete_request {
+  # Argument:
+  # $1 = Request URL path
+  # $2 = (optional) API version
+  URL="${ARO_HCP_HOST}${1}?api-version=${2:-${API_VERSION}}"
+  HEADERS=$(ms_arm_resource_system_data_header)
+  aro_hcp_request DELETE "${URL}" "${HEADERS}"
+}
+
+function aro_hcp_post_request {
+  # Arguments:
+  # $1 = Request URL path
+  # $2 = Request JSON body
+  # $3 = (optional) API version
+  URL="${ARO_HCP_HOST}${1}?api-version=${3:-${API_VERSION}}"
+  HEADERS=$(ms_arm_resource_system_data_header)
+  aro_hcp_request POST "${URL}" "${HEADERS}" "${2}"
+}
+
+function aro_hcp_get_subscription {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_get_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}" "2.0"
+}
+
+function aro_hcp_put_subscription {
+  STATE=${1:-Registered}
+  AZURE_TENANT_ID=$(az account show --output json | jq -r '.tenantId')
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  AZURE_SUBSCRIPTION_ID_DATA='{"state":"'${STATE}'", "registrationDate": "'$(date --iso-8601=seconds)'", "properties": {"tenantId": "'${AZURE_TENANT_ID}'"}}'
+  aro_hcp_put_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}" "${AZURE_SUBSCRIPTION_ID_DATA}" "2.0"
+}
+
+function aro_hcp_list_clusters_by_subscription {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_get_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters"
+}
+
+function aro_hcp_list_clusters_by_resource_group {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_get_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters"
+}
+
+function aro_hcp_list_external_auths {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_get_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters/${CLUSTER}/externalAuths"
+}
+
+function aro_hcp_list_node_pools {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_get_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters/${CLUSTER}/nodePools"
+}
+
+function aro_hcp_list_versions {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  LOCATION=$(az config get defaults.location --output json 2> /dev/null | jq -r '.value')
+  aro_hcp_get_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/providers/Microsoft.RedHatOpenShift/locations/${LOCATION}/hcpOpenShiftVersions"
+}
+
+function aro_hcp_get_cluster {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_get_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters/${CLUSTER}"
+}
+
+function aro_hcp_put_cluster {
+  IDENTITY_URL='https://dummyhost.identity.azure.net'
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_put_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters/${CLUSTER}" "@${1:-cluster.json}"
+}
+
+function aro_hcp_patch_cluster {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_patch_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters/${CLUSTER}" "@${1:-cluster_patch.json}"
+}
+
+function aro_hcp_delete_cluster {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_delete_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters/${CLUSTER}"
+}
+
+function aro_hcp_get_external_auth {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_get_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters/${CLUSTER}/externalAuths/${EXTERNAL_AUTH}"
+}
+
+function aro_hcp_put_external_auth {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_put_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters/${CLUSTER}/externalAuths/${EXTERNAL_AUTH}" "@${1:-external_auth.json}"
+}
+
+function aro_hcp_patch_external_auth {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_patch_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters/${CLUSTER}/externalAuths/${EXTERNAL_AUTH}" "@${1:-external_auth_patch.json}"
+}
+
+function aro_hcp_delete_external_auth {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_delete_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters/${CLUSTER}/externalAuths/${EXTERNAL_AUTH}"
+}
+
+function aro_hcp_get_node_pool {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_get_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters/${CLUSTER}/nodePools/${NODE_POOL}"
+}
+
+function aro_hcp_put_node_pool {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_put_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters/${CLUSTER}/nodePools/${NODE_POOL}" "@${1:-node_pool.json}"
+}
+
+function aro_hcp_patch_node_pool {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_patch_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters/${CLUSTER}/nodePools/${NODE_POOL}" "@${1:-node_pool_patch.json}"
+}
+
+function aro_hcp_scale_node_pool {
+  PATCH='{\"properties\": {\"replicas\":'${1:-2}'}}'
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_patch_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters/${CLUSTER}/nodePools/${NODE_POOL}" "${PATCH}"
+}
+
+function aro_hcp_delete_node_pool {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_delete_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters/${CLUSTER}/nodePools/${NODE_POOL}"
+}
+
+function aro_hcp_post_preflight {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_post_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/deployments/test/preflight" "@${1:-preflight.json}"
+}
+
+function aro_hcp_post_request_admin_credential {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_post_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters/${CLUSTER}/requestAdminCredential"
+}
+
+function aro_hcp_post_revoke_credentials {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  aro_hcp_post_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.RedHatOpenShift/hcpOpenShiftClusters/${CLUSTER}/revokeCredentials"
+}
+
+function aro_hcp_get_version {
+  AZURE_SUBSCRIPTION_ID=$(az account show --output json | jq -r '.id')
+  LOCATION=$(az config get defaults.location --output json 2> /dev/null | jq -r '.value')
+  aro_hcp_get_request "/subscriptions/${AZURE_SUBSCRIPTION_ID}/providers/Microsoft.RedHatOpenShift/locations/${LOCATION}/hcpOpenShiftVersions/${1}"
+}
+
