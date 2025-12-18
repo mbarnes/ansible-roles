@@ -6,6 +6,7 @@
     - xfce4-whiskermenu-plugin
     - krb5-auth-dialog
     - fonts-hack
+    - gnome-disk-utility
     - gvfs-backends
     - libglib2.0-bin  # for /usr/bin/gsettings
     - menulibre
