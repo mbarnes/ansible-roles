@@ -134,3 +134,17 @@
     - golang
     - user
 
+  - pause:
+      prompt: |
+
+        Additional tasks out of scope for this playbook:
+
+          [ ] Sign in to Firefox account
+          [ ] Configure Firefox to use RH Kerberos ticket:
+              - about:config
+              - network.negotiate-auth.trusted-uris = .redhat.com
+
+      seconds: 1
+    tags:
+    - user
+
