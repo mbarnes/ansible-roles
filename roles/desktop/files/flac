@@ -1,0 +1,3 @@
+alias yt-dlp-flac="yt-dlp --extract-audio --format best --audio-format=flac"
+alias flac2mp3="for a in ./*.flac; do ffmpeg -v error -i \"\$a\" -qscale:a 0 \"\${a[@]/%flac/mp3}\"; done"
+alias flac2ogg="for a in ./*.flac; do ffmpeg -v error -i \"\$a\" -qscale:a 0 \"\${a[@]/%flac/ogg}\"; done"

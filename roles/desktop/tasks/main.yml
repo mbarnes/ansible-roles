@@ -5,6 +5,7 @@
     - xfce4
     - xfce4-whiskermenu-plugin
     - krb5-auth-dialog
+    - ffmpeg
     - fonts-hack
     - gnome-disk-utility
     - gvfs-backends
@@ -13,6 +14,7 @@
     - mugshot
     - needrestart
     - network-manager-openvpn-gnome
+    - yt-dlp
   become: yes
 
 - name: Check for Bluetooth support
@@ -80,6 +82,7 @@
     dest: "{{ bash_aliases_dir }}/"
   loop:
   - ensure-display
+  - flac
   - gcr-ssh-agent
 
 - name: Tweak GSettings
