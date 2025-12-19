@@ -17,6 +17,12 @@
       line: "127.0.1.1\t{{ common_system_fqdn }}"
     when: common_system_fqdn == ansible_hostname
 
+  - name: Disable any cdrom apt sources
+    replace:
+      path: /etc/apt/sources.list
+      regexp: '^deb cdrom:(.*)$'
+      replace: '#deb cdrom:\1'
+
   - when: ansible_distribution in ["Debian", "OSMC"]
     block:
 
