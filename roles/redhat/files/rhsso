@@ -1,0 +1,38 @@
+#!/bin/bash
+
+function usage {
+  echo "Usage: $(basename $0) [-c]" 2>&1
+  echo "Generate a PIN+TOKEN password for Red Hat Single Sign-On"
+  echo "   -c  Copy password to clipboard."
+}
+
+while getopts ":ch" arg
+do
+  case $arg in
+    c)
+      use_clipboard=1
+      ;;
+    h)
+      usage
+      exit
+      ;;
+    ?)
+      echo "Invalid option: -${OPTARG}"
+      exit 2
+      ;;
+  esac
+done
+
+# OTP increments a counter in the sso.redhat.com entry,
+# so synchronize the password-store repo before and after.
+pass git pull --rebase --quiet
+PIN=$(pass show sso.redhat.com | head --lines=1)
+OTP=$(pass otp sso.redhat.com | tail --lines=1)
+pass git push --quiet
+
+if [[ ${use_clipboard:-0} == 1 ]]
+then
+  echo -n "${PIN}${OTP}" | xclip -in -selection clipboard
+else
+  echo -n "${PIN}${OTP}"
+fi

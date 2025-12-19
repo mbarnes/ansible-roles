@@ -78,12 +78,6 @@
     state: started
     scope: user
 
-- name: Add helpful Kerberos shell scripts
-  copy:
-    src: kinit-redhat
-    dest: "{{ ansible_user_dir }}/.local/bin/"
-    mode: u=rwx,g=rx,o=rx
-
 - name: Add daily Kerberos ticket cron job
   cron:
     name: Acquire Kerberos ticket when a VPN connection is active
@@ -97,3 +91,12 @@
   loop:
   - kerberos
   - tmux-sessions
+
+- name: Add helpful shell scripts
+  copy:
+    src: "{{ item }}"
+    dest: "{{ ansible_user_dir }}/.local/bin/"
+    mode: u=rwx,g=rx,o=rx
+  loop:
+  - kinit-redhat
+  - rhsso
