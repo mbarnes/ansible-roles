@@ -1,0 +1,17 @@
+Add a "firefox-settings" role
+- Create a default profile if none exist
+- Apply settings to a user.js file in each available profile
+- Settings would be things you can specify in about:config
+- See https://braheezy.github.io/posts/automating-firefox-with-ansible/
+
+Add further tmux customizations
+- Start "home" and "work" tmux sessions on user login
+  See https://wiki.archlinux.org/title/Tmux#Autostart_with_systemd
+- Auto-attach to a tmux session based on current workspace?
+  - Check XDG_CURRENT_DESKTOP for a desktop session
+  - Make sure we're not already in a tmux session
+  - Make sure there are no other clients attached to the session
+  - Match tmux session to current workspace name
+    - Preconfigure workspace names "home", "work", "misc"
+    - Use "wmctrl -d | awk '$2 == "*" { print $10 }'" to print the current workspace
+- Configure session-specific options / windows / panes based on session name?
