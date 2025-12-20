@@ -4,11 +4,14 @@
     name:
     - xfce4
     - xfce4-whiskermenu-plugin
-    - krb5-auth-dialog
+    - apt-config-icons-hidpi
     - ffmpeg
     - fonts-hack
     - gnome-disk-utility
+    - gnome-software
+    - gnome-software-plugin-flatpak
     - gvfs-backends
+    - krb5-auth-dialog
     - libglib2.0-bin  # for /usr/bin/gsettings
     - menulibre
     - mugshot
