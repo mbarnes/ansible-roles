@@ -71,6 +71,15 @@
     - org.videolan.VLC
     method: user
 
+# This allows device renaming in pavucontrol.
+- name: Load module-device-manager when starting PulseAudio
+  copy:
+    content: "load-module module-device-manager"
+    dest: /etc/pulse/default.pa.d/module-device-manager.pa
+  notify:
+  - Restart pulseaudio
+  become: yes
+
 - name: Add user to more groups
   user:
     name: "{{ ansible_user_id }}"

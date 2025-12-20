@@ -1,0 +1,6 @@
+---
+- name: Restart pulseaudio
+  systemd_service:
+    name: pulseaudio.service
+    scope: user
+    state: restarted
