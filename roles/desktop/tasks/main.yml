@@ -10,6 +10,7 @@
     - gnome-disk-utility
     - gnome-software
     - gnome-software-plugin-flatpak
+    - gnome-themes-extra-data  # for Adwaita-dark theme
     - gvfs-backends
     - krb5-auth-dialog
     - libglib2.0-bin  # for /usr/bin/gsettings
@@ -96,6 +97,40 @@
   - ensure-display
   - flac
   - gcr-ssh-agent
+
+- name: Tweak XFCE configuration
+  community.general.xfconf:
+    channel: "{{ item.channel }}"
+    property: "{{ item.property }}"
+    value: "{{ item.value }}"
+    value_type: "{{ item.value_type }}"
+    force_array: "{{ item.force_array | default(false) }}"
+    state: "{{ item.state | default('present') }}"
+  loop:
+  - channel: xfce4-power-manager
+    property: /xfce4-power-manager/show-tray-icon
+    value: true
+    value_type: bool
+  - channel: xfwm4
+    property: /general/workspace_count
+    value: 3
+    value_type: int
+  - channel: xfwm4
+    property: /general/workspace_names
+    value:
+    - home
+    - work
+    - misc
+    value_type: string
+    force_array: true
+  - channel: xsettings
+    property: /Net/ThemeName
+    value: Adwaita-dark
+    value_type: string
+  - channel: xsettings
+    property: /Xfce/SyncThemes
+    value: true
+    value_type: bool
 
 - name: Tweak GSettings
   command: "gsettings set {{ item.schema }} {{ item.key }} {{ item.value }}"
