@@ -13,4 +13,5 @@ common_system_base_packages:
 - man-db
 - rsync
 - tmux
+- tmux-plugin-manager
 - usbutils
