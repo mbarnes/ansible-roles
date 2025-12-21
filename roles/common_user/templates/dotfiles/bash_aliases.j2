@@ -10,8 +10,14 @@ alias reset='/usr/bin/reset; stty sane; tput rs1; clear; echo -e "\033c"'
 export EDITOR=vim
 export PAGER=less
 
-if [ -d ~/.config/bash_aliases ]; then
-    pushd ~/.config/bash_aliases > /dev/null
+# Define user-specific XDG base directories.
+export XDG_DATA_HOME={{ xdg_data_home }}
+export XDG_CONFIG_HOME={{ xdg_config_home }}
+export XDG_STATE_HOME={{ xdg_state_home }}
+export XDG_CACHE_HOME={{ xdg_cache_home }}
+
+if [ -d $XDG_CONFIG_HOME/bash_aliases ]; then
+    pushd $XDG_CONFIG_HOME/bash_aliases > /dev/null
     for file in $(ls); do
         if [ -r $file ]; then
             . ./$file

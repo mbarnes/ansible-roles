@@ -23,8 +23,8 @@
     marker: "# [{{ role_name }}] {mark} ANSIBLE MANAGED BLOCK"
     block: |
       if [ -n "$BASH_VERSION" ]; then
-          if [ -d ~/.config/bash_profile ]; then
-              pushd ~/.config/bash_profile > /dev/null
+          if [ -d $XDG_CONFIG_HOME/bash_profile ]; then
+              pushd $XDG_CONFIG_HOME/bash_profile > /dev/null
               for file in $(ls); do
                   if [ -r $file ]; then
                      . ./$file
@@ -35,7 +35,7 @@
       fi
 
 - name: Copy dotfiles to home directory
-  copy:
+  template:
     src: "{{ item }}"
-    dest: "{{ ansible_user_dir }}/.{{ item | basename }}"
-  with_fileglob: "dotfiles/*"
+    dest: "{{ ansible_user_dir }}/.{{ item | basename | replace('.j2', '') }}"
+  with_fileglob: "templates/dotfiles/*"

@@ -144,13 +144,13 @@
 
 - name: Add bookmark for auto-mounted NFS shares
   lineinfile:
-    path: "{{ ansible_user_dir }}/.config/gtk-3.0/bookmarks"
+    path: "{{ xdg_config_home }}/gtk-3.0/bookmarks"
     line: "file:///net/nfs/mnt/storage Remote Storage"
     create: true
 
 - name: Tweak GTK settings
   community.general.ini_file:
-    path: "{{ ansible_user_dir }}/.config/gtk-3.0/settings.ini"
+    path: "{{ xdg_config_home }}/gtk-3.0/settings.ini"
     section: Settings
     option: "{{ item.option }}"
     value: "{{ item.value }}"
@@ -160,7 +160,7 @@
 
 - name: xfce4-terminal - Tweak settings
   community.general.ini_file:
-    path: "{{ ansible_user_dir }}/.config/xfce4/terminal/terminalrc"
+    path: "{{ xdg_config_home }}/xfce4/terminal/terminalrc"
     section: Configuration
     option: "{{ item.option }}"
     value: "{{ item.value }}"

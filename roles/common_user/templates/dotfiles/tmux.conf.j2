@@ -19,7 +19,7 @@ set -g mouse on
 set -g default-terminal "screen-256color"
 
 # Additional configuration
-source ~/.config/tmux/*
+source {{ tmux_config_dir }}/*
 
 # Initialize tmux-plugin-manager
 run /usr/share/tmux-plugin-manager/tpm
