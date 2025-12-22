@@ -1,6 +1,6 @@
 ---
 - name: Add base desktop packages
-  apt:
+  ansible.builtin.apt:
     name:
     - xfce4
     - xfce4-whiskermenu-plugin
@@ -22,11 +22,11 @@
   become: yes
 
 - name: Check for Bluetooth support
-  set_fact:
+  ansible.builtin.set_fact:
     bluetooth_module_loaded: "{{ kernel_modules | selectattr('module', 'eq', 'bluetooth') | length | bool }}"
 
 - name: Add Bluetooth packages
-  apt:
+  ansible.builtin.apt:
     name:
     - blueman
     - pulseaudio-module-bluetooth
@@ -34,7 +34,7 @@
   when: bluetooth_module_loaded
 
 - name: Remove unwanted packages
-  apt:
+  ansible.builtin.apt:
     name:
     - atril      # replaced by org.gnome.Evince
     - parole     # replaced by org.videolan.VLC
@@ -74,7 +74,7 @@
 
 # This allows device renaming in pavucontrol.
 - name: Load module-device-manager when starting PulseAudio
-  copy:
+  ansible.builtin.copy:
     content: "load-module module-device-manager"
     dest: /etc/pulse/default.pa.d/module-device-manager.pa
   notify:
@@ -82,7 +82,7 @@
   become: yes
 
 - name: Add user to more groups
-  user:
+  ansible.builtin.user:
     name: "{{ ansible_user_id }}"
     groups:
     - systemd-journal
@@ -90,7 +90,7 @@
   become: yes
 
 - name: Add helpful Bash snippets
-  copy:
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: "{{ bash_aliases_dir }}/"
   loop:
@@ -133,7 +133,7 @@
     value_type: bool
 
 - name: Tweak GSettings
-  command: "gsettings set {{ item.schema }} {{ item.key }} {{ item.value }}"
+  ansible.builtin.command: "gsettings set {{ item.schema }} {{ item.key }} {{ item.value }}"
   loop:
   # Either "recent" or "cwd"; controls whether the file chooser starts up
   # showing the list of recently-used files, or the contents of the current
@@ -143,7 +143,7 @@
     value: "cwd"
 
 - name: Add bookmark for auto-mounted NFS shares
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ xdg_config_home }}/gtk-3.0/bookmarks"
     line: "file:///net/nfs/mnt/storage Remote Storage"
     create: true

@@ -5,16 +5,16 @@
 
   # See https://www.google.com/linuxrepositories/
   - name: Add Google's official GPG key
-    get_url:
+    ansible.builtin.get_url:
       url: https://dl.google.com/linux/linux_signing_key.pub
       dest: /etc/apt/trusted.gpg.d/google-chrome.asc
 
   - name: Add apt repository for Google Chrome
-    apt_repository:
+    ansible.builtin.apt_repository:
       repo: "deb [arch={{ dpkg_architecture }}] https://dl.google.com/linux/chrome/deb/ stable main"
       filename: google-chrome
 
   - name: Add google-chrome-stable package
-    apt:
+    ansible.builtin.apt:
       name:
       - google-chrome-stable

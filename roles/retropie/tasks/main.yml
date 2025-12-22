@@ -1,6 +1,6 @@
 ---
 - name: Add user to "input" group
-  user:
+  ansible.builtin.user:
     name: "{{ ansible_user_id }}"
     groups: input
     append: yes
@@ -11,7 +11,7 @@
 # modifications when trying to update.  Just create an initial
 # clone.  The setup.sh script itself can update the repo.
 - name: Clone retrOSMCmk2 repo for RetroPie installer
-  git:
+  ansible.builtin.git:
     repo: https://github.com/hissingshark/retrOSMCmk2.git
     dest: "{{ ansible_user_dir }}/retrOSMCmk2"
     update: false

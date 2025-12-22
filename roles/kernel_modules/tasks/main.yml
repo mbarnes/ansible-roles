@@ -1,15 +1,15 @@
 ---
 - name: Add jc package
-  apt:
+  ansible.builtin.apt:
     name:
     - jc
   become: yes
 
 - name: Run lsmod
-  command: jc lsmod
+  ansible.builtin.command: jc lsmod
   register: lsmod_result
   changed_when: False
 
 - name: Set kernel_modules fact
-  set_fact:
+  ansible.builtin.set_fact:
     kernel_modules: "{{ lsmod_result.stdout | from_json }}"

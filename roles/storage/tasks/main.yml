@@ -9,12 +9,12 @@
   #     installing the mdadm package to prevent this.
 
   - name: Add directory for mdadm configuration
-    file:
+    ansible.builtin.file:
       path: /etc/mdadm
       state: directory
 
   - name: Add a mdadm configuration
-    template:
+    ansible.builtin.template:
       src: mdadm.conf.j2
       dest: /etc/mdadm/mdadm.conf
       mode: u=rw,g=r,o=r
@@ -23,28 +23,28 @@
       force: no
 
   - name: Add mdadm package
-    apt:
+    ansible.builtin.apt:
       name: mdadm
     register: mdadm_install
 
   - name: Reboot to create RAID device
-    shell: sleep 2 && systemctl reboot
+    ansible.builtin.shell: sleep 2 && systemctl reboot
     async: 1
     poll: 0
     when: mdadm_install.changed
     ignore_errors: true
 
   - name: Wait for host to become reachable
-    wait_for_connection:
+    ansible.builtin.wait_for_connection:
       delay: 10
       timeout: 600
     when: mdadm_install.changed
 
   - name: Scan for software RAID devices
-    command: /sbin/mdadm --detail --scan
+    ansible.builtin.command: /sbin/mdadm --detail --scan
     register: mdadm_scan
 
-  - set_fact:
+  - ansible.builtin.set_fact:
       raid_device_present: "{{ mdadm_scan.stdout_lines | length | bool }}"
 
   - name: Configure software RAID device
@@ -52,22 +52,22 @@
     block:
 
     - name: Add scan results to configuration
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/mdadm/mdadm.conf
         regexp: "^ARRAY "
         line: "{{ mdadm_scan.stdout_lines[0] }}"
       notify: Restart mdmonitor
 
     - name: Find the canonical RAID device path
-      command: "realpath {{ mdadm_scan.stdout_lines[0].split()[1] }}"
+      ansible.builtin.command: "realpath {{ mdadm_scan.stdout_lines[0].split()[1] }}"
       register: raid_device
 
     - name: Activate RAID array
-      command: "/sbin/mdadm --activate {{ raid_device }}"
+      ansible.builtin.command: "/sbin/mdadm --activate {{ raid_device }}"
       when: mdadm_scan.stdout_lines[0] is match("INACTIVE-ARRAY")
 
     - name: Identify LVM volume group for RAID device
-      set_fact:
+      ansible.builtin.set_fact:
         raid_device_vg: "{{ item.value.vg }}"
       when:
       - item.key == raid_device.stdout
@@ -75,22 +75,22 @@
       loop: "{{ ansible_lvm.pvs | dict2items }}"
 
     - name: Ensure RAID device has a volume group
-      assert:
+      ansible.builtin.assert:
         that: raid_device_vg is defined
         success_msg: "volume group is {{ raid_device_vg }}"
 
     - name: Identify LVM logical volume for RAID device
-      set_fact:
+      ansible.builtin.set_fact:
         raid_device_lv: "{{ item.key }}"
       when: item.value.vg == raid_device_vg
       loop: "{{ ansible_lvm.lvs | dict2items }}"
 
     - name: Set device path for mass-storage volume
-      set_fact:
+      ansible.builtin.set_fact:
         storage_device: "{{ '/dev/%s/%s' % (raid_device_vg, raid_device_lv) }}"
 
     - name: Add fstab entry and mount
-      mount:
+      ansible.builtin.mount:
         src: "{{ storage_device }}"
         path: "{{ storage_path }}"
         fstype: "{{ storage_fstype }}"
@@ -99,21 +99,21 @@
         state: mounted
 
     - name: Enable mdmonitor
-      systemd_service:
+      ansible.builtin.systemd_service:
         name: mdmonitor.service
         enabled: true
         state: started
 
     - name: Add nfs-kernel-server package
-      apt:
+      ansible.builtin.apt:
         name: nfs-kernel-server
 
   - name: Add curlftpfs package
-    apt:
+    ansible.builtin.apt:
       name: curlftpfs
 
   - name: Add .netrc file
-    copy:
+    ansible.builtin.copy:
       content: !vault |
         $ANSIBLE_VAULT;1.1;AES256
         66343036353631613132303062353435613162373463313533366234396433643266393934636536
@@ -131,7 +131,7 @@
     no_log: True
 
   - name: Create a mount point for the router's FTP server
-    file:
+    ansible.builtin.file:
       path: /mnt/router
       state: directory
 
@@ -142,7 +142,7 @@
   # therefore the FTP file system can not stay mounted at
   # all times.  Hence the "noauto" option.
   - name: Define the router's FTP server as a file system
-    mount:
+    ansible.builtin.mount:
       src: curlftpfs#router.asus.com
       path: /mnt/router
       fstype: fuse
@@ -150,11 +150,11 @@
       state: present
 
 - name: Add bash aliases
-  copy:
+  ansible.builtin.copy:
     src: bash_aliases
     dest: "{{ bash_aliases_dir }}/{{ role_name }}_aliases"
 
 - name: Copy helpful mdadm notes
-  copy:
+  ansible.builtin.copy:
     src: mdadm.notes
     dest: "{{ ansible_user_dir }}/mdadm.notes"

@@ -4,14 +4,14 @@
   block:
 
   - name: Add lightdm and related packages
-    apt:
+    ansible.builtin.apt:
       name:
       - lightdm
       - lightdm-gtk-greeter
       - light-locker
 
   - name: Tweak lightdm configuration
-    lineinfile:
+    ansible.builtin.lineinfile:
       path: /etc/lightdm/lightdm.conf
       regexp: "#?{{ item.key }}="
       line: "{{ item.key }}={{ item.value }}"
@@ -29,7 +29,7 @@
     state: present
 
 - name: Download a face image for login screen
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ lightdm_face_url }}"
     dest: "{{ ansible_user_dir }}/.face"
     force: true

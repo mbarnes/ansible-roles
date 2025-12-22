@@ -8,7 +8,7 @@
   #       scope of this playbook.
 
   - name: Add pwquality PAM module
-    apt:
+    ansible.builtin.apt:
       name: libpam-pwquality
 
   - name: Configure pwquality to meet Microsoft Intune requirements
@@ -26,17 +26,17 @@
       state: args_present
 
   - name: Add Microsoft's apt repository for Ubuntu
-    apt_repository:
+    ansible.builtin.apt_repository:
       repo: "deb [arch={{ dpkg_architecture }} signed-by={{ microsoft_signing_key_path }}] https://packages.microsoft.com/{{ ansible_distribution | lower}}/{{ ansible_distribution_version }}/prod {{ ansible_distribution_release }} main"
       filename: "microsoft-{{ ansible_distribution | lower }}-{{ ansible_distribution_release }}-prod"
 
   - name: Add Microsoft's apt repository for Edge browser
-    apt_repository:
+    ansible.builtin.apt_repository:
       repo: "deb [arch={{ dpkg_architecture }} signed-by={{ microsoft_signing_key_path }}] https://packages.microsoft.com/repos/edge stable main"
       filename: "microsoft-edge"
 
   - name: Install required packages for Microsoft Intune compliance
-    apt:
+    ansible.builtin.apt:
       name:
       - intune-portal
       - microsoft-edge-stable
@@ -44,7 +44,7 @@
   # XXX Copied from the redhat role for Google Chrome.
   #     Should this be split off as a separate role?
   - name: Add Red Hat Kerberos policy for Microsoft Edge
-    copy:
+    ansible.builtin.copy:
       src: edge/redhat-corp.json
       dest: /etc/opt/edge/policies/managed/
       mode: u=rw,g=r,o=r
@@ -52,5 +52,5 @@
       group: root
 
   - name: Install git-credential-manager
-    include_role:
+    ansible.builtin.include_role:
       name: git_credential_manager

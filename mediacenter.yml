@@ -31,14 +31,14 @@
   pre_tasks:
 
   - name: Check Ansible version
-    assert:
+    ansible.builtin.assert:
       that: "ansible_version.full is version('2.9', '>=')"
       msg: "This playbook requires Ansible 2.9 or later"
     tags:
     - always
 
   - name: Check for necessary inventory variables
-    assert:
+    ansible.builtin.assert:
       that: "item is defined"
       msg: "Missing required variable \"{{ item }}\". Please add this to your inventory."
     loop:
@@ -48,7 +48,7 @@
     - always
 
   - name: Verify vault secret
-    set_fact:
+    ansible.builtin.set_fact:
       vault_test: !vault |
         $ANSIBLE_VAULT;1.1;AES256
         37393232346234616538646162396633353964346536303438363862383035643166343438663836

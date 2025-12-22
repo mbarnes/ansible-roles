@@ -1,11 +1,11 @@
 ---
 - name: Add lvm2 package
-  apt:
+  ansible.builtin.apt:
     name: lvm2
   become: yes
 
 - name: Gather ansible_lvm facts
-  setup:
+  ansible.builtin.setup:
     # LVM facts have to be collected as root, but collecting all
     # facts as root will reset user details like ansible_user_id
     # to root.  Collect the minimum subset to pick up LVM facts.
@@ -13,5 +13,5 @@
   become: yes
 
 - name: Ensure we have ansible_lvm facts
-  assert:
+  ansible.builtin.assert:
     that: ansible_lvm is defined

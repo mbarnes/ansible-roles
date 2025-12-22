@@ -4,7 +4,7 @@
 #       to set up the required tools and configuration.
 
 - name: Add Debian packaging tools
-  apt:
+  ansible.builtin.apt:
     name:
     - build-essential
     - devscripts
@@ -13,17 +13,17 @@
   become: true
 
 - name: Add dh_make configuration
-  template:
+  ansible.builtin.template:
     src: dh_make.j2
     dest: "{{ bash_aliases_dir }}/dh_make"
 
 - name: Add dquilt configuration
-  copy:
+  ansible.builtin.copy:
     src: dquilt
     dest: "{{ bash_aliases_dir }}/"
 
 - name: Copy dotfiles to home directory
-  copy:
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: "{{ ansible_user_dir }}/.{{ item | basename }}"
   with_fileglob: "dotfiles/*"

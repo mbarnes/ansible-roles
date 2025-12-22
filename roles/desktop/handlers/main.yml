@@ -1,6 +1,6 @@
 ---
 - name: Restart pulseaudio
-  systemd_service:
+  ansible.builtin.systemd_service:
     name: pulseaudio.service
     scope: user
     state: restarted

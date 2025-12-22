@@ -4,13 +4,13 @@
   block:
 
   - name: Add autofs and nfs-common packages
-    apt:
+    ansible.builtin.apt:
       name:
       - autofs
       - nfs-common
 
   - name: Enable automatic host-based mounts
-    lineinfile:
+    ansible.builtin.lineinfile:
       path: /etc/auto.master
       regexp: '^#?(/net\s+-hosts)$'
       line: '\1'

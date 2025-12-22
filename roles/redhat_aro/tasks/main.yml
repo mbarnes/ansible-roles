@@ -5,19 +5,19 @@
 
   # See https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
   - name: Add Microsoft's official GPG key
-    get_url:
+    ansible.builtin.get_url:
       url: https://packages.microsoft.com/keys/microsoft.asc
       dest: "{{ microsoft_signing_key_path }}"
 
   - name: Add apt repository for Azure CLI
-    apt_repository:
+    ansible.builtin.apt_repository:
       #repo: "deb [arch={{ dpkg_architecture }} signed-by={{ microsoft_signing_key_path }}] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_distribution_release }} main"
       # FIXME Repository does not yet support Debian Trixie.
       repo: "deb [arch={{ dpkg_architecture }} signed-by={{ microsoft_signing_key_path }}] https://packages.microsoft.com/repos/azure-cli/ bookworm main"
       filename: azure-cli
 
   - name: Add packages for ARO development
-    apt:
+    ansible.builtin.apt:
       name:
       - azure-cli
       - curl
@@ -29,7 +29,7 @@
       - virt-viewer
 
 - name: Add bash aliases
-  copy:
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: "{{ bash_aliases_dir }}/"
   loop:
@@ -37,25 +37,25 @@
   - aro_hcp_testing
 
 - name: Install Azure Bicep CLI
-  command:
+  ansible.builtin.command:
     cmd: az bicep install
     creates: "{{ ansible_user_dir }}/.azure/bin/bicep"
   register: azure_bicep_installed
 
 - name: Update Azure Bicep CLI
-  command:
+  ansible.builtin.command:
     cmd: az bicep upgrade
   when: not azure_bicep_installed.changed
 
 - name: Install kubectl
-  command:
+  ansible.builtin.command:
     cmd: >
       az aks install-cli
       --install-location {{ ansible_user_dir }}/.local/bin/kubectl
       --kubelogin-install-location {{ ansible_user_dir }}/.local/bin/kubelogin
     creates: "{{ ansible_user_dir }}/.local/bin/kubectl"
 
-- import_role:
+- ansible.builtin.import_role:
     name: github_release
   vars:
     github_release_owner: openshift-online
@@ -63,5 +63,5 @@
     github_release_binary_name: ocm
 
 - name: Configure host for Microsoft Intune
-  include_tasks: microsoft_intune.yml
+  ansible.builtin.include_tasks: microsoft_intune.yml
   when: enable_microsoft_intune | default(False)

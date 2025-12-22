@@ -4,32 +4,32 @@
   block:
 
   - name: Add required packages for OpenVPN
-    apt:
+    ansible.builtin.apt:
       name:
       - openvpn
       - unzip
 
   - name: Create directory for openvpn files
-    file:
+    ansible.builtin.file:
       path: /etc/openvpn/pia
       state: directory
     register: pia
 
   - name: Download openvpn files for privateinternetaccess
-    unarchive:
+    ansible.builtin.unarchive:
       remote_src: yes
       src: https://www.privateinternetaccess.com/openvpn/openvpn.zip
       dest: "{{ pia.path }}"
       creates: "{{ pia.path }}/ca.rsa.2048.crt"
 
   - name: List openvpn files for privateinternetaccess
-    find:
+    ansible.builtin.find:
       paths: "{{ pia.path }}"
       patterns: "*.ovpn"
     register: pia_config
 
   - name: Tweak openvpn files to use a credentials file
-    lineinfile:
+    ansible.builtin.lineinfile:
       path: "{{ item }}"
       line: auth-user-pass pia.credentials
       regexp: ^auth-user-pass
@@ -37,7 +37,7 @@
     notify: Restart openvpn
 
   - name: Add privateinternetaccess credentials
-    copy:
+    ansible.builtin.copy:
       content: !vault |
         $ANSIBLE_VAULT;1.1;AES256
         65386633353866633366616662373861323433613133393535653132633261343562373336353431
@@ -53,19 +53,19 @@
     notify: Restart openvpn
 
   - name: Link openvpn configuration to the preferred server
-    file:
+    ansible.builtin.file:
       src: "{{ pia.path }}/{{ privateinternetaccess_server }}.ovpn"
       dest: /etc/openvpn/default.conf
       state: link
     notify: Restart openvpn
 
   - name: Enable openvpn
-    systemd_service:
+    ansible.builtin.systemd_service:
       name: openvpn.service
       enabled: true
       state: started
 
 - name: Add bash aliases
-  copy:
+  ansible.builtin.copy:
     src: bash_aliases
     dest: "{{ bash_aliases_dir }}/{{ role_name }}_aliases"

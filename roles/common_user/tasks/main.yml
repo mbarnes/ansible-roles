@@ -1,6 +1,6 @@
 ---
 - name: Add corresponding packages for our dotfiles
-  apt:
+  ansible.builtin.apt:
     name:
     - bash
     - rsync
@@ -9,7 +9,7 @@
   become: true
 
 - name: Create config directories
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: directory
   loop:
@@ -18,7 +18,7 @@
   - "{{ tmux_config_dir }}"
 
 - name: Source additional bash configurations
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: "{{ ansible_user_dir }}/.profile"
     marker: "# [{{ role_name }}] {mark} ANSIBLE MANAGED BLOCK"
     block: |
@@ -35,7 +35,7 @@
       fi
 
 - name: Copy dotfiles to home directory
-  template:
+  ansible.builtin.template:
     src: "{{ item }}"
     dest: "{{ ansible_user_dir }}/.{{ item | basename | replace('.j2', '') }}"
   with_fileglob: "templates/dotfiles/*"

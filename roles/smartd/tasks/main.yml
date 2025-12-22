@@ -4,11 +4,11 @@
   block:
 
   - name: Install smartmontools
-    apt:
+    ansible.builtin.apt:
       name: smartmontools
 
   - name: Create smartd configuration
-    template:
+    ansible.builtin.template:
       src: smartd.conf.j2
       dest: "{{ smartd_config_path }}"
       owner: root
@@ -18,7 +18,7 @@
     notify: Restart smartd
 
   - name: Enable smartd
-    systemd_service:
+    ansible.builtin.systemd_service:
       name: smartd.service
       enabled: true
       state: started

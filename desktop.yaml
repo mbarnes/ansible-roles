@@ -24,7 +24,7 @@
   pre_tasks:
 
   - name: Check for necessary inventory variables
-    assert:
+    ansible.builtin.assert:
       that: "item is defined"
       msg: "Missing required variables \"{{ item }}\". Please add this to your inventory."
     loop:
@@ -39,7 +39,7 @@
   # Common System Configuration
   #-----------------------------
 
-  - import_role:
+  - ansible.builtin.import_role:
       name: common_system
     vars:
       common_system_extra_packages:
@@ -52,14 +52,14 @@
   # Boot and Login Configuration
   #------------------------------
 
-  - import_role:
+  - ansible.builtin.import_role:
       name: plymouth
     tags:
     - boot
     - plymouth
     - system
 
-  - import_role:
+  - ansible.builtin.import_role:
       name: lightdm
     tags:
     - lightdm
@@ -69,7 +69,7 @@
   # Common User Configuration
   #---------------------------
 
-  - import_role:
+  - ansible.builtin.import_role:
       name: common_user
     tags:
     - common_user
@@ -79,7 +79,7 @@
   # Desktop Configuration
   #-----------------------
 
-  - import_role:
+  - ansible.builtin.import_role:
       name: desktop
     tags:
     - desktop
@@ -87,7 +87,7 @@
 
   # XXX Disabled until a package dependency bug is fixed:
   #     https://github.com/balena-io/etcher/issues/4543
-  #- import_role:
+  #- ansible.builtin.import_role:
   #    name: balena_etcher
   #  tags:
   #  - desktop
@@ -97,13 +97,13 @@
   # Transfer User Secrets
   #-----------------------
 
-  - import_role:
+  - ansible.builtin.import_role:
       name: secrets
     tags:
     - secrets
     - user
 
-  - pause:
+  - ansible.builtin.pause:
       prompt: |
 
         Additional tasks out of scope for this playbook:

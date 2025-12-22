@@ -1,9 +1,9 @@
 ---
 - name: Look up timezone name
-  command: cat /etc/timezone
+  ansible.builtin.command: cat /etc/timezone
   register: timezone_result
   changed_when: False
 
 - name: Set timezone fact
-  set_fact:
+  ansible.builtin.set_fact:
     timezone: "{{ timezone_result.stdout }}"

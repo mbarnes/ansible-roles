@@ -6,13 +6,13 @@
   # Based on https://wiki.debian.org/plymouth
 
   - name: Add plymouth package
-    apt:
+    ansible.builtin.apt:
       name:
       - plymouth
       - plymouth-x11
 
   - name: Check if splash is configured in boot command
-    lineinfile:
+    ansible.builtin.lineinfile:
       path: /etc/default/grub
       regexp: '^GRUB_CMDLINE_LINUX_DEFAULT=".*splash'
       state: absent
@@ -21,7 +21,7 @@
     changed_when: false
 
   - name: Add splash to boot command
-    lineinfile:
+    ansible.builtin.lineinfile:
       path: /etc/default/grub
       regexp: "^(GRUB_CMDLINE_LINUX_DEFAULT=\".*)\"$"
       line: '\1 splash"'

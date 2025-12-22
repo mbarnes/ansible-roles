@@ -1,6 +1,6 @@
 ---
 - name: Add powerline package and dependencies
-  apt:
+  ansible.builtin.apt:
     name:
     - git
     - powerline
@@ -9,33 +9,33 @@
   become: true
 
 - name: Copy powerline configuration
-  copy:
+  ansible.builtin.copy:
     src: config.json
     dest: "{{ xdg_config_home }}/powerline/"
     mode: u=rw,g=r,o=r
 
 - name: Add powerline to vim
-  command: vim-addons install powerline
+  ansible.builtin.command: vim-addons install powerline
 
 - name: Clone vim-colors-solarized as a vim package
-  git:
+  ansible.builtin.git:
     repo: https://github.com/altercation/vim-colors-solarized.git
     dest: "{{ ansible_user_dir }}/.vim/pack/plugins/opt/vim-colors-solarized"
 
 - name: Configure bash for powerline
-  copy:
+  ansible.builtin.copy:
     src: powerline.sh
     dest: "{{ bash_profile_dir }}/powerline.sh"
     mode: u=rw,g=r,o=r
 
 - name: Configure tmux for powerline
-  file:
+  ansible.builtin.file:
     src: /usr/share/powerline/bindings/tmux/powerline.conf
     dest: "{{ tmux_config_dir }}/powerline.conf"
     state: link
 
 - name: Configure vim for powerline
-  copy:
+  ansible.builtin.copy:
     src: powerline-config.vim
     dest: "{{ ansible_user_dir }}/.vim/plugin/powerline-config.vim"
     mode: u=rw,g=r,o=r

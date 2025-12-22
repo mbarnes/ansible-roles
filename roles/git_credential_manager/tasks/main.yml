@@ -1,5 +1,5 @@
 ---
-- import_role:
+- ansible.builtin.import_role:
     name: github_release
   vars:
     github_release_name: Git Credential Manager
@@ -7,6 +7,6 @@
     github_release_repo: git-credential-manager
 
 - name: Add bash configuration
-  copy:
+  ansible.builtin.copy:
     src: git-credential-manager
     dest: "{{ bash_aliases_dir }}/"

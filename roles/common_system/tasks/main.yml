@@ -4,21 +4,21 @@
   block:
 
   - name: Update 127.0.1.1 hosts entry (w/ FQDN)
-    lineinfile:
+    ansible.builtin.lineinfile:
       path: /etc/hosts
       regexp: '^127\.0\.1\.1'
       line: "127.0.1.1\t{{ common_system_fqdn }} {{ ansible_hostname }}"
     when: common_system_fqdn != ansible_hostname
 
   - name: Update 127.0.1.1 hosts entry (w/o FQDN)
-    lineinfile:
+    ansible.builtin.lineinfile:
       path: /etc/hosts
       regexp: '^127\.0\.1\.1'
       line: "127.0.1.1\t{{ common_system_fqdn }}"
     when: common_system_fqdn == ansible_hostname
 
   - name: Disable any cdrom apt sources
-    replace:
+    ansible.builtin.replace:
       path: /etc/apt/sources.list
       regexp: '^deb cdrom:(.*)$'
       replace: '#deb cdrom:\1'
@@ -27,19 +27,19 @@
     block:
 
     - name: Set Debian backports repository name
-      set_fact:
+      ansible.builtin.set_fact:
         backports_apt_repository_name: "{{ ansible_distribution_release }}-backports"
 
     - name: Add Debian backports repository
-      apt_repository:
+      ansible.builtin.apt_repository:
         repo: "deb http://deb.debian.org/debian {{ backports_apt_repository_name }} main"
         filename: "{{ backports_apt_repository_name }}"
 
   - name: Add basic CLI tools
-    apt:
+    ansible.builtin.apt:
       name: "{{ common_system_base_packages + common_system_extra_packages }}"
 
   - name: Update the command-not-found cache
-    command: /usr/sbin/update-command-not-found
+    ansible.builtin.command: /usr/sbin/update-command-not-found
     # Command is not present on Ubuntu distribution
     when: ansible_distribution in ["Debian", "OSMC"]

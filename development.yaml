@@ -29,7 +29,7 @@
   pre_tasks:
 
   - name: Check for necessary inventory variables
-    assert:
+    ansible.builtin.assert:
       that: "item is defined"
       msg: "Missing required variable \"{{ item }}\". Please add this to your inventory."
     loop:
@@ -44,7 +44,7 @@
   # Common System Configuration
   #-----------------------------
 
-  - import_role:
+  - ansible.builtin.import_role:
       name: common_system
     vars:
       common_system_extra_packages:
@@ -58,7 +58,7 @@
   #-----------------------
 
   # FIXME Package is obsolete; re-evaluate whether to keep.
-  #- import_role:
+  #- ansible.builtin.import_role:
   #    name: dropbox
   #  tags:
   #  - dropbox
@@ -70,7 +70,7 @@
 
   # FIXME Re-evaluate whether Google Meet works well on Firefox.
   #       If it does, maybe we don't need Chrome?
-  #- import_role:
+  #- ansible.builtin.import_role:
   #    name: google_chrome
   #  tags:
   #  - google_chrome
@@ -80,13 +80,13 @@
   # Red Hat Configuration
   #-----------------------
 
-  - import_role:
+  - ansible.builtin.import_role:
       name: redhat
     tags:
     - redhat
     - system
 
-  - import_role:
+  - ansible.builtin.import_role:
       name: redhat_aro
     tags:
     - redhat
@@ -96,7 +96,7 @@
   # Common User Configuration
   #---------------------------
 
-  - import_role:
+  - ansible.builtin.import_role:
       name: common_user
     tags:
     - common_user
@@ -106,7 +106,7 @@
   # Debian Maintainer Configuration
   #---------------------------------
 
-  - import_role:
+  - ansible.builtin.import_role:
       name: deb_maint
     vars:
       deb_email: mbarnes@fastmail.com
@@ -118,7 +118,7 @@
   # Powerline Configuration
   #-------------------------
 
-  - import_role:
+  - ansible.builtin.import_role:
       name: powerline
     tags:
     - powerline
@@ -128,13 +128,13 @@
   # Golang Configuration
   #----------------------
 
-  - import_role:
+  - ansible.builtin.import_role:
       name: golang
     tags:
     - golang
     - user
 
-  - pause:
+  - ansible.builtin.pause:
       prompt: |
 
         Additional tasks out of scope for this playbook:

@@ -4,12 +4,12 @@
   block:
 
   - name: Add Docker's official GPG key
-    get_url:
+    ansible.builtin.get_url:
       url: https://download.docker.com/linux/debian/gpg
       dest: /etc/apt/trusted.gpg.d/docker.asc
 
   - name: Set dpkg architecture for Docker
-    set_fact:
+    ansible.builtin.set_fact:
       docker_dpkg_architecture: "{{ dpkg_architecture }}"
 
   # Override the dpkg architecture on OSMC to allow 64-bit containers.
@@ -25,7 +25,7 @@
   # Further info at:
   # https://discourse.osmc.tv/t/support-for-64bit-docker-containers/94286
   - name: Override dpkg architecture for Docker on OSMC
-    set_fact:
+    ansible.builtin.set_fact:
       docker_dpkg_architecture: arm64
     when:
     - ansible_distribution == "OSMC"
@@ -33,7 +33,7 @@
     - ansible_userspace_bits == "32"
 
   - name: Add apt repository for Docker
-    apt_repository:
+    ansible.builtin.apt_repository:
       repo: "deb [arch={{ docker_dpkg_architecture }}] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
       filename: docker
 
@@ -41,15 +41,15 @@
   #     (Is this still needed on Debian Bookworm?)
   #     https://github.com/moby/libnetwork/issues/2331
   - name: Add iptables package
-    apt:
+    ansible.builtin.apt:
       name:
       - iptables
 
   - name: Link iptables to iptables-legacy
-    command: update-alternatives --set iptables /usr/sbin/iptables-legacy
+    ansible.builtin.command: update-alternatives --set iptables /usr/sbin/iptables-legacy
 
   - name: Add docker-ce packages
-    apt:
+    ansible.builtin.apt:
       name:
       # XXX Not sure why the package architecture has to be specified
       #     again here, but without it Ansible fails on OSMC with the
@@ -58,18 +58,18 @@
       - "docker-ce-cli:{{ docker_dpkg_architecture }}"
 
   - name: Add user to "docker" group
-    user:
+    ansible.builtin.user:
       name: "{{ ansible_user_id }}"
       groups: docker
       append: yes
 
   - name: Enable and start docker.service
-    systemd_service:
+    ansible.builtin.systemd_service:
       name: docker.service
       enabled: true
       state: started
 
 - name: Add bash aliases
-  copy:
+  ansible.builtin.copy:
     src: bash_aliases
     dest: "{{ bash_aliases_dir }}/{{ role_name }}_aliases"

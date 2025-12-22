@@ -1,19 +1,19 @@
 - name: "{{ github_release_repo }} : Query latest release asset"
-  uri:
+  ansible.builtin.uri:
     url: "https://api.github.com/repos/{{ github_release_owner }}/{{ github_release_repo }}/releases/latest"
     headers:
       Accept: "application/vnd.github+json"
   register: github_release_assets
 
 - name: "{{ github_release_repo }} : Find arch-specific deb package amongst release assets"
-  set_fact:
+  ansible.builtin.set_fact:
     github_release_deb_asset: "{{ item }}"
   when: item.name.endswith(dpkg_architecture + ".deb")
   loop: "{{ github_release_assets.json.assets }}"
   no_log: true  # Avoid spewing a bunch of JSON
 
 - name: "{{ github_release_repo }} : Find any deb package amongst release assets"
-  set_fact:
+  ansible.builtin.set_fact:
     github_release_deb_asset: "{{ item }}"
   when:
   - github_release_deb_asset is not defined
@@ -22,7 +22,7 @@
   no_log: true  # Avoid spewing a bunch of JSON
 
 - name: "{{ github_release_repo }} : Find arch-specific zip file amongst release assets"
-  set_fact:
+  ansible.builtin.set_fact:
     github_release_zip_asset: "{{ item }}"
   when:
   # zip file is a fallback when there is no deb
@@ -32,7 +32,7 @@
   no_log: true  # Avoid spewing a bunch of JSON
 
 - name: "{{ github_release_repo }} : Find arch-specific binary file amongst release assets"
-  set_fact:
+  ansible.builtin.set_fact:
     github_release_bin_asset: "{{ item }}"
   when:
   # binary file is a fallback when there is no deb or zip file
@@ -42,7 +42,7 @@
   loop: "{{ github_release_assets.json.assets }}"
   no_log: true  # Avoid spewing a bunch of JSON
 
-- assert:
+- ansible.builtin.assert:
     that: github_release_deb_asset is defined or github_release_zip_asset is defined or github_release_bin_asset is defined
     fail_msg: "No deb package or zip file or binary file available for {{ github_release_name | default(github_release_repo) }}"
 
@@ -50,53 +50,53 @@
   block:
 
   - name: "{{ github_release_repo }} : Create a temporary directory"
-    tempfile:
+    ansible.builtin.tempfile:
       state: directory
     register: github_release_temp_dir
 
   - name: "{{ github_release_repo }} : Download deb package"
-    get_url:
+    ansible.builtin.get_url:
       url: "{{ github_release_deb_asset.browser_download_url }}"
       checksum: "{{ github_release_deb_asset.digest }}"
       dest: "{{ github_relese_temp_dir.path }}"
 
   - name: "{{ github_release_repo }} : Install deb package"
-    apt:
+    ansible.builtin.apt:
       deb: "{{ github_release_temp_dir.path }}/{{ github_release_deb_asset.browser_download_url | basename }}"
     become: yes
 
 - when: github_release_zip_asset is defined
   block:
 
-  - assert:
+  - ansible.builtin.assert:
       that: github_release_zip_binary_path is defined
       fail_msg: "Need github_release_zip_binary_path var to install from a zip file"
 
   - name: "{{ github_release_repo }} : Create a temporary directory"
-    tempfile:
+    ansible.builtin.tempfile:
       state: directory
     register: github_release_temp_dir
 
   - name: "{{ github_release_repo }} : Download zip file"
-    get_url:
+    ansible.builtin.get_url:
       url: "{{ github_release_zip_asset.browser_download_url }}"
       checksum: "{{ github_release_zip_asset.digest }}"
       dest: "{{ github_release_temp_dir.path }}"
 
   - name: "{{ github_release_repo }} : Unpack zip file"
-    unarchive:
+    ansible.builtin.unarchive:
       src: "{{ github_release_temp_dir.path }}/{{ github_release_zip_asset.browser_download_url | basename }}"
       dest: "{{ github_release_temp_dir.path }}"
       remote_src: yes
 
   - name: "{{ github_release_repo }} : Copy binary from zip file"
-    copy:
+    ansible.builtin.copy:
       src: "{{ github_release_temp_dir.path }}/{{ github_release_zip_binary_path }}"
       dest: "{{ ansible_user_dir }}/.local/bin/{{ github_release_binary_name }}"
       mode: u=rwx,g=rx,o=rx
 
 - name: "{{ github_release_repo }} : Install binary file"
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ github_release_bin_asset.browser_download_url }}"
     checksum: "{{ github_release_bin_asset.digest }}"
     dest: "{{ ansible_user_dir }}/.local/bin/{{ github_release_binary_name | default(github_release_repo) }}"

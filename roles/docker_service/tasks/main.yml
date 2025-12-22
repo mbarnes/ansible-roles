@@ -4,12 +4,12 @@
   block:
 
   - name: "{{ docker_service_name }} : Pull docker image"
-    docker_image:
+    ansible.builtin.docker_image:
       name: "{{ docker_service_image_name }}"
       source: pull
 
   - name: "{{ docker_service_name }} : Create volume mount points"
-    file:
+    ansible.builtin.file:
       path: "{{ item.path }}"
       mode: "{{ item.mode | default(omit) }}"
       owner: "{{ item.owner | default(ansible_user_uid) }}"
@@ -18,13 +18,13 @@
     loop: "{{ docker_service_mount_points }}"
 
   - name: "{{ docker_service_name }} : Include configuration tasks"
-    include_tasks: "{{ docker_service_config_tasks }}"
+    ansible.builtin.include_tasks: "{{ docker_service_config_tasks }}"
     when: docker_service_config_tasks
 
   # Do not replace existing environment files since their
   # purpose is to adjust container limits post-installation.
   - name: "{{ docker_service_name }} : Add environment file"
-    copy:
+    ansible.builtin.copy:
       content: "{{ docker_service_environment }}"
       dest: "/etc/default/{{ docker_service_name }}"
       mode: u=rw,g=r,o=r
@@ -34,7 +34,7 @@
     when: docker_service_environment is defined
 
   - name: "{{ docker_service_name }} : Add service file for docker image"
-    template:
+    ansible.builtin.template:
       src: "{{ docker_service_name }}.service.j2"
       dest: "/etc/systemd/system/{{ docker_service_name }}.service"
       mode: u=rw,g=r,o=r
@@ -43,7 +43,7 @@
     register: docker_service_file
 
   - name: "{{ docker_service_name }} : Enable and start service"
-    systemd_service:
+    ansible.builtin.systemd_service:
       name: "{{ docker_service_name }}.service"
       enabled: true
       state: "{{ docker_service_file.changed | ternary('restarted', 'started') }}"
