@@ -33,14 +33,13 @@
     tags:
     - always
 
-  tasks:
+  roles:
 
   #-----------------------------
   # Common System Configuration
   #-----------------------------
 
-  - ansible.builtin.import_role:
-      name: common_system
+  - role: common_system
     vars:
       common_system_extra_packages:
       - flatpak
@@ -52,15 +51,13 @@
   # Boot and Login Configuration
   #------------------------------
 
-  - ansible.builtin.import_role:
-      name: plymouth
+  - role: plymouth
     tags:
     - boot
     - plymouth
     - system
 
-  - ansible.builtin.import_role:
-      name: lightdm
+  - role: lightdm
     tags:
     - lightdm
     - system
@@ -69,8 +66,7 @@
   # Common User Configuration
   #---------------------------
 
-  - ansible.builtin.import_role:
-      name: common_user
+  - role: common_user
     tags:
     - common_user
     - user
@@ -79,16 +75,14 @@
   # Desktop Configuration
   #-----------------------
 
-  - ansible.builtin.import_role:
-      name: desktop
+  - role: desktop
     tags:
     - desktop
     - user
 
   # XXX Disabled until a package dependency bug is fixed:
   #     https://github.com/balena-io/etcher/issues/4543
-  #- ansible.builtin.import_role:
-  #    name: balena_etcher
+  #- role: balena_etcher
   #  tags:
   #  - desktop
   #  - user
@@ -97,11 +91,12 @@
   # Transfer User Secrets
   #-----------------------
 
-  - ansible.builtin.import_role:
-      name: secrets
+  - role: secrets
     tags:
     - secrets
     - user
+
+  tasks:
 
   - ansible.builtin.pause:
       prompt: |
