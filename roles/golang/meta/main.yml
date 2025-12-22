@@ -1,4 +1,4 @@
 ---
 dependencies:
-- role: common_user
-- role: git_dev
+  - role: common_user
+  - role: git_dev

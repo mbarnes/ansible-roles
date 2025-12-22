@@ -2,10 +2,10 @@
 - name: Add powerline package and dependencies
   ansible.builtin.apt:
     name:
-    - git
-    - powerline
-    - python3-powerline
-    - vim-addon-manager
+      - git
+      - powerline
+      - python3-powerline
+      - vim-addon-manager
   become: true
 
 - name: Copy powerline configuration
@@ -17,7 +17,7 @@
 - name: Add powerline to vim
   ansible.builtin.command: vim-addons install powerline
 
-- name: Clone vim-colors-solarized as a vim package
+- name: Clone vim-colors-solarized as a vim package  # noqa: latest
   ansible.builtin.git:
     repo: https://github.com/altercation/vim-colors-solarized.git
     dest: "{{ ansible_user_dir }}/.vim/pack/plugins/opt/vim-colors-solarized"
@@ -25,13 +25,13 @@
 - name: Configure bash for powerline
   ansible.builtin.copy:
     src: powerline.sh
-    dest: "{{ bash_profile_dir }}/powerline.sh"
+    dest: "{{ common_user_bash_profile_dir }}/powerline.sh"
     mode: u=rw,g=r,o=r
 
 - name: Configure tmux for powerline
   ansible.builtin.file:
     src: /usr/share/powerline/bindings/tmux/powerline.conf
-    dest: "{{ tmux_config_dir }}/powerline.conf"
+    dest: "{{ common_user_tmux_config_dir }}/powerline.conf"
     state: link
 
 - name: Configure vim for powerline

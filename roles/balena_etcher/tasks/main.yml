@@ -1,5 +1,6 @@
 ---
-- ansible.builtin.import_role:
+- name: Install the latest Balena Etcher release
+  ansible.builtin.import_role:
     name: github_release
   vars:
     github_release_name: Balena Etcher

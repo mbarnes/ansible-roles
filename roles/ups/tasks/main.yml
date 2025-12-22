@@ -1,55 +1,55 @@
 ---
 - name: Begin UPS configuration
-  become: yes
+  become: true
   block:
 
-  - name: Add apcupsd package
-    ansible.builtin.apt:
-      name:
-      - apcupsd
-      - bsd-mailx  # provides /usr/bin/mail for APCUPSD_MAIL
+    - name: Add apcupsd package
+      ansible.builtin.apt:
+        name:
+          - apcupsd
+          - bsd-mailx  # provides /usr/bin/mail for APCUPSD_MAIL
 
-  - name: Customize apcupsd configuration
-    ansible.builtin.lineinfile:
-      path: /etc/apcupsd/apcupsd.conf
-      regexp: "^#?({{ item.key }})"
-      line: "\\1 {{ item.value }}"
-      backrefs: yes
-    loop:
-    # XXX There are two UPSNAME lines in apcupsd.conf.
-    #     We want the first match but lineinfile picks
-    #     the last match.
-    #- key: UPSNAME
-    #  value: "{{ inventory_hostname }}"
-    - key: UPSCABLE
-      value: usb
-    - key: UPSTYPE
-      value: usb
-    - key: DEVICE
-      value: ""
-    notify: Restart apcupsd
+    - name: Customize apcupsd configuration
+      ansible.builtin.lineinfile:
+        path: /etc/apcupsd/apcupsd.conf
+        regexp: "^#?({{ item.key }})"
+        line: "\\1 {{ item.value }}"
+        backrefs: true
+      loop:
+        # XXX There are two UPSNAME lines in apcupsd.conf.
+        #     We want the first match but lineinfile picks
+        #     the last match.
+        # - key: UPSNAME
+        #   value: "{{ inventory_hostname }}"
+        - key: UPSCABLE
+          value: usb
+        - key: UPSTYPE
+          value: usb
+        - key: DEVICE
+          value: ""
+      notify: Restart apcupsd
 
-  - name: Set email address for power events
-    ansible.builtin.lineinfile:
-      path: /etc/apcupsd/apccontrol
-      regexp: "^export SYSADMIN="
-      line: "export SYSADMIN={{ mta_destination_address }}"
-    notify: Restart apcupsd
+    - name: Set email address for power events
+      ansible.builtin.lineinfile:
+        path: /etc/apcupsd/apccontrol
+        regexp: "^export SYSADMIN="
+        line: "export SYSADMIN={{ mta_destination_address }}"
+      notify: Restart apcupsd
 
-  - name: Add custom power handling scripts
-    ansible.builtin.template:
-      src: "{{ item }}.j2"
-      dest: "/etc/apcupsd/{{ item }}"
-      mode: u=rwx,g=rx,o=rx
-      owner: root
-      group: root
-    loop:
-    - onbattery
-    - offbattery
-    notify: Restart apcupsd
+    - name: Add custom power handling scripts
+      ansible.builtin.template:
+        src: "{{ item }}.j2"
+        dest: "/etc/apcupsd/{{ item }}"
+        mode: u=rwx,g=rx,o=rx
+        owner: root
+        group: root
+      loop:
+        - onbattery
+        - offbattery
+      notify: Restart apcupsd
 
-  - name: Enable apcupsd
-    ansible.builtin.systemd_service:
-      name: apcupsd.service
-      enabled: true
-      state: started
+    - name: Enable apcupsd
+      ansible.builtin.systemd_service:
+        name: apcupsd.service
+        enabled: true
+        state: started

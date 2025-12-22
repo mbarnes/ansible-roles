@@ -16,8 +16,8 @@
   ansible.builtin.set_fact:
     github_release_deb_asset: "{{ item }}"
   when:
-  - github_release_deb_asset is not defined
-  - item.name.endswith(".deb")
+    - github_release_deb_asset is not defined
+    - item.name.endswith(".deb")
   loop: "{{ github_release_assets.json.assets }}"
   no_log: true  # Avoid spewing a bunch of JSON
 
@@ -25,9 +25,9 @@
   ansible.builtin.set_fact:
     github_release_zip_asset: "{{ item }}"
   when:
-  # zip file is a fallback when there is no deb
-  - github_release_deb_asset is not defined
-  - item.name.endswith("linux-" + dpkg_architecture + ".zip")
+    # zip file is a fallback when there is no deb
+    - github_release_deb_asset is not defined
+    - item.name.endswith("linux-" + dpkg_architecture + ".zip")
   loop: "{{ github_release_assets.json.assets }}"
   no_log: true  # Avoid spewing a bunch of JSON
 
@@ -35,65 +35,72 @@
   ansible.builtin.set_fact:
     github_release_bin_asset: "{{ item }}"
   when:
-  # binary file is a fallback when there is no deb or zip file
-  - github_release_deb_asset is not defined
-  - github_release_zip_asset is not defined
-  - item.name.endswith("linux-" + dpkg_architecture)
+    # binary file is a fallback when there is no deb or zip file
+    - github_release_deb_asset is not defined
+    - github_release_zip_asset is not defined
+    - item.name.endswith("linux-" + dpkg_architecture)
   loop: "{{ github_release_assets.json.assets }}"
   no_log: true  # Avoid spewing a bunch of JSON
 
-- ansible.builtin.assert:
+- name: "{{ github_release_repo }} : Ensure there is a usable asset"
+  ansible.builtin.assert:
     that: github_release_deb_asset is defined or github_release_zip_asset is defined or github_release_bin_asset is defined
     fail_msg: "No deb package or zip file or binary file available for {{ github_release_name | default(github_release_repo) }}"
 
-- when: github_release_deb_asset is defined
+- name: "{{ github_release_repo }} : Download and install a deb package"
+  when: github_release_deb_asset is defined
   block:
 
-  - name: "{{ github_release_repo }} : Create a temporary directory"
-    ansible.builtin.tempfile:
-      state: directory
-    register: github_release_temp_dir
+    - name: "{{ github_release_repo }} : Create a temporary directory"
+      ansible.builtin.tempfile:
+        state: directory
+      register: github_release_temp_dir
 
-  - name: "{{ github_release_repo }} : Download deb package"
-    ansible.builtin.get_url:
-      url: "{{ github_release_deb_asset.browser_download_url }}"
-      checksum: "{{ github_release_deb_asset.digest }}"
-      dest: "{{ github_relese_temp_dir.path }}"
+    - name: "{{ github_release_repo }} : Download deb package"
+      ansible.builtin.get_url:
+        url: "{{ github_release_deb_asset.browser_download_url }}"
+        checksum: "{{ github_release_deb_asset.digest }}"
+        dest: "{{ github_relese_temp_dir.path }}"
+        mode: u=rw,g=r,o=r
 
-  - name: "{{ github_release_repo }} : Install deb package"
-    ansible.builtin.apt:
-      deb: "{{ github_release_temp_dir.path }}/{{ github_release_deb_asset.browser_download_url | basename }}"
-    become: yes
+    - name: "{{ github_release_repo }} : Install deb package"
+      ansible.builtin.apt:
+        deb: "{{ github_release_temp_dir.path }}/{{ github_release_deb_asset.browser_download_url | basename }}"
+      become: true
 
-- when: github_release_zip_asset is defined
+- name: "{{ github_release_repo }} : Download and install a zipped binary file"
+  when: github_release_zip_asset is defined
   block:
 
-  - ansible.builtin.assert:
-      that: github_release_zip_binary_path is defined
-      fail_msg: "Need github_release_zip_binary_path var to install from a zip file"
+    - name: "{{ github_release_repo }} : Ensure github_release_zip_binary_path is defined"
+      ansible.builtin.assert:
+        that: github_release_zip_binary_path is defined
+        fail_msg: "Need github_release_zip_binary_path var to install from a zip file"
 
-  - name: "{{ github_release_repo }} : Create a temporary directory"
-    ansible.builtin.tempfile:
-      state: directory
-    register: github_release_temp_dir
+    - name: "{{ github_release_repo }} : Create a temporary directory"
+      ansible.builtin.tempfile:
+        state: directory
+      register: github_release_temp_dir
 
-  - name: "{{ github_release_repo }} : Download zip file"
-    ansible.builtin.get_url:
-      url: "{{ github_release_zip_asset.browser_download_url }}"
-      checksum: "{{ github_release_zip_asset.digest }}"
-      dest: "{{ github_release_temp_dir.path }}"
+    - name: "{{ github_release_repo }} : Download zip file"
+      ansible.builtin.get_url:
+        url: "{{ github_release_zip_asset.browser_download_url }}"
+        checksum: "{{ github_release_zip_asset.digest }}"
+        dest: "{{ github_release_temp_dir.path }}"
+        mode: u=rw,g=r,o=r
 
-  - name: "{{ github_release_repo }} : Unpack zip file"
-    ansible.builtin.unarchive:
-      src: "{{ github_release_temp_dir.path }}/{{ github_release_zip_asset.browser_download_url | basename }}"
-      dest: "{{ github_release_temp_dir.path }}"
-      remote_src: yes
+    - name: "{{ github_release_repo }} : Unpack zip file"
+      ansible.builtin.unarchive:
+        src: "{{ github_release_temp_dir.path }}/{{ github_release_zip_asset.browser_download_url | basename }}"
+        dest: "{{ github_release_temp_dir.path }}"
+        mode: u=rw,g=r,o=r
+        remote_src: true
 
-  - name: "{{ github_release_repo }} : Copy binary from zip file"
-    ansible.builtin.copy:
-      src: "{{ github_release_temp_dir.path }}/{{ github_release_zip_binary_path }}"
-      dest: "{{ ansible_user_dir }}/.local/bin/{{ github_release_binary_name }}"
-      mode: u=rwx,g=rx,o=rx
+    - name: "{{ github_release_repo }} : Copy binary from zip file"
+      ansible.builtin.copy:
+        src: "{{ github_release_temp_dir.path }}/{{ github_release_zip_binary_path }}"
+        dest: "{{ ansible_user_dir }}/.local/bin/{{ github_release_binary_name }}"
+        mode: u=rwx,g=rx,o=rx
 
 - name: "{{ github_release_repo }} : Install binary file"
   ansible.builtin.get_url:

@@ -19,113 +19,117 @@
 # - golang        : (user) Golang Configuration
 #
 
-- hosts: development_group
+- name: Configure hosts for a Red Hat development environment
+  hosts: development_group
 
   vars:
-    git_config_user_email: mbarnes@fedorapeople.org
-    git_config_user_signingkey: 612E87B275813A59
+    # Necessary for the secrets role because the password store repo is private.
+    ansible_ssh_common_args: -o ForwardAgent=yes
+
+    git_dev_user_email: mbarnes@fedorapeople.org
+    git_dev_user_signingkey: 612E87B275813A59
 
   pre_tasks:
 
-  - name: Check for necessary inventory variables
-    ansible.builtin.assert:
-      that: "item is defined"
-      msg: "Missing required variable \"{{ item }}\". Please add this to your inventory."
-    loop:
-    - local_area_network
-    - local_area_netmask
-    tags:
-    - always
+    - name: Check for necessary inventory variables
+      ansible.builtin.assert:
+        that: "item is defined"
+        msg: "Missing required variable \"{{ item }}\". Please add this to your inventory."
+      loop:
+        - local_area_network
+        - local_area_netmask
+      tags:
+        - always
 
   roles:
 
-  #-----------------------------
-  # Common System Configuration
-  #-----------------------------
+    # -----------------------------
+    #  Common System Configuration
+    # -----------------------------
 
-  - role: common_system
-    vars:
-      common_system_extra_packages:
-      - systemd-resolved
-    tags:
-    - common_system
-    - system
+    - role: common_system
+      vars:
+        common_system_extra_packages:
+          - systemd-resolved
+      tags:
+        - common_system
+        - system
 
-  #-----------------------
-  # Dropbox Configuration
-  #-----------------------
+    # -----------------------
+    #  Dropbox Configuration
+    # -----------------------
 
-  # FIXME Package is obsolete; re-evaluate whether to keep.
-  #- role: dropbox
-  #  tags:
-  #  - dropbox
-  #  - system
+    # FIXME Package is obsolete; re-evaluate whether to keep.
+    # - role: dropbox
+    #   tags:
+    #     - dropbox
+    #     - system
 
-  #-----------------------
-  # Red Hat Configuration
-  #-----------------------
+    # -----------------------
+    #  Red Hat Configuration
+    # -----------------------
 
-  - role: redhat
-    tags:
-    - redhat
-    - system
+    - role: redhat
+      tags:
+        - redhat
+        - system
 
-  - role: redhat_aro
-    tags:
-    - redhat
-    - system
+    - role: redhat_aro
+      tags:
+        - redhat
+        - system
 
-  #---------------------------
-  # Common User Configuration
-  #---------------------------
+    # ---------------------------
+    #  Common User Configuration
+    # ---------------------------
 
-  - role: common_user
-    tags:
-    - common_user
-    - user
+    - role: common_user
+      tags:
+        - common_user
+        - user
 
-  #---------------------------------
-  # Debian Maintainer Configuration
-  #---------------------------------
+    # ---------------------------------
+    #  Debian Maintainer Configuration
+    # ---------------------------------
 
-  - role: deb_maint
-    vars:
-      deb_email: mbarnes@fastmail.com
-    tags:
-    - deb_maint
-    - user
+    - role: deb_maint
+      vars:
+        deb_maint_email: mbarnes@fastmail.com
+      tags:
+        - deb_maint
+        - user
 
-  #-------------------------
-  # Powerline Configuration
-  #-------------------------
+    # -------------------------
+    #  Powerline Configuration
+    # -------------------------
 
-  - role: powerline
-    tags:
-    - powerline
-    - user
+    - role: powerline
+      tags:
+        - powerline
+        - user
 
-  #----------------------
-  # Golang Configuration
-  #----------------------
+    # ----------------------
+    #  Golang Configuration
+    # ----------------------
 
-  - role: golang
-    tags:
-    - golang
-    - user
+    - role: golang
+      tags:
+        - golang
+        - user
 
   tasks:
 
-  - ansible.builtin.pause:
-      prompt: |
+    - name: List manual follow-up tasks
+      ansible.builtin.pause:
+        prompt: |
 
-        Additional tasks out of scope for this playbook:
+          Additional tasks out of scope for this playbook:
 
-          [ ] Sign in to Firefox account
-          [ ] Configure Firefox to use RH Kerberos ticket:
-              - about:config
-              - network.negotiate-auth.trusted-uris = .redhat.com
+            [ ] Sign in to Firefox account
+            [ ] Configure Firefox to use RH Kerberos ticket:
+                - about:config
+                - network.negotiate-auth.trusted-uris = .redhat.com
 
-      seconds: 1
-    tags:
-    - user
-
+        seconds: 1
+      tags:
+        - user

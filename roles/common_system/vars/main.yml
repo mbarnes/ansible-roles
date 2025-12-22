@@ -4,14 +4,14 @@
 common_system_fqdn: "{{ lookup('community.general.dig', ansible_default_ipv4.address + '/PTR') }}"
 
 common_system_base_packages:
-- apt-file
-- bash-completion
-- bind9-dnsutils
-- command-not-found
-- htop
-- lsof
-- man-db
-- rsync
-- tmux
-- tmux-plugin-manager
-- usbutils
+  - apt-file
+  - bash-completion
+  - bind9-dnsutils
+  - command-not-found
+  - htop
+  - lsof
+  - man-db
+  - rsync
+  - tmux
+  - tmux-plugin-manager
+  - usbutils

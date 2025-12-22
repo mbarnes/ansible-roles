@@ -1,5 +1,5 @@
 #!/usr/bin/ansible-playbook
-#---
+---
 #
 # Configures hosts in an inventory group named "desktop_group"
 # consisting of pre-installed Debian GNU/Linux hoss with networking
@@ -19,93 +19,98 @@
 # - secrets       : (user) Transfer User Secrets
 #
 
-- hosts: desktop_group
+- name: Configure hosts for an XFCE desktop environment
+  hosts: desktop_group
+
+  vars:
+    # Necessary for the secrets role because the password store repo is private.
+    ansible_ssh_common_args: -o ForwardAgent=yes
 
   pre_tasks:
 
-  - name: Check for necessary inventory variables
-    ansible.builtin.assert:
-      that: "item is defined"
-      msg: "Missing required variables \"{{ item }}\". Please add this to your inventory."
-    loop:
-    - local_area_network
-    - local_area_netmask
-    tags:
-    - always
+    - name: Check for necessary inventory variables
+      ansible.builtin.assert:
+        that: "item is defined"
+        msg: "Missing required variables \"{{ item }}\". Please add this to your inventory."
+      loop:
+        - local_area_network
+        - local_area_netmask
+      tags:
+        - always
 
   roles:
 
-  #-----------------------------
-  # Common System Configuration
-  #-----------------------------
+    # -----------------------------
+    #  Common System Configuration
+    # -----------------------------
 
-  - role: common_system
-    vars:
-      common_system_extra_packages:
-      - flatpak
-    tags:
-    - common_system
-    - system
+    - role: common_system
+      vars:
+        common_system_extra_packages:
+          - flatpak
+      tags:
+        - common_system
+        - system
 
-  #------------------------------
-  # Boot and Login Configuration
-  #------------------------------
+    # ------------------------------
+    #  Boot and Login Configuration
+    # ------------------------------
 
-  - role: plymouth
-    tags:
-    - boot
-    - plymouth
-    - system
+    - role: plymouth
+      tags:
+        - boot
+        - plymouth
+        - system
 
-  - role: lightdm
-    tags:
-    - lightdm
-    - system
+    - role: lightdm
+      tags:
+        - lightdm
+        - system
 
-  #---------------------------
-  # Common User Configuration
-  #---------------------------
+    # ---------------------------
+    #  Common User Configuration
+    # ---------------------------
 
-  - role: common_user
-    tags:
-    - common_user
-    - user
+    - role: common_user
+      tags:
+        - common_user
+        - user
 
-  #-----------------------
-  # Desktop Configuration
-  #-----------------------
+    # -----------------------
+    #  Desktop Configuration
+    # -----------------------
 
-  - role: desktop
-    tags:
-    - desktop
-    - user
+    - role: desktop
+      tags:
+        - desktop
+        - user
 
-  # XXX Disabled until a package dependency bug is fixed:
-  #     https://github.com/balena-io/etcher/issues/4543
-  #- role: balena_etcher
-  #  tags:
-  #  - desktop
-  #  - user
+    # XXX Disabled until a package dependency bug is fixed:
+    #     https://github.com/balena-io/etcher/issues/4543
+    # - role: balena_etcher
+    #   tags:
+    #     - desktop
+    #     - user
 
-  #-----------------------
-  # Transfer User Secrets
-  #-----------------------
+    # -----------------------
+    #  Transfer User Secrets
+    # -----------------------
 
-  - role: secrets
-    tags:
-    - secrets
-    - user
+    - role: secrets
+      tags:
+        - secrets
+        - user
 
   tasks:
 
-  - ansible.builtin.pause:
-      prompt: |
+    - name: List manual follow-up tasks
+      ansible.builtin.pause:
+        prompt: |
 
-        Additional tasks out of scope for this playbook:
+          Additional tasks out of scope for this playbook:
 
-          [ ] Sign in to Firefox account
+            [ ] Sign in to Firefox account
 
-      seconds: 1
-    tags:
-    - user
-
+        seconds: 1
+      tags:
+        - user

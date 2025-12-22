@@ -1,25 +1,30 @@
 ---
 - name: Begin MTA configuration
-  become: yes
+  become: true
   block:
 
-  - name: Add msmtp-mta package
-    ansible.builtin.apt:
-      name: msmtp-mta
+    - name: Add msmtp-mta package
+      ansible.builtin.apt:
+        name: msmtp-mta
 
-  - name: Add msmtp configuration
-    ansible.builtin.copy:
-      src: msmtprc.vault
-      dest: /etc/msmtprc
-      mode: u=rw,g=,o=
-      owner: root
-      group: root
-    no_log: True
+    - name: Add msmtp configuration
+      ansible.builtin.copy:
+        src: msmtprc.vault
+        dest: /etc/msmtprc
+        mode: u=rw,g=,o=
+        owner: root
+        group: root
+      no_log: true
 
-  - name: Extract default address from msmtp
-    ansible.builtin.shell: "msmtp --pretend < /dev/null | grep ^from | awk '{ print $3 }'"
-    register: msmtp_from
+    - name: Extract default address from msmtp
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          msmtp --pretend < /dev/null | grep ^from | awk '{ print $3 }'
+        executable: /bin/bash
+      register: msmtp_from
+      changed_when: false
 
-  - name: Set mta_destination_address
-    ansible.builtin.set_fact:
-      mta_destination_address: "{{ msmtp_from.stdout }}"
+    - name: Set mta_destination_address
+      ansible.builtin.set_fact:
+        mta_destination_address: "{{ msmtp_from.stdout }}"

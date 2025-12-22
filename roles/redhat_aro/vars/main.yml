@@ -1,2 +1,2 @@
 ---
-microsoft_signing_key_path: /etc/apt/trusted.gpg.d/microsoft.asc
+redhat_aro_microsoft_signing_key_path: /etc/apt/trusted.gpg.d/microsoft.asc

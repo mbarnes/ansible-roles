@@ -2,4 +2,4 @@
 - name: Add Minecraft Launcher
   ansible.builtin.apt:
     deb: https://launcher.mojang.com/download/Minecraft.deb
-  become: yes
+  become: true

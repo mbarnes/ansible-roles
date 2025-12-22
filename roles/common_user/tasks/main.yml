@@ -2,20 +2,21 @@
 - name: Add corresponding packages for our dotfiles
   ansible.builtin.apt:
     name:
-    - bash
-    - rsync
-    - tmux
-    - vim-nox
+      - bash
+      - rsync
+      - tmux
+      - vim-nox
   become: true
 
 - name: Create config directories
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
+    mode: u=rwx,g=rwx,o=rx
   loop:
-  - "{{ bash_aliases_dir }}"
-  - "{{ bash_profile_dir }}"
-  - "{{ tmux_config_dir }}"
+    - "{{ common_user_bash_aliases_dir }}"
+    - "{{ common_user_bash_profile_dir }}"
+    - "{{ common_user_tmux_config_dir }}"
 
 - name: Source additional bash configurations
   ansible.builtin.blockinfile:
@@ -38,4 +39,5 @@
   ansible.builtin.template:
     src: "{{ item }}"
     dest: "{{ ansible_user_dir }}/.{{ item | basename | replace('.j2', '') }}"
+    mode: u=rw,g=rw,o=r
   with_fileglob: "templates/dotfiles/*"

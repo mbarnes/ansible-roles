@@ -1,75 +1,79 @@
 ---
 - name: Begin Docker configuration
-  become: yes
+  become: true
   block:
 
-  - name: Add Docker's official GPG key
-    ansible.builtin.get_url:
-      url: https://download.docker.com/linux/debian/gpg
-      dest: /etc/apt/trusted.gpg.d/docker.asc
+    - name: Add Docker's official GPG key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/debian/gpg
+        dest: /etc/apt/trusted.gpg.d/docker.asc
+        mode: u=rw,g=r,o=r
 
-  - name: Set dpkg architecture for Docker
-    ansible.builtin.set_fact:
-      docker_dpkg_architecture: "{{ dpkg_architecture }}"
+    - name: Set dpkg architecture for Docker
+      ansible.builtin.set_fact:
+        docker_dpkg_architecture: "{{ dpkg_architecture }}"
 
-  # Override the dpkg architecture on OSMC to allow 64-bit containers.
-  #
-  # Motivated by LinuxServer.io dropping support for 32-bit architectures,
-  # namely armhf (https://www.linuxserver.io/blog/a-farewell-to-arm-hf).
-  #
-  # As of 2023, OSMC on ARM-based platforms (Vero4K and Raspberry Pi) has
-  # a 64-bit kernel but userspace is still 32-bits.  Work is underway to
-  # transition OSMC to a 64-bit userspace, but in the meantime use this
-  # workaround to run arm64 container images.
-  #
-  # Further info at:
-  # https://discourse.osmc.tv/t/support-for-64bit-docker-containers/94286
-  - name: Override dpkg architecture for Docker on OSMC
-    ansible.builtin.set_fact:
-      docker_dpkg_architecture: arm64
-    when:
-    - ansible_distribution == "OSMC"
-    - ansible_architecture == "aarch64"
-    - ansible_userspace_bits == "32"
+    # Override the dpkg architecture on OSMC to allow 64-bit containers.
+    #
+    # Motivated by LinuxServer.io dropping support for 32-bit architectures,
+    # namely armhf (https://www.linuxserver.io/blog/a-farewell-to-arm-hf).
+    #
+    # As of 2023, OSMC on ARM-based platforms (Vero4K and Raspberry Pi) has
+    # a 64-bit kernel but userspace is still 32-bits.  Work is underway to
+    # transition OSMC to a 64-bit userspace, but in the meantime use this
+    # workaround to run arm64 container images.
+    #
+    # Further info at:
+    # https://discourse.osmc.tv/t/support-for-64bit-docker-containers/94286
+    - name: Override dpkg architecture for Docker on OSMC
+      ansible.builtin.set_fact:
+        docker_dpkg_architecture: arm64
+      when:
+        - ansible_distribution == "OSMC"
+        - ansible_architecture == "aarch64"
+        - ansible_userspace_bits == "32"
 
-  - name: Add apt repository for Docker
-    ansible.builtin.apt_repository:
-      repo: "deb [arch={{ docker_dpkg_architecture }}] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
-      filename: docker
+    - name: Add apt repository for Docker
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ docker_dpkg_architecture }}] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+        filename: docker
 
-  # XXX Workaround for Docker on Debian Bullseye
-  #     (Is this still needed on Debian Bookworm?)
-  #     https://github.com/moby/libnetwork/issues/2331
-  - name: Add iptables package
-    ansible.builtin.apt:
-      name:
-      - iptables
+    # XXX Workaround for Docker on Debian Bullseye
+    #     (Is this still needed on Debian Bookworm?)
+    #     https://github.com/moby/libnetwork/issues/2331
+    - name: Add iptables package
+      ansible.builtin.apt:
+        name:
+          - iptables
 
-  - name: Link iptables to iptables-legacy
-    ansible.builtin.command: update-alternatives --set iptables /usr/sbin/iptables-legacy
+    - name: Link iptables to iptables-legacy
+      community.general.alternatives:
+        name: iptables
+        path: /usr/sbin/iptables-legacy
 
-  - name: Add docker-ce packages
-    ansible.builtin.apt:
-      name:
-      # XXX Not sure why the package architecture has to be specified
-      #     again here, but without it Ansible fails on OSMC with the
-      #     error "No package matching 'docker-ce' is available".
-      - "docker-ce:{{ docker_dpkg_architecture }}"
-      - "docker-ce-cli:{{ docker_dpkg_architecture }}"
+    - name: Add docker-ce packages
+      ansible.builtin.apt:
+        name:
+          # XXX Not sure why the package architecture has to be specified
+          #     again here, but without it Ansible fails on OSMC with the
+          #     error "No package matching 'docker-ce' is available".
+          - "docker-ce:{{ docker_dpkg_architecture }}"
+          - "docker-ce-cli:{{ docker_dpkg_architecture }}"
 
-  - name: Add user to "docker" group
-    ansible.builtin.user:
-      name: "{{ ansible_user_id }}"
-      groups: docker
-      append: yes
+    - name: Add user to "docker" group
+      ansible.builtin.user:
+        name: "{{ ansible_user_id }}"
+        groups: docker
+        append: true
 
-  - name: Enable and start docker.service
-    ansible.builtin.systemd_service:
-      name: docker.service
-      enabled: true
-      state: started
+    - name: Enable and start docker.service
+      ansible.builtin.systemd_service:
+        name: docker.service
+        enabled: true
+        state: started
 
 - name: Add bash aliases
   ansible.builtin.copy:
     src: bash_aliases
-    dest: "{{ bash_aliases_dir }}/{{ role_name }}_aliases"
+    dest: "{{ common_user_bash_aliases_dir }}/{{ role_name }}_aliases"
+    mode: u=rw,g=rw,o=r

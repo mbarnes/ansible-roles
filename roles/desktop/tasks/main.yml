@@ -2,24 +2,25 @@
 - name: Add base desktop packages
   ansible.builtin.apt:
     name:
-    - xfce4
-    - xfce4-whiskermenu-plugin
-    - apt-config-icons-hidpi
-    - ffmpeg
-    - fonts-hack
-    - gnome-disk-utility
-    - gnome-software
-    - gnome-software-plugin-flatpak
-    - gnome-themes-extra-data  # for Adwaita-dark theme
-    - gvfs-backends
-    - krb5-auth-dialog
-    - libglib2.0-bin  # for /usr/bin/gsettings
-    - menulibre
-    - mugshot
-    - needrestart
-    - network-manager-openvpn-gnome
-    - yt-dlp
-  become: yes
+      - xfce4
+      - xfce4-whiskermenu-plugin
+      - apt-config-icons-hidpi
+      - dconf-cli
+      - ffmpeg
+      - fonts-hack
+      - gnome-disk-utility
+      - gnome-software
+      - gnome-software-plugin-flatpak
+      - gnome-themes-extra-data  # for Adwaita-dark theme
+      - gvfs-backends
+      - krb5-auth-dialog
+      - libglib2.0-bin  # for /usr/bin/gsettings
+      - menulibre
+      - mugshot
+      - needrestart
+      - network-manager-openvpn-gnome
+      - yt-dlp
+  become: true
 
 - name: Check for Bluetooth support
   ansible.builtin.set_fact:
@@ -28,23 +29,23 @@
 - name: Add Bluetooth packages
   ansible.builtin.apt:
     name:
-    - blueman
-    - pulseaudio-module-bluetooth
-  become: yes
+      - blueman
+      - pulseaudio-module-bluetooth
+  become: true
   when: bluetooth_module_loaded
 
 - name: Remove unwanted packages
   ansible.builtin.apt:
     name:
-    - atril      # replaced by org.gnome.Evince
-    - parole     # replaced by org.videolan.VLC
-    - xarchiver  # replaced by org.gnome.FileRoller
-    - xsane
-    - xterm      # replaced by xfce4-terminal
-    autoremove: yes
-    purge: yes
+      - atril      # replaced by org.gnome.Evince
+      - parole     # replaced by org.videolan.VLC
+      - xarchiver  # replaced by org.gnome.FileRoller
+      - xsane
+      - xterm      # replaced by xfce4-terminal
+    autoremove: true
+    purge: true
     state: absent
-  become: yes
+  become: true
 
 - name: Add Flathub remote
   community.general.flatpak_remote:
@@ -55,21 +56,21 @@
 - name: Install flatpak applications
   community.general.flatpak:
     name:
-    - io.github.nokse22.inspector
-    - org.gnome.Calculator
-    - org.gnome.Characters
-    - org.gnome.Evince
-    - org.gnome.FileRoller
-    - org.gnome.Firmware
-    - org.gnome.SimpleScan
-    - org.gnome.gThumb
-    - org.gnome.gedit
-    - org.gnome.meld
-    - org.gnome.seahorse.Application
-    - org.gnumeric.Gnumeric
-    - org.mozilla.Thunderbird
-    - org.musicbrainz.Picard
-    - org.videolan.VLC
+      - io.github.nokse22.inspector
+      - org.gnome.Calculator
+      - org.gnome.Characters
+      - org.gnome.Evince
+      - org.gnome.FileRoller
+      - org.gnome.Firmware
+      - org.gnome.SimpleScan
+      - org.gnome.gThumb
+      - org.gnome.gedit
+      - org.gnome.meld
+      - org.gnome.seahorse.Application
+      - org.gnumeric.Gnumeric
+      - org.mozilla.Thunderbird
+      - org.musicbrainz.Picard
+      - org.videolan.VLC
     method: user
 
 # This allows device renaming in pavucontrol.
@@ -77,26 +78,28 @@
   ansible.builtin.copy:
     content: "load-module module-device-manager"
     dest: /etc/pulse/default.pa.d/module-device-manager.pa
+    mode: u=rw,g=r,o=r
   notify:
-  - Restart pulseaudio
-  become: yes
+    - Restart pulseaudio
+  become: true
 
 - name: Add user to more groups
   ansible.builtin.user:
     name: "{{ ansible_user_id }}"
     groups:
-    - systemd-journal
-    append: yes
-  become: yes
+      - systemd-journal
+    append: true
+  become: true
 
 - name: Add helpful Bash snippets
   ansible.builtin.copy:
     src: "{{ item }}"
-    dest: "{{ bash_aliases_dir }}/"
+    dest: "{{ common_user_bash_aliases_dir }}/"
+    mode: u=rw,g=rw,o=r
   loop:
-  - ensure-display
-  - flac
-  - gcr-ssh-agent
+    - ensure-display
+    - flac
+    - gcr-ssh-agent
 
 - name: Tweak XFCE configuration
   community.general.xfconf:
@@ -107,45 +110,45 @@
     force_array: "{{ item.force_array | default(false) }}"
     state: "{{ item.state | default('present') }}"
   loop:
-  - channel: xfce4-power-manager
-    property: /xfce4-power-manager/show-tray-icon
-    value: true
-    value_type: bool
-  - channel: xfwm4
-    property: /general/workspace_count
-    value: 3
-    value_type: int
-  - channel: xfwm4
-    property: /general/workspace_names
-    value:
-    - home
-    - work
-    - misc
-    value_type: string
-    force_array: true
-  - channel: xsettings
-    property: /Net/ThemeName
-    value: Adwaita-dark
-    value_type: string
-  - channel: xsettings
-    property: /Xfce/SyncThemes
-    value: true
-    value_type: bool
+    - channel: xfce4-power-manager
+      property: /xfce4-power-manager/show-tray-icon
+      value: true
+      value_type: bool
+    - channel: xfwm4
+      property: /general/workspace_count
+      value: "{{ desktop_workspace_names | length }}"
+      value_type: int
+    - channel: xfwm4
+      property: /general/workspace_names
+      value: "{{ desktop_workspace_names }}"
+      value_type: string
+      force_array: true
+    - channel: xsettings
+      property: /Net/ThemeName
+      value: Adwaita-dark
+      value_type: string
+    - channel: xsettings
+      property: /Xfce/SyncThemes
+      value: true
+      value_type: bool
 
 - name: Tweak GSettings
-  ansible.builtin.command: "gsettings set {{ item.schema }} {{ item.key }} {{ item.value }}"
+  community.general.dconf:
+    key: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: "{{ item.state | default('present') }}"
   loop:
-  # Either "recent" or "cwd"; controls whether the file chooser starts up
-  # showing the list of recently-used files, or the contents of the current
-  # working directory.
-  - schema: "org.gtk.Settings.FileChooser"
-    key: "startup-mode"
-    value: "cwd"
+    # Either "recent" or "cwd"; controls whether the file chooser starts up
+    # showing the list of recently-used files, or the contents of the current
+    # working directory.
+    - key: "/org/gtk/settings/file-chooser/startup-mode"
+      value: "'cwd'"
 
 - name: Add bookmark for auto-mounted NFS shares
   ansible.builtin.lineinfile:
     path: "{{ xdg_config_home }}/gtk-3.0/bookmarks"
     line: "file:///net/nfs/mnt/storage Remote Storage"
+    mode: u=rw,g=rw,o=r
     create: true
 
 - name: Tweak GTK settings
@@ -154,43 +157,45 @@
     section: Settings
     option: "{{ item.option }}"
     value: "{{ item.value }}"
+    mode: u=rw,g=rw,o=r
   loop:
-  - option: gtk-primary-button-warps-slider
-    value: "false"
+    - option: gtk-primary-button-warps-slider
+      value: "false"
 
-- name: xfce4-terminal - Tweak settings
+- name: Tweak xfce4-terminal settings
   community.general.ini_file:
     path: "{{ xdg_config_home }}/xfce4/terminal/terminalrc"
     section: Configuration
     option: "{{ item.option }}"
     value: "{{ item.value }}"
     no_extra_spaces: true
+    mode: u=rw,g=rw,o=r
   loop:
-  - option: CommandLoginShell
-    value: "TRUE"
-  - option: FontName
-    value: "Hack 10"
-  - option: MiscAlwaysShowTabs
-    value: "TRUE"
-  - option: MiscDefaultGeometry
-    value: "80x43"
-  - option: ShortcutsNoHelpkey
-    value: "TRUE"
-  - option: ShortcutsNoMenukey
-    value: "TRUE"
-  # Color codes copied from:
-  # /usr/share/xfce4/terminal/colorschemes/solarized-dark.theme
-  - option: ColorForeground
-    value: "#839496"
-  - option: ColorBackground
-    value: "#002b36"
-  - option: ColorCursor
-    value: "#93a1a1"
-  - option: TabActivityColor
-    value: "#dc322f"
-  - option: ColorPalette
-    value: "#073642;#dc322f;#859900;#b58900;#268bd2;#d33682;#2aa198;#eee8d5;#002b36;#cb4b16;#586e75;#657b83;#839496;#6c71c4;#93a1a1;#fdf6e3"
-  - option: ColorBold
-    value: "#93a1a1"
-  - option: ColorBoldUseDefault
-    value: "FALSE"
+    - option: CommandLoginShell
+      value: "TRUE"
+    - option: FontName
+      value: "Hack 10"
+    - option: MiscAlwaysShowTabs
+      value: "TRUE"
+    - option: MiscDefaultGeometry
+      value: "80x43"
+    - option: ShortcutsNoHelpkey
+      value: "TRUE"
+    - option: ShortcutsNoMenukey
+      value: "TRUE"
+    # Color codes copied from:
+    # /usr/share/xfce4/terminal/colorschemes/solarized-dark.theme
+    - option: ColorForeground
+      value: "#839496"
+    - option: ColorBackground
+      value: "#002b36"
+    - option: ColorCursor
+      value: "#93a1a1"
+    - option: TabActivityColor
+      value: "#dc322f"
+    - option: ColorPalette
+      value: "#073642;#dc322f;#859900;#b58900;#268bd2;#d33682;#2aa198;#eee8d5;#002b36;#cb4b16;#586e75;#657b83;#839496;#6c71c4;#93a1a1;#fdf6e3"
+    - option: ColorBold
+      value: "#93a1a1"
+    - option: ColorBoldUseDefault
+      value: "FALSE"

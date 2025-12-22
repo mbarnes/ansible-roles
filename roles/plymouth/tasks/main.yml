@@ -1,30 +1,30 @@
 ---
 - name: Begin Plymouth configuration
-  become: yes
+  become: true
   block:
 
-  # Based on https://wiki.debian.org/plymouth
+    # Based on https://wiki.debian.org/plymouth
 
-  - name: Add plymouth package
-    ansible.builtin.apt:
-      name:
-      - plymouth
-      - plymouth-x11
+    - name: Add plymouth package
+      ansible.builtin.apt:
+        name:
+          - plymouth
+          - plymouth-x11
 
-  - name: Check if splash is configured in boot command
-    ansible.builtin.lineinfile:
-      path: /etc/default/grub
-      regexp: '^GRUB_CMDLINE_LINUX_DEFAULT=".*splash'
-      state: absent
-    check_mode: true
-    register: grub_cmdline_check
-    changed_when: false
+    - name: Check if splash is configured in boot command
+      ansible.builtin.lineinfile:
+        path: /etc/default/grub
+        regexp: '^GRUB_CMDLINE_LINUX_DEFAULT=".*splash'
+        state: absent
+      check_mode: true
+      register: grub_cmdline_check
+      changed_when: false
 
-  - name: Add splash to boot command
-    ansible.builtin.lineinfile:
-      path: /etc/default/grub
-      regexp: "^(GRUB_CMDLINE_LINUX_DEFAULT=\".*)\"$"
-      line: '\1 splash"'
-      backrefs: true
-    when: grub_cmdline_check.found == 0
-    notify: Update GRUB configuration
+    - name: Add splash to boot command
+      ansible.builtin.lineinfile:
+        path: /etc/default/grub
+        regexp: "^(GRUB_CMDLINE_LINUX_DEFAULT=\".*)\"$"
+        line: '\1 splash"'
+        backrefs: true
+      when: grub_cmdline_check.found == 0
+      notify: Update GRUB configuration

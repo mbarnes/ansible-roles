@@ -1,24 +1,25 @@
 ---
 - name: Begin ConnMan configuration
-  become: yes
+  become: true
   block:
 
-  - name: Tweak general configuration
-    community.general.ini_file:
-      path: /etc/connman.conf
-      section: General
-      option: "{{ item.option }}"
-      value: "{{ item.value }}"
-      no_extra_spaces: true
-    loop:
-    - option: AllowHostnameUpdates
-      value: "{{ connman_allow_hostname_updates | ternary('true', 'false') }}"
-    - option: AllowDomainnameUpdates
-      value: "{{ connman_allow_domainname_updates | ternary('true', 'false') }}"
-    notify: Restart connman
+    - name: Tweak general configuration
+      community.general.ini_file:
+        path: /etc/connman.conf
+        section: General
+        option: "{{ item.option }}"
+        value: "{{ item.value }}"
+        no_extra_spaces: true
+        mode: u=rw,g=r,o=r
+      loop:
+        - option: AllowHostnameUpdates
+          value: "{{ connman_allow_hostname_updates | ternary('true', 'false') }}"
+        - option: AllowDomainnameUpdates
+          value: "{{ connman_allow_domainname_updates | ternary('true', 'false') }}"
+      notify: Restart connman
 
-  - name: Set DNS proxy preference
-    ansible.builtin.lineinfile:
-      path: /etc/osmc/prefs.d/connman
-      regexp: "^#?dnsproxy="
-      line: "dnsproxy={{ connman_enable_dns_proxy | ternary('yes', 'no') }}"
+    - name: Set DNS proxy preference
+      ansible.builtin.lineinfile:
+        path: /etc/osmc/prefs.d/connman
+        regexp: "^#?dnsproxy="
+        line: "dnsproxy={{ connman_enable_dns_proxy | ternary('yes', 'no') }}"

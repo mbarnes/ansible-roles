@@ -2,13 +2,13 @@
 - name: Add jc package
   ansible.builtin.apt:
     name:
-    - jc
-  become: yes
+      - jc
+  become: true
 
 - name: Run lsmod
   ansible.builtin.command: jc lsmod
   register: lsmod_result
-  changed_when: False
+  changed_when: false
 
 - name: Set kernel_modules fact
   ansible.builtin.set_fact:

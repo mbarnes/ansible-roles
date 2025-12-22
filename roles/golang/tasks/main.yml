@@ -2,24 +2,26 @@
 - name: Add the default Go toolchain
   ansible.builtin.apt:
     name:
-    - golang-go
-    - go-bindata
+      - golang-go
+      - go-bindata
   become: true
 
 - name: Create GOPATH directory
   ansible.builtin.file:
     path: "{{ golang_path }}"
     state: directory
+    mode: u=rwx,g=rwx,o=rx
 
 # Do not overwrite the file since GOROOT may have been
 # manually changed to a different Go toolchain version.
 - name: Add GOPATH and GOROOT environment variables
   ansible.builtin.template:
     src: golang.j2
-    dest: "{{ bash_aliases_dir }}/golang"
-    force: no
+    dest: "{{ common_user_bash_aliases_dir }}/golang"
+    mode: u=rw,g=rw,o=r
+    force: false
 
-- name: Clone vim-go as a vim package
+- name: Clone vim-go as a vim package  # noqa: latest
   ansible.builtin.git:
     repo: https://github.com/fatih/vim-go.git
     dest: "{{ ansible_user_dir }}/.vim/pack/plugins/start/vim-go"

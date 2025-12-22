@@ -1,64 +1,66 @@
 ---
 - name: Begin Red Hat configuration
-  become: yes
+  become: true
   block:
 
-  # ca-certificates to ensure /etc/ssl/certs/ exists
-  # krb5-user for /usr/bin/kinit and /usr/bin/klist
-  # kstart for /usr/bin/krenew
-  - name: Add necessary packages
-    ansible.builtin.apt:
-      name:
-      - ca-certificates
-      - krb5-user
-      - kstart
-      - network-manager-openvpn
+    # ca-certificates to ensure /etc/ssl/certs/ exists
+    # krb5-user for /usr/bin/kinit and /usr/bin/klist
+    # kstart for /usr/bin/krenew
+    - name: Add necessary packages
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - krb5-user
+          - kstart
+          - network-manager-openvpn
 
-  # Root CA and openvpn profiles copied from:
-  # https://gitlab.consulting.redhat.com/ckuperst/debian-ubuntu-popos-redhat-internal-vpn/
+    # Root CA and openvpn profiles copied from:
+    # https://gitlab.consulting.redhat.com/ckuperst/debian-ubuntu-popos-redhat-internal-vpn/
 
-  - name: Add Red Hat IT Root Certificate Authority
-    ansible.builtin.copy:
-      src: 2022-IT-Root-CA.pem
-      dest: /etc/ssl/certs
-      mode: u=rw,g=r,o=r
-      owner: root
-      group: root
+    - name: Add Red Hat IT Root Certificate Authority
+      ansible.builtin.copy:
+        src: 2022-IT-Root-CA.pem
+        dest: /etc/ssl/certs
+        mode: u=rw,g=r,o=r
+        owner: root
+        group: root
 
-  - name: Add Red Hat VPN system connections
-    ansible.builtin.copy:
-      src: "{{ item }}"
-      dest: /etc/NetworkManager/system-connections/
-      mode: u=rw,g=,o=
-      owner: root
-      group: root
-    with_fileglob: "openvpn/*"
-    notify: Reload NetworkManager connection files
+    - name: Add Red Hat VPN system connections
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /etc/NetworkManager/system-connections/
+        mode: u=rw,g=,o=
+        owner: root
+        group: root
+      with_fileglob: "openvpn/*"
+      notify: Reload NetworkManager connection files
 
-  - name: Add directory for Kerberos configuration
-    ansible.builtin.file:
-      path: /etc/krb5.conf.d
-      state: directory
+    - name: Add directory for Kerberos configuration
+      ansible.builtin.file:
+        path: /etc/krb5.conf.d
+        state: directory
+        mode: u=rwx,g=rx,o=rx
 
-  # From https://gitlab.corp.redhat.com/it-iam/system-configs/-/raw/master/krb5/idm/linux-krb5.conf
-  # With these modifications:
-  # - Add renew_lifetime = 7d
-  # - Use default credentials cache (FILE:/tmp/krb5cc_%{uid})
-  - name: Add Red Hat Kerberos configuration
-    ansible.builtin.copy:
-      src: krb5.conf
-      dest: /etc/
-      mode: u=rw,g=r,o=r
-      owner: root
-      group: root
+    # From https://gitlab.corp.redhat.com/it-iam/system-configs/-/raw/master/krb5/idm/linux-krb5.conf
+    # With these modifications:
+    # - Add renew_lifetime = 7d
+    # - Use default credentials cache (FILE:/tmp/krb5cc_%{uid})
+    - name: Add Red Hat Kerberos configuration
+      ansible.builtin.copy:
+        src: krb5.conf
+        dest: /etc/
+        mode: u=rw,g=r,o=r
+        owner: root
+        group: root
 
 - name: Add systemd units for automatic Kerberos renewal
   ansible.builtin.copy:
     src: "{{ item }}"
     dest: "{{ xdg_config_home }}/systemd/user/"
+    mode: u=rw,g=rw,o=r
   loop:
-  - krenew.path
-  - krenew.service
+    - krenew.path
+    - krenew.service
 
 - name: Start automatic Kerberos renewal
   ansible.builtin.systemd_service:
@@ -77,10 +79,11 @@
 - name: Add helpful shell aliases
   ansible.builtin.copy:
     src: "{{ item }}"
-    dest: "{{ bash_aliases_dir }}/"
+    dest: "{{ common_user_bash_aliases_dir }}/"
+    mode: u=rw,g=rw,o=r
   loop:
-  - kerberos
-  - tmux-sessions
+    - kerberos
+    - tmux-sessions
 
 - name: Add helpful shell scripts
   ansible.builtin.copy:
@@ -88,5 +91,5 @@
     dest: "{{ ansible_user_dir }}/.local/bin/"
     mode: u=rwx,g=rx,o=rx
   loop:
-  - kinit-redhat
-  - rhsso
+    - kinit-redhat
+    - rhsso

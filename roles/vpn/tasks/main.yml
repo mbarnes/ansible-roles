@@ -1,71 +1,73 @@
 ---
 - name: Begin OpenVPN configuration
-  become: yes
+  become: true
   block:
 
-  - name: Add required packages for OpenVPN
-    ansible.builtin.apt:
-      name:
-      - openvpn
-      - unzip
+    - name: Add required packages for OpenVPN
+      ansible.builtin.apt:
+        name:
+          - openvpn
+          - unzip
 
-  - name: Create directory for openvpn files
-    ansible.builtin.file:
-      path: /etc/openvpn/pia
-      state: directory
-    register: pia
+    - name: Create directory for openvpn files
+      ansible.builtin.file:
+        path: /etc/openvpn/pia
+        state: directory
+        mode: u=rwx,g=rx,o=rx
+      register: pia
 
-  - name: Download openvpn files for privateinternetaccess
-    ansible.builtin.unarchive:
-      remote_src: yes
-      src: https://www.privateinternetaccess.com/openvpn/openvpn.zip
-      dest: "{{ pia.path }}"
-      creates: "{{ pia.path }}/ca.rsa.2048.crt"
+    - name: Download openvpn files for privateinternetaccess
+      ansible.builtin.unarchive:
+        remote_src: true
+        src: https://www.privateinternetaccess.com/openvpn/openvpn.zip
+        dest: "{{ pia.path }}"
+        creates: "{{ pia.path }}/ca.rsa.2048.crt"
 
-  - name: List openvpn files for privateinternetaccess
-    ansible.builtin.find:
-      paths: "{{ pia.path }}"
-      patterns: "*.ovpn"
-    register: pia_config
+    - name: List openvpn files for privateinternetaccess
+      ansible.builtin.find:
+        paths: "{{ pia.path }}"
+        patterns: "*.ovpn"
+      register: pia_config
 
-  - name: Tweak openvpn files to use a credentials file
-    ansible.builtin.lineinfile:
-      path: "{{ item }}"
-      line: auth-user-pass pia.credentials
-      regexp: ^auth-user-pass
-    loop: "{{ pia_config.files | map(attribute='path') | list }}"
-    notify: Restart openvpn
+    - name: Tweak openvpn files to use a credentials file
+      ansible.builtin.lineinfile:
+        path: "{{ item }}"
+        line: auth-user-pass pia.credentials
+        regexp: ^auth-user-pass
+      loop: "{{ pia_config.files | map(attribute='path') | list }}"
+      notify: Restart openvpn
 
-  - name: Add privateinternetaccess credentials
-    ansible.builtin.copy:
-      content: !vault |
-        $ANSIBLE_VAULT;1.1;AES256
-        65386633353866633366616662373861323433613133393535653132633261343562373336353431
-        6537366332643536623536323634336432393731396433660a323030396466396433613661366465
-        32643231373963616335623439643131653966323536336534663438373464336266326662343738
-        6361343139306134610a663139653132386363336663356436656631353266346361343037383665
-        30613334343663356166333863626462373133623733306464306433613662376535
-      dest: /etc/openvpn/pia.credentials
-      mode: u=rw,g=,o=
-      owner: root
-      group: root
-    no_log: True
-    notify: Restart openvpn
+    - name: Add privateinternetaccess credentials
+      ansible.builtin.copy:
+        content: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          65386633353866633366616662373861323433613133393535653132633261343562373336353431
+          6537366332643536623536323634336432393731396433660a323030396466396433613661366465
+          32643231373963616335623439643131653966323536336534663438373464336266326662343738
+          6361343139306134610a663139653132386363336663356436656631353266346361343037383665
+          30613334343663356166333863626462373133623733306464306433613662376535
+        dest: /etc/openvpn/pia.credentials
+        mode: u=rw,g=,o=
+        owner: root
+        group: root
+      no_log: true
+      notify: Restart openvpn
 
-  - name: Link openvpn configuration to the preferred server
-    ansible.builtin.file:
-      src: "{{ pia.path }}/{{ privateinternetaccess_server }}.ovpn"
-      dest: /etc/openvpn/default.conf
-      state: link
-    notify: Restart openvpn
+    - name: Link openvpn configuration to the preferred server
+      ansible.builtin.file:
+        src: "{{ pia.path }}/{{ vpn_privateinternetaccess_server }}.ovpn"
+        dest: /etc/openvpn/default.conf
+        state: link
+      notify: Restart openvpn
 
-  - name: Enable openvpn
-    ansible.builtin.systemd_service:
-      name: openvpn.service
-      enabled: true
-      state: started
+    - name: Enable openvpn
+      ansible.builtin.systemd_service:
+        name: openvpn.service
+        enabled: true
+        state: started
 
 - name: Add bash aliases
   ansible.builtin.copy:
     src: bash_aliases
-    dest: "{{ bash_aliases_dir }}/{{ role_name }}_aliases"
+    dest: "{{ common_user_bash_aliases_dir }}/{{ role_name }}_aliases"
+    mode: u=rw,g=rw,o=r

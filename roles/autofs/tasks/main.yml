@@ -1,18 +1,18 @@
 ---
 - name: Begin autofs configuration
-  become: yes
+  become: true
   block:
 
-  - name: Add autofs and nfs-common packages
-    ansible.builtin.apt:
-      name:
-      - autofs
-      - nfs-common
+    - name: Add autofs and nfs-common packages
+      ansible.builtin.apt:
+        name:
+          - autofs
+          - nfs-common
 
-  - name: Enable automatic host-based mounts
-    ansible.builtin.lineinfile:
-      path: /etc/auto.master
-      regexp: '^#?(/net\s+-hosts)$'
-      line: '\1'
-      backrefs: true
-    notify: Restart autofs
+    - name: Enable automatic host-based mounts
+      ansible.builtin.lineinfile:
+        path: /etc/auto.master
+        regexp: '^#?(/net\s+-hosts)$'
+        line: '\1'
+        backrefs: true
+      notify: Restart autofs

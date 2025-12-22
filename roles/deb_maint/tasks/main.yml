@@ -6,24 +6,27 @@
 - name: Add Debian packaging tools
   ansible.builtin.apt:
     name:
-    - build-essential
-    - devscripts
-    - debhelper
-    - quilt
+      - build-essential
+      - devscripts
+      - debhelper
+      - quilt
   become: true
 
 - name: Add dh_make configuration
   ansible.builtin.template:
     src: dh_make.j2
-    dest: "{{ bash_aliases_dir }}/dh_make"
+    dest: "{{ common_user_bash_aliases_dir }}/dh_make"
+    mode: u=rw,g=rw,o=r
 
 - name: Add dquilt configuration
   ansible.builtin.copy:
     src: dquilt
-    dest: "{{ bash_aliases_dir }}/"
+    dest: "{{ common_user_bash_aliases_dir }}/"
+    mode: u=rw,g=rw,o=r
 
 - name: Copy dotfiles to home directory
   ansible.builtin.copy:
     src: "{{ item }}"
     dest: "{{ ansible_user_dir }}/.{{ item | basename }}"
+    mode: u=rw,g=rw,o=r
   with_fileglob: "dotfiles/*"

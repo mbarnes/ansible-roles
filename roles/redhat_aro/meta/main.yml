@@ -1,6 +1,6 @@
 ---
 dependencies:
-- role: common_user
-- role: dpkg_architecture
-- role: docker
-- role: golang
+  - role: common_user
+  - role: dpkg_architecture
+  - role: docker
+  - role: golang
