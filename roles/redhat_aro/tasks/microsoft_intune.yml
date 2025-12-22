@@ -41,8 +41,6 @@
       - intune-portal
       - microsoft-edge-stable
 
-  # XXX Copied from the redhat role for Google Chrome.
-  #     Should this be split off as a separate role?
   - name: Add Red Hat Kerberos policy for Microsoft Edge
     ansible.builtin.copy:
       src: edge/redhat-corp.json

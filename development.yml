@@ -12,7 +12,6 @@
 # - user          : Run all user-level tasks
 # - common_system : (system) Common System Configuration
 # - dropbox       : (system) Dropbox Configuration
-# - google_chrome : (system) Google Chrome Configuration
 # - redhat        : (system) Red Hat Configuration
 # - common_user   : (user) Common User Configuration
 # - deb_maint     : (user) Debian Maintainer Configuration
@@ -60,17 +59,6 @@
   #- role: dropbox
   #  tags:
   #  - dropbox
-  #  - system
-
-  #-----------------------------
-  # Google Chrome Configuration
-  #-----------------------------
-
-  # FIXME Re-evaluate whether Google Meet works well on Firefox.
-  #       If it does, maybe we don't need Chrome?
-  #- role: google_chrome
-  #  tags:
-  #  - google_chrome
   #  - system
 
   #-----------------------
