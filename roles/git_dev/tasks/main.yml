@@ -2,11 +2,12 @@
 - name: Add git and related packages
   ansible.builtin.apt:
     name:
-    - git
-    - tig
+      - git
+      - tig
   become: true
 
 - name: Add git configuration
   ansible.builtin.template:
     src: gitconfig.j2
     dest: "{{ ansible_user_dir }}/.gitconfig"
+    mode: u=rw,g=rw,o=r

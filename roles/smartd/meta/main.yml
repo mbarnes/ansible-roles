@@ -2,4 +2,4 @@
 # Original author: Michel Weitbrecht
 ---
 dependencies:
-- role: mta
+  - role: mta

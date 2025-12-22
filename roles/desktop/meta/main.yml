@@ -1,8 +1,8 @@
 ---
 dependencies:
-- role: autofs
-- role: kernel_modules
-# Broken libgdk-pixbuf2.0-0 dependency
-#- role: minecraft
-- role: mozilla_firefox
-- role: powerline
+  - role: autofs
+  - role: kernel_modules
+  # Broken libgdk-pixbuf2.0-0 dependency
+  # - role: minecraft
+  - role: mozilla_firefox
+  - role: powerline

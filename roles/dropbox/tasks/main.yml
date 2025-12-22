@@ -1,24 +1,25 @@
 ---
 - name: Begin Dropbox configuration
-  become: yes
+  become: true
   block:
 
-  # See https://help.dropbox.com/installs/linux-commands
-  # It describes different methods for obtaining the signing
-  # key for Debian and Fedora repositories but it's the same
-  # key, and with apt-key(8) being deprecated it's easier to
-  # just grab the Fedora one.
-  - name: Add Dropbox's official GPG key
-    ansible.builtin.get_url:
-      url: https://linux.dropbox.com/fedora/rpm-public-key.asc
-      dest: /etc/apt/trusted.gpg.d/dropbox.asc
+    # See https://help.dropbox.com/installs/linux-commands
+    # It describes different methods for obtaining the signing
+    # key for Debian and Fedora repositories but it's the same
+    # key, and with apt-key(8) being deprecated it's easier to
+    # just grab the Fedora one.
+    - name: Add Dropbox's official GPG key
+      ansible.builtin.get_url:
+        url: https://linux.dropbox.com/fedora/rpm-public-key.asc
+        dest: /etc/apt/trusted.gpg.d/dropbox.asc
+        mode: u=rw,g=r,o=r
 
-  - name: Add apt repository for Dropbox
-    ansible.builtin.apt_repository:
-      repo: "deb [arch={{ dpkg_architecture }}] https://linux.dropbox.com/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} main"
-      filename: dropbox
+    - name: Add apt repository for Dropbox
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ dpkg_architecture }}] https://linux.dropbox.com/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} main"
+        filename: dropbox
 
-  - name: Add dropbox package
-    ansible.builtin.apt:
-      name:
-      - dropbox
+    - name: Add dropbox package
+      ansible.builtin.apt:
+        name:
+          - dropbox

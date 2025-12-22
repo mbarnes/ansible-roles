@@ -2,7 +2,7 @@
 - name: Get architecture of packages dpkg installs
   ansible.builtin.command: dpkg --print-architecture
   register: dpkg_result
-  changed_when: False
+  changed_when: false
 
 - name: Set dpkg_architecture fact
   ansible.builtin.set_fact:

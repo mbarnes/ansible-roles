@@ -3,4 +3,4 @@
   ansible.builtin.systemd_service:
     name: apcupsd.service
     state: restarted
-  become: yes
+  become: true

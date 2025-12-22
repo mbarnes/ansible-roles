@@ -3,3 +3,4 @@
   ansible.builtin.template:
     src: proxy.conf.j2
     dest: "{{ nginx_config_dir }}/nginx/site-confs/proxy-{{ nginx_revproxy_name }}.conf"
+    mode: u=rw,g=rw,o=r

@@ -21,7 +21,8 @@
 # - retropie      : (user) RetroPie Configuration
 #
 
-- hosts: mediacenter_group
+- name: Configure hosts to run Open Source Media Center (OSMC)
+  hosts: mediacenter_group
   remote_user: osmc
 
   vars:
@@ -30,135 +31,135 @@
 
   pre_tasks:
 
-  - name: Check Ansible version
-    ansible.builtin.assert:
-      that: "ansible_version.full is version('2.9', '>=')"
-      msg: "This playbook requires Ansible 2.9 or later"
-    tags:
-    - always
+    - name: Check Ansible version
+      ansible.builtin.assert:
+        that: "ansible_version.full is version('2.9', '>=')"
+        msg: "This playbook requires Ansible 2.9 or later"
+      tags:
+        - always
 
-  - name: Check for necessary inventory variables
-    ansible.builtin.assert:
-      that: "item is defined"
-      msg: "Missing required variable \"{{ item }}\". Please add this to your inventory."
-    loop:
-    - local_area_network
-    - local_area_netmask
-    tags:
-    - always
+    - name: Check for necessary inventory variables
+      ansible.builtin.assert:
+        that: "item is defined"
+        msg: "Missing required variable \"{{ item }}\". Please add this to your inventory."
+      loop:
+        - local_area_network
+        - local_area_netmask
+      tags:
+        - always
 
-  - name: Verify vault secret
-    ansible.builtin.set_fact:
-      vault_test: !vault |
-        $ANSIBLE_VAULT;1.1;AES256
-        37393232346234616538646162396633353964346536303438363862383035643166343438663836
-        3830353761366261363430336430653836616233366239640a653134326561306261643436303539
-        66393361353064353139626632366562363337333063663865353333333230383336363436626563
-        3236356330363838620a306332613635313765393939306265636465313830666637613433386465
-        63306364396263333965613739613663323331333733316438383165636230396366
-    tags:
-    - always
+    - name: Verify vault secret
+      ansible.builtin.set_fact:
+        vault_test: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          37393232346234616538646162396633353964346536303438363862383035643166343438663836
+          3830353761366261363430336430653836616233366239640a653134326561306261643436303539
+          66393361353064353139626632366562363337333063663865353333333230383336363436626563
+          3236356330363838620a306332613635313765393939306265636465313830666637613433386465
+          63306364396263333965613739613663323331333733316438383165636230396366
+      tags:
+        - always
 
   roles:
 
-  #-----------------------------
-  # Common System Configuration
-  #-----------------------------
+    # -----------------------------
+    #  Common System Configuration
+    # -----------------------------
 
-  - role: common_system
-    vars:
-      common_system_extra_packages:
-      - python3-netaddr  # for ipaddr filter
-    tags:
-    - common_system
-    - system
+    - role: common_system
+      vars:
+        common_system_extra_packages:
+          - python3-netaddr  # for ipaddr filter
+      tags:
+        - common_system
+        - system
 
-  #-----------------------
-  # Journal Configuration
-  #-----------------------
+    # -----------------------
+    #  Journal Configuration
+    # -----------------------
 
-  - role: journal
-    tags:
-    - journal
-    - system
+    - role: journal
+      tags:
+        - journal
+        - system
 
-  #-----------------------
-  # ConnMan Configuration
-  #-----------------------
+    # -----------------------
+    #  ConnMan Configuration
+    # -----------------------
 
-  - role: connman
-    tags:
-    - connman
-    - system
+    - role: connman
+      tags:
+        - connman
+        - system
 
-  #------------------------------------------
-  # Mail Transport Agent (MTA) Configuration
-  #------------------------------------------
+    # ------------------------------------------
+    #  Mail Transport Agent (MTA) Configuration
+    # ------------------------------------------
 
-  - role: mta
-    when: host_provides_nfs
-    tags:
-    - mta
-    - system
+    - role: mta
+      when: host_provides_nfs
+      tags:
+        - mta
+        - system
 
-  #--------------------------------------------------
-  # Uninterruptible Power Supply (UPS) Configuration
-  # For an APC Back-UPS CS 350
-  #--------------------------------------------------
+    # --------------------------------------------------
+    #  Uninterruptible Power Supply (UPS) Configuration
+    #  For an APC Back-UPS CS 350
+    # --------------------------------------------------
 
-  - role: ups
-    when: host_provides_nfs
-    tags:
-    - ups
-    - system
+    - role: ups
+      when: host_provides_nfs
+      tags:
+        - ups
+        - system
 
-  #-----------------------
-  # Storage Configuration
-  #-----------------------
+    # -----------------------
+    #  Storage Configuration
+    # -----------------------
 
-  - role: storage
-    when: host_provides_nfs
-    tags:
-    - storage
-    - system
+    - role: storage
+      when: host_provides_nfs
+      tags:
+        - storage
+        - system
 
-  - role: smartd
-    vars:
-      smartd_devices:
-        DEVICESCAN:
-          type: removable
-          nocheck: standby
-          mail_recipients:
-          - "{{ mta_destination_address }}"
-          mail_script: /usr/share/smartmontools/smartd-runner
-    when: host_provides_nfs
-    tags:
-    - storage
-    - system
+    - role: smartd
+      vars:
+        smartd_devices:
+          DEVICESCAN:
+            type: removable
+            nocheck: standby
+            mail_recipients:
+              - "{{ mta_destination_address }}"
+            mail_script: /usr/share/smartmontools/smartd-runner
+      when: host_provides_nfs
+      tags:
+        - storage
+        - system
 
-  #---------------------------
-  # Common User Configuration
-  #---------------------------
+    # ---------------------------
+    #  Common User Configuration
+    # ---------------------------
 
-  - role: common_user
-    tags:
-    - common_user
-    - user
+    - role: common_user
+      tags:
+        - common_user
+        - user
 
-  #-------------------------
-  # Powerline Configuration
-  #-------------------------
+    # -------------------------
+    #  Powerline Configuration
+    # -------------------------
 
-  - role: powerline
-    tags:
-    - powerline
-    - user
+    - role: powerline
+      tags:
+        - powerline
+        - user
 
-  #------------------------
-  # RetroPie Configuration
-  #------------------------
+    # ------------------------
+    #  RetroPie Configuration
+    # ------------------------
 
-  - role: retropie
-    tags:
-    - retropie
-    - user
+    - role: retropie
+      tags:
+        - retropie
+        - user

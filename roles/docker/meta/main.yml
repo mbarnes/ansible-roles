@@ -1,4 +1,4 @@
 ---
 dependencies:
-- role: common_user
-- role: dpkg_architecture
+  - role: common_user
+  - role: dpkg_architecture

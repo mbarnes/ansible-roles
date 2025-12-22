@@ -1,0 +1,8 @@
+---
+# .ansible-lint
+
+skip_list:
+  # Roles that work like functions often prefix their task
+  # names with a Jinja template showing an identifier. e.g.
+  # name: "{{ docker_service_name }} : Pull docker image"
+  - name[template]

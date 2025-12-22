@@ -1,24 +1,24 @@
 ---
 - name: Begin LightDM configuration
-  become: yes
+  become: true
   block:
 
-  - name: Add lightdm and related packages
-    ansible.builtin.apt:
-      name:
-      - lightdm
-      - lightdm-gtk-greeter
-      - light-locker
+    - name: Add lightdm and related packages
+      ansible.builtin.apt:
+        name:
+          - lightdm
+          - lightdm-gtk-greeter
+          - light-locker
 
-  - name: Tweak lightdm configuration
-    ansible.builtin.lineinfile:
-      path: /etc/lightdm/lightdm.conf
-      regexp: "#?{{ item.key }}="
-      line: "{{ item.key }}={{ item.value }}"
-    loop:
-    - key: greeter-hide-users
-      value: "false"
-    when: ansible_distribution == "Debian"
+    - name: Tweak lightdm configuration
+      ansible.builtin.lineinfile:
+        path: /etc/lightdm/lightdm.conf
+        regexp: "#?{{ item.key }}="
+        line: "{{ item.key }}={{ item.value }}"
+      loop:
+        - key: greeter-hide-users
+          value: "false"
+      when: ansible_distribution == "Debian"
 
 - name: Give lightdm user access to user directory
   ansible.posix.acl:
@@ -32,4 +32,5 @@
   ansible.builtin.get_url:
     url: "{{ lightdm_face_url }}"
     dest: "{{ ansible_user_dir }}/.face"
+    mode: u=rw,g=r,o=r
     force: true

@@ -1,11 +1,11 @@
 ---
 # Allow connman to change the system hostname. This can happen for example if
 # we receive DHCP hostname option. Default value is true.
-connman_allow_hostname_updates: True
+connman_allow_hostname_updates: true
 
 # Allow connman to change the system domainname. This can happen for example if
 # we receive DHCP domainname option. Default value is true.
-connman_allow_domainname_updates: True
+connman_allow_domainname_updates: true
 
 # Preference that maps to connman(8) option --nodnsproxy:
 #
@@ -18,4 +18,4 @@ connman_allow_domainname_updates: True
 #   ConnMan is not able to cache the DNS queries because the DNS traffic is
 #   not going through ConnMan and that can cause some extra network traffic.
 #
-connman_enable_dns_proxy: True
+connman_enable_dns_proxy: true

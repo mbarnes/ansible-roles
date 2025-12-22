@@ -1,45 +1,48 @@
 ---
 - name: Begin system configuration
-  become: yes
+  become: true
   block:
 
-  - name: Update 127.0.1.1 hosts entry (w/ FQDN)
-    ansible.builtin.lineinfile:
-      path: /etc/hosts
-      regexp: '^127\.0\.1\.1'
-      line: "127.0.1.1\t{{ common_system_fqdn }} {{ ansible_hostname }}"
-    when: common_system_fqdn != ansible_hostname
+    - name: Update 127.0.1.1 hosts entry (w/ FQDN)
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: '^127\.0\.1\.1'
+        line: "127.0.1.1\t{{ common_system_fqdn }} {{ ansible_hostname }}"
+      when: common_system_fqdn != ansible_hostname
 
-  - name: Update 127.0.1.1 hosts entry (w/o FQDN)
-    ansible.builtin.lineinfile:
-      path: /etc/hosts
-      regexp: '^127\.0\.1\.1'
-      line: "127.0.1.1\t{{ common_system_fqdn }}"
-    when: common_system_fqdn == ansible_hostname
+    - name: Update 127.0.1.1 hosts entry (w/o FQDN)
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: '^127\.0\.1\.1'
+        line: "127.0.1.1\t{{ common_system_fqdn }}"
+      when: common_system_fqdn == ansible_hostname
 
-  - name: Disable any cdrom apt sources
-    ansible.builtin.replace:
-      path: /etc/apt/sources.list
-      regexp: '^deb cdrom:(.*)$'
-      replace: '#deb cdrom:\1'
+    - name: Disable any cdrom apt sources
+      ansible.builtin.replace:
+        path: /etc/apt/sources.list
+        regexp: '^deb cdrom:(.*)$'
+        replace: '#deb cdrom:\1'
 
-  - when: ansible_distribution in ["Debian", "OSMC"]
-    block:
+    - name: Maybe add Debian backports repository
+      when: ansible_distribution in ["Debian", "OSMC"]
+      block:
 
-    - name: Set Debian backports repository name
-      ansible.builtin.set_fact:
-        backports_apt_repository_name: "{{ ansible_distribution_release }}-backports"
+        - name: Set Debian backports repository name
+          ansible.builtin.set_fact:
+            backports_apt_repository_name: "{{ ansible_distribution_release }}-backports"
 
-    - name: Add Debian backports repository
-      ansible.builtin.apt_repository:
-        repo: "deb http://deb.debian.org/debian {{ backports_apt_repository_name }} main"
-        filename: "{{ backports_apt_repository_name }}"
+        - name: Add Debian backports repository
+          ansible.builtin.apt_repository:
+            repo: "deb http://deb.debian.org/debian {{ backports_apt_repository_name }} main"
+            filename: "{{ backports_apt_repository_name }}"
 
-  - name: Add basic CLI tools
-    ansible.builtin.apt:
-      name: "{{ common_system_base_packages + common_system_extra_packages }}"
+    - name: Add basic CLI tools
+      ansible.builtin.apt:
+        name: "{{ common_system_base_packages + common_system_extra_packages }}"
 
-  - name: Update the command-not-found cache
-    ansible.builtin.command: /usr/sbin/update-command-not-found
-    # Command is not present on Ubuntu distribution
-    when: ansible_distribution in ["Debian", "OSMC"]
+    - name: Update the command-not-found cache
+      ansible.builtin.command: /usr/sbin/update-command-not-found
+      register: common_system_update_command_not_found
+      changed_when: "'inputs unchanged' not in common_system_update_command_not_found.stderr"
+      # Command is not present on Ubuntu distribution
+      when: ansible_distribution in ["Debian", "OSMC"]
