@@ -38,14 +38,13 @@
     tags:
     - always
 
-  tasks:
+  roles:
 
   #-----------------------------
   # Common System Configuration
   #-----------------------------
 
-  - ansible.builtin.import_role:
-      name: common_system
+  - role: common_system
     vars:
       common_system_extra_packages:
       - systemd-resolved
@@ -58,8 +57,7 @@
   #-----------------------
 
   # FIXME Package is obsolete; re-evaluate whether to keep.
-  #- ansible.builtin.import_role:
-  #    name: dropbox
+  #- role: dropbox
   #  tags:
   #  - dropbox
   #  - system
@@ -70,8 +68,7 @@
 
   # FIXME Re-evaluate whether Google Meet works well on Firefox.
   #       If it does, maybe we don't need Chrome?
-  #- ansible.builtin.import_role:
-  #    name: google_chrome
+  #- role: google_chrome
   #  tags:
   #  - google_chrome
   #  - system
@@ -80,14 +77,12 @@
   # Red Hat Configuration
   #-----------------------
 
-  - ansible.builtin.import_role:
-      name: redhat
+  - role: redhat
     tags:
     - redhat
     - system
 
-  - ansible.builtin.import_role:
-      name: redhat_aro
+  - role: redhat_aro
     tags:
     - redhat
     - system
@@ -96,8 +91,7 @@
   # Common User Configuration
   #---------------------------
 
-  - ansible.builtin.import_role:
-      name: common_user
+  - role: common_user
     tags:
     - common_user
     - user
@@ -106,8 +100,7 @@
   # Debian Maintainer Configuration
   #---------------------------------
 
-  - ansible.builtin.import_role:
-      name: deb_maint
+  - role: deb_maint
     vars:
       deb_email: mbarnes@fastmail.com
     tags:
@@ -118,8 +111,7 @@
   # Powerline Configuration
   #-------------------------
 
-  - ansible.builtin.import_role:
-      name: powerline
+  - role: powerline
     tags:
     - powerline
     - user
@@ -128,11 +120,12 @@
   # Golang Configuration
   #----------------------
 
-  - ansible.builtin.import_role:
-      name: golang
+  - role: golang
     tags:
     - golang
     - user
+
+  tasks:
 
   - ansible.builtin.pause:
       prompt: |
