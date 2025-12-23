@@ -1,0 +1,83 @@
+#!/usr/bin/ansible-playbook
+---
+#
+# Upgrades the Portainer CE container running on hosts in an inventory group
+# named "portainer_group", then upgrades the Portainer CE agent container
+# running on hosts in an inventory group named "portainer_agents".
+#
+
+- name: Upgrade Portainer CE to the latest long-term support release
+  hosts: portainer_group
+  remote_user: root
+
+  vars:
+    portainer_image_name: portainer/portainer-ce:lts
+    portainer_container_name: portainer
+
+  tasks:
+
+    - name: Pull latest portainer/portainer-ce:lts image
+      community.docker.docker_image:
+        name: "{{ portainer_image_name }}"
+        source: pull
+      register: pull_portainer_image
+
+    - name: Bounce the running portainer container
+      when: pull_portainer_image.changed  # noqa: no-handler
+      block:
+
+        - name: Stop and remove a running portainer container
+          community.docker.docker_container:
+            name: "{{ portainer_container_name }}"
+            state: absent
+
+        - name: Start the new portainer/portainer-ce:lts image
+          community.docker.docker_container:
+            name: "{{ portainer_container_name }}"
+            image: "{{ portainer_image_name }}"
+            detach: true
+            restart_policy: always
+            ports:
+              - "8000:8000"
+              - "9000:9000"
+              - "9443:9443"
+            volumes:
+              - "/var/run/docker.sock:/var/run/docker.sock"
+              - "portainer_data:/data"
+
+- name: Upgrade Portainer CE agents to the latest long-term support release
+  hosts: portainer_agents
+  remote_user: root
+
+  vars:
+    portainer_agent_image_name: portainer/agent:lts
+    portainer_agent_container_name: portainer_agent
+
+  tasks:
+
+    - name: Pull latest portainer/agent:lts image
+      community.docker.docker_image:
+        name: "{{ portainer_agent_image_name }}"
+        source: pull
+      register: pull_portainer_agent_image
+
+    - name: Bounce the running portainer_agent container
+      when: pull_portainer_agent_image.changed  # noqa: no-handler
+      block:
+
+        - name: Stop and remove a running portainer_agent container
+          community.docker.docker_container:
+            name: "{{ portainer_container_agent_name }}"
+            state: absent
+
+        - name: Start the new portainer/agent:lts image
+          community.docker.docker_container:
+            name: "{{ portainer_agent_container_name }}"
+            image: "{{ portainer_agent_image_name }}"
+            detach: true
+            restart_policy: always
+            ports:
+              - "9001:9001"
+            volumes:
+              - "/var/run/docker.sock:/var/run/docker.sock"
+              - "/var/lib/docker/volumes:/var/lib/docker/volumes"
