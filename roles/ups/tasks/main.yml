@@ -29,13 +29,6 @@
           value: ""
       notify: Restart apcupsd
 
-    - name: Set email address for power events
-      ansible.builtin.lineinfile:
-        path: /etc/apcupsd/apccontrol
-        regexp: "^export SYSADMIN="
-        line: "export SYSADMIN={{ mta_destination_address }}"
-      notify: Restart apcupsd
-
     - name: Add custom power handling scripts
       ansible.builtin.template:
         src: "{{ item }}.j2"

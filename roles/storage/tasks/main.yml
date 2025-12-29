@@ -15,8 +15,8 @@
         mode: u=rwx,g=rx,o=rx
 
     - name: Add a mdadm configuration
-      ansible.builtin.template:
-        src: mdadm.conf.j2
+      ansible.builtin.copy:
+        src: mdadm.conf
         dest: /etc/mdadm/mdadm.conf
         mode: u=rw,g=r,o=r
         owner: root

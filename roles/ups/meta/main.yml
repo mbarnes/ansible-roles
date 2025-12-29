@@ -1,4 +1,3 @@
 ---
 dependencies:
-  - role: mta  # for mta_destination_address
   - role: storage  # for storage_path

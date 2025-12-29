@@ -1,4 +1,4 @@
-#!/usr/bin/env -S ansible-playbook --ask-become-pass
+#!/usr/bin/env -S ansible-playbook --ask-become-pass --ask-vault-pass
 ---
 #
 # Configures hosts in an inventory group named "desktop_group"
@@ -14,6 +14,7 @@
 # - boot          : (system) Boot and Login Configuration
 # - lightdm       : (system,boot) Configure LightDM
 # - plymouth      : (system,boot) Configure Plymouth
+# - mta           : (system) Mail Transfer Agent (MTA) Configuration
 # - common_user   : (user) Common User Configuration
 # - desktop       : (user) Desktop Configuration
 # - secrets       : (user) Transfer User Secrets
@@ -65,6 +66,26 @@
     - role: lightdm
       tags:
         - lightdm
+        - system
+
+    # -----------------------------------------
+    #  Mail Transfer Agent (MTA) Configuration
+    # -----------------------------------------
+
+    - role: mta
+      vars:
+        mta_relay_user: mbarnes@fastmail.com
+        mta_relay_host: smtp.fastmail.com
+        mta_relay_pass: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          36333536313765613033653363626333336433643238343135626234663261613437346562626566
+          6364633463666536353833343461613234363263643864660a633130356132393337376133386461
+          65636336376665666363386633643466623436373665633932353162613066623939363666383434
+          3139656536343031350a376136653236323064336634633130333637356361303563366430336363
+          61326433626262343433383832336261366665363065353562633064333566613461
+        mta_user_forward: mbarnes@fastmail.com
+      tags:
+        - mta
         - system
 
     # ---------------------------

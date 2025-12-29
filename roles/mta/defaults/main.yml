@@ -1,0 +1,4 @@
+---
+mta_secrets_file: /etc/mail/secrets
+mta_relay_label: default
+mta_relay_port: 587

@@ -2,4 +2,3 @@
 dependencies:
   - role: ansible_lvm
   - role: common_user
-  - role: mta  # for mta_destination_address
