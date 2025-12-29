@@ -1,11 +1,11 @@
-#!/usr/bin/ansible-playbook
+#!/usr/bin/env -S ansible-playbook --ask-become-pass
 ---
 #
 # Configures hosts in an inventory group named "development_group"
 # consisting of pre-installed Debian GNU/Linux hosts with networking
 # and SSH service available, and the remote user in the "sudo" group.
 #
-# Usage: ./development.yml --ask-become-pass
+# Usage: ./development.yml [--limit HOSTS] [--tags TAGS]
 #
 # Available tags:
 # - system        : Run all system-level tasks (as root)

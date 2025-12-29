@@ -1,11 +1,11 @@
-#!/usr/bin/ansible-playbook
+#!/usr/bin/env -S ansible-playbook --ask-become-pass
 ---
 #
 # Configures hosts in an inventory group named "desktop_group"
 # consisting of pre-installed Debian GNU/Linux hoss with networking
 # and SSH service available, and the remote user in the "sudo" group.
 #
-# Usage: ./desktop.yml --ask-become-pass
+# Usage: ./desktop.yml [--limit HOSTS] [--tags TAGS]
 #
 # Available tags:
 # - system        : Run all system-level tasks (as root)

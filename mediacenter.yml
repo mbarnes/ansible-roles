@@ -1,11 +1,11 @@
-#!/usr/bin/ansible-playbook
+#!/usr/bin/env -S ansible-playbook --ask-vault-pass
 ---
 #
 # Configures hosts in an inventory group named "mediacenter_group"
 # consisting of pre-installed OSMC devices with networking and SSH
 # service available.
 #
-# Usage: ./mediacenter.yml --ask-vault-pass
+# Usage: ./mediacenter.yml [--limit HOSTS] [--tags TAGS]
 #
 # Available tags:
 # - system        : Run all system-level tasks (as root)
