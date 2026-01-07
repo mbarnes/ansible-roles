@@ -28,6 +28,7 @@
           - curl
           - jq
           - make
+          - net-tools
           - npm
           - podman
           - promtool
