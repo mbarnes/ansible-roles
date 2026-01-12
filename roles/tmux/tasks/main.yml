@@ -1,0 +1,33 @@
+---
+- name: Install tmux and tmux-plugin-manager
+  ansible.builtin.apt:
+    name:
+      - tmux
+      - tmux-plugin-manager
+  become: true
+
+- name: Create tmux config directory
+  ansible.builtin.file:
+    path: "{{ tmux_config_parts_dir }}"
+    state: directory
+    mode: u=rwx,g=rwx,o=rx
+
+- name: Copy base tmux configuration
+  ansible.builtin.template:
+    src: tmux.conf.j2
+    dest: "{{ tmux_config_dir }}/tmux.conf"
+    mode: u=rw,g=rw,o=r
+  notify: Install tmux plugins
+
+- name: Remove old tmux dotfile (~/.tmux.conf)
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.tmux.conf"
+    state: absent
+
+- name: Add a tmux shell alias
+  ansible.builtin.copy:
+    content: |
+      # Force tmux to assume the terminal supports 256 colors.
+      alias tmux="tmux -2"
+    dest: "{{ common_user_bash_aliases_dir }}/tmux"
+    mode: u=rw,g=rw,o=r

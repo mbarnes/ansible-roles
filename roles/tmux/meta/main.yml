@@ -1,4 +1,4 @@
 ---
 dependencies:
   - role: common_user
-  - role: tmux
+  - role: xdg

@@ -3,3 +3,4 @@ dependencies:
   - role: common_user
   - role: mozilla_firefox
   - role: secrets
+  - role: tmux

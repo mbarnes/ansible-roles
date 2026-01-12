@@ -1,0 +1,4 @@
+---
+- name: Install tmux plugins
+  ansible.builtin.command: /usr/share/tmux-plugin-manager/bin/install_plugins
+  changed_when: true

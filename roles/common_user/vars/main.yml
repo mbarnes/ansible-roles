@@ -1,3 +1,2 @@
 common_user_bash_aliases_dir: "{{ xdg_config_home }}/bash_aliases"
 common_user_bash_profile_dir: "{{ xdg_config_home }}/bash_profile"
-common_user_tmux_config_dir: "{{ xdg_config_home }}/tmux"

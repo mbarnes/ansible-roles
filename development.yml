@@ -88,6 +88,11 @@
         - common_user
         - user
 
+    - role: tmux
+      tags:
+        - common_user
+        - user
+
     # ---------------------------------
     #  Debian Maintainer Configuration
     # ---------------------------------

@@ -12,6 +12,4 @@ common_system_base_packages:
   - lsof
   - man-db
   - rsync
-  - tmux
-  - tmux-plugin-manager
   - usbutils

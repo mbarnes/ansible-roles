@@ -4,7 +4,6 @@
     name:
       - bash
       - rsync
-      - tmux
       - vim-nox
   become: true
 
@@ -16,7 +15,6 @@
   loop:
     - "{{ common_user_bash_aliases_dir }}"
     - "{{ common_user_bash_profile_dir }}"
-    - "{{ common_user_tmux_config_dir }}"
 
 - name: Source additional bash configurations
   ansible.builtin.blockinfile:

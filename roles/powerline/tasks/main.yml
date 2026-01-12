@@ -31,7 +31,7 @@
 - name: Configure tmux for powerline
   ansible.builtin.file:
     src: /usr/share/powerline/bindings/tmux/powerline.conf
-    dest: "{{ common_user_tmux_config_dir }}/powerline.conf"
+    dest: "{{ tmux_config_parts_dir }}/powerline.conf"
     state: link
 
 - name: Configure vim for powerline
