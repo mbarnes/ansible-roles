@@ -17,6 +17,15 @@
         line: "127.0.1.1\t{{ common_system_fqdn }}"
       when: common_system_fqdn == ansible_hostname
 
+    # Force the system time to synchronize with network time. When
+    # rolling a VM back to a snapshot for testing, the system time
+    # may be in the distant past.
+    - name: Restart systemd-timesyncd.service
+      ansible.builtin.systemd_service:
+        name: systemd-timesyncd.service
+        state: restarted
+      when: ansible_virtualization_role == "guest"
+
     - name: Disable any cdrom apt sources
       ansible.builtin.replace:
         path: /etc/apt/sources.list
