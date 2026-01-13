@@ -83,7 +83,7 @@ function aro_hcp_environment_stg {
 
 # Try to guess the right environment based
 # on the current default Azure subscription.
-case $(az account show --output tsv --query "id") in
+case $(az account show --output tsv --query "id" 2> /dev/null) in
   "5299e6b7-b23b-46c8-8277-dc1147807117")
     aro_hcp_environment_int
     ;;
