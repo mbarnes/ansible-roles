@@ -1,9 +1,3 @@
-Add a "firefox-settings" role
-- Create a default profile if none exist
-- Apply settings to a user.js file in each available profile
-- Settings would be things you can specify in about:config
-- See https://braheezy.github.io/posts/automating-firefox-with-ansible/
-
 Add further tmux customizations
 - Start "home" and "work" tmux sessions on user login
   See https://wiki.archlinux.org/title/Tmux#Autostart_with_systemd

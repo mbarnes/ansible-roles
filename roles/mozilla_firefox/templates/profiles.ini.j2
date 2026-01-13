@@ -1,0 +1,12 @@
+[General]
+StartWithLastProfile=1
+Version=2
+
+[Install{{ mozilla_firefox_install_id }}]
+Default={{ mozilla_firefox_default_profile_path }}
+Locked=1
+
+[Profile0]
+Name={{ mozilla_firefox_default_profile_name }}
+IsRelative=1
+Path={{ mozilla_firefox_default_profile_path }}

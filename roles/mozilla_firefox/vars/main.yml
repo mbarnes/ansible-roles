@@ -1,0 +1,13 @@
+---
+mozilla_firefox_profiles_ini_path: "{{ ansible_user_dir }}/.mozilla/firefox/profiles.ini"
+
+# The install ID is a hex string obtained by converting the Firefox installation
+# path into an array of integers and digesting it with Google's 64-bit City hash
+# function.
+#
+# More details on the algorithm are here:
+# https://github.com/bradenhilton/mozillainstallhash
+#
+# The deb package provided by Mozilla installs Firefox to "/usr/lib/firefox", so
+# just hard-code the install ID rather than trying to recompute it.
+mozilla_firefox_install_id: 4F96D1932A9F858E

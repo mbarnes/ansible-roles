@@ -34,3 +34,77 @@
         name:
           - firefox-esr
         state: absent
+
+- name: Create a firefox user directory
+  ansible.builtin.file:
+    path: "{{ mozilla_firefox_profiles_ini_path | dirname }}"
+    state: directory
+    mode: u=rwx,g=,o=
+
+- name: Check for a profiles.ini file
+  ansible.builtin.stat:
+    path: "{{ mozilla_firefox_profiles_ini_path }}"
+  register: mozilla_firefox_profiles_ini
+
+- name: Create a default profile
+  when: not mozilla_firefox_profiles_ini.stat.exists
+  block:
+
+    # Another way to do this is run "firefox -no-remote -CreateProfile ..."
+    # (https://wiki.mozilla.org/Firefox/CommandLineOptions#-CreateProfile_profile_name)
+    # The problem is Firefox requires an X11 user session and a valid XAUTHORITY even
+    # for this command, and a new install will not have an .Xauthority file yet.
+
+    - name: Create a profile directory
+      ansible.builtin.tempfile:
+        state: directory
+        path: "{{ mozilla_firefox_profiles_ini_path | dirname }}"
+        prefix: ""
+        suffix: ".{{ mozilla_firefox_default_profile_name }}"
+      register: mozilla_firefox_tempfile
+      changed_when: true
+
+    - name: Set the default profile path
+      ansible.builtin.set_fact:
+        mozilla_firefox_default_profile_path: "{{ mozilla_firefox_tempfile.path | basename }}"
+
+    - name: Generate a profiles.ini file
+      ansible.builtin.template:
+        src: profiles.ini.j2
+        dest: "{{ mozilla_firefox_profiles_ini_path }}"
+        mode: u=rw,g=rw,o=r
+
+- name: Set custom preferences
+  when: mozilla_firefox_preferences is defined
+  block:
+
+    - name: Read profiles.ini
+      ansible.builtin.slurp:
+        src: "{{ mozilla_firefox_profiles_ini_path }}"
+      register: mozilla_firefox_profiles_ini_base64
+
+    - name: Convert profiles.ini content to JSON
+      ansible.builtin.set_fact:
+        mozilla_firefox_profiles_ini_content: "{{ mozilla_firefox_profiles_ini_base64.content | b64decode | community.general.jc('ini') }}"
+
+    - name: Extract profile names and paths
+      ansible.builtin.set_fact:
+        mozilla_firefox_profiles: >
+          {{ mozilla_firefox_profiles | default({}) | combine({
+            item.value['Name']: (mozilla_firefox_profiles_ini_path | dirname, item.value['Path']) | path_join
+          }) }}
+      when: item.key is match('Profile.*')
+      loop: "{{ mozilla_firefox_profiles_ini_content | dict2items }}"
+
+    # The reason mozilla_firefox_profiles is a dictonary by profile name
+    # is because I had the idea of an optional role parameter of profile
+    # names to apply the preferences to. But there is no compelling use
+    # case for it yet. Just noting it here for posterity.
+    - name: Set preferences in every profile
+      ansible.builtin.lineinfile:
+        create: true
+        path: "{{ item[0].value }}/user.js"
+        search_string: "\"{{ item[1].key }}\""
+        line: "user_pref(\"{{ item[1].key }}\", {{ item[1].value | to_json }});"
+        mode: u=rw,g=rw,o=r
+      loop: "{{ mozilla_firefox_profiles | dict2items | product(mozilla_firefox_preferences | dict2items) }}"
