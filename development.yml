@@ -48,9 +48,6 @@
     # -----------------------------
 
     - role: common_system
-      vars:
-        common_system_extra_packages:
-          - systemd-resolved
       tags:
         - common_system
         - system

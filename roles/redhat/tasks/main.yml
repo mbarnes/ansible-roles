@@ -14,6 +14,22 @@
           - kstart
           - network-manager-openvpn
 
+    - name: Install systemd-resolved
+      ansible.builtin.apt:
+        name:
+          - systemd-resolved
+      register: redhat_install_systemd_resolved
+
+    # XXX Workaround for https://bugs.debian.org/1092805
+    #     systemd-resolved.service must be restarted after install
+    #     for it to be usable. We need to do this immediately, not
+    #     as a handler.
+    - name: Restart systemd-resolved
+      ansible.builtin.systemd_service:
+        name: systemd-resolved.service
+        state: restarted
+      when: redhat_install_systemd_resolved.changed # noqa: no-handler
+
     # Root CA and openvpn profiles copied from:
     # https://gitlab.consulting.redhat.com/ckuperst/debian-ubuntu-popos-redhat-internal-vpn/
 
