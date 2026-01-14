@@ -2,5 +2,8 @@
 dependencies:
   - role: common_user
   - role: mozilla_firefox
+    vars:
+      mozilla_firefox_preferences:
+        network.negotiate-auth.trusted-uris: .redhat.com
   - role: secrets
   - role: tmux
