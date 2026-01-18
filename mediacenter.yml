@@ -1,4 +1,4 @@
-#!/usr/bin/env -S ansible-playbook --ask-vault-pass
+#!/usr/bin/env -S ansible-playbook
 ---
 #
 # Configures hosts in an inventory group named "mediacenter_group"
@@ -15,7 +15,6 @@
 # - connman       : (system) ConnMan Configuration
 # - mta           : (system) Mail Transfer Agent (MTA) Configuration
 # - ups           : (system) Uninterruptible Power Supply (UPS) Configuration
-# - storage       : (system) Storage Configuration
 # - common_user   : (user) Common User Configuration
 # - powerline     : (user) Powerline Configuration
 # - retropie      : (user) RetroPie Configuration
@@ -24,10 +23,6 @@
 - name: Configure hosts to run Open Source Media Center (OSMC)
   hosts: mediacenter_group
   remote_user: osmc
-
-  vars:
-    # Host services are determined by DNS aliases
-    host_provides_nfs: "{{ lookup('community.general.dig', 'nfs' ) == ansible_default_ipv4.address }}"
 
   pre_tasks:
 
@@ -45,18 +40,6 @@
       loop:
         - local_area_network
         - local_area_netmask
-      tags:
-        - always
-
-    - name: Verify vault secret
-      ansible.builtin.set_fact:
-        vault_test: !vault |
-          $ANSIBLE_VAULT;1.1;AES256
-          37393232346234616538646162396633353964346536303438363862383035643166343438663836
-          3830353761366261363430336430653836616233366239640a653134326561306261643436303539
-          66393361353064353139626632366562363337333063663865353333333230383336363436626563
-          3236356330363838620a306332613635313765393939306265636465313830666637613433386465
-          63306364396263333965613739613663323331333733316438383165636230396366
       tags:
         - always
 
@@ -90,62 +73,6 @@
     - role: connman
       tags:
         - connman
-        - system
-
-    # -----------------------------------------
-    #  Mail Transfer Agent (MTA) Configuration
-    # -----------------------------------------
-
-    - role: mta
-      when: host_provides_nfs
-      vars:
-        mta_relay_user: mbarnes@fastmail.com
-        mta_relay_host: smtp.fastmail.com
-        mta_relay_pass: !vault |
-          $ANSIBLE_VAULT;1.1;AES256
-          36333536313765613033653363626333336433643238343135626234663261613437346562626566
-          6364633463666536353833343461613234363263643864660a633130356132393337376133386461
-          65636336376665666363386633643466623436373665633932353162613066623939363666383434
-          3139656536343031350a376136653236323064336634633130333637356361303563366430336363
-          61326433626262343433383832336261366665363065353562633064333566613461
-        mta_user_forward: mbarnes@fastmail.com
-      tags:
-        - mta
-        - system
-
-    # --------------------------------------------------
-    #  Uninterruptible Power Supply (UPS) Configuration
-    #  For an APC Back-UPS CS 350
-    # --------------------------------------------------
-
-    - role: ups
-      when: host_provides_nfs
-      tags:
-        - ups
-        - system
-
-    # -----------------------
-    #  Storage Configuration
-    # -----------------------
-
-    - role: storage
-      when: host_provides_nfs
-      tags:
-        - storage
-        - system
-
-    - role: smartd
-      vars:
-        smartd_devices:
-          DEVICESCAN:
-            type: removable
-            nocheck: standby
-            mail_recipients:
-              - root
-            mail_script: /usr/share/smartmontools/smartd-runner
-      when: host_provides_nfs
-      tags:
-        - storage
         - system
 
     # ---------------------------

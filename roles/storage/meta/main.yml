@@ -1,4 +1,0 @@
----
-dependencies:
-  - role: ansible_lvm
-  - role: common_user

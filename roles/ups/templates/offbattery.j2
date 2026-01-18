@@ -15,8 +15,4 @@ MSG="$HOSTNAME UPS $1 Power has returned"
    /sbin/apcaccess status
 ) | $APCUPSD_MAIL -s "$MSG" $SYSADMIN
 
-# Mount storage array and restart media services
-mount {{ storage_path }}
-systemctl start mediacenter.service nfs-server.service
-
 exit 0

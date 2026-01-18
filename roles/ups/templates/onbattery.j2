@@ -15,8 +15,4 @@ MSG="$HOSTNAME UPS $1 Power Failure !!!"
    /sbin/apcaccess status
 ) | $APCUPSD_MAIL -s "$MSG" $SYSADMIN
 
-# Stop media services and unmount storage array
-systemctl stop mediacenter.service nfs-server.service
-umount {{ storage_path }}
-
 exit 0

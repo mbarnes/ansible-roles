@@ -1,5 +1,0 @@
----
-# Static mount parameters
-storage_path: /mnt/storage
-storage_fstype: ext4
-storage_options: auto

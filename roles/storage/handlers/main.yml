@@ -1,6 +1,0 @@
----
-- name: Restart mdmonitor
-  ansible.builtin.systemd_service:
-    name: mdmonitor.service
-    state: restarted
-  become: true
