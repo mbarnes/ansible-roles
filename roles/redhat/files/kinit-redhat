@@ -5,5 +5,5 @@ then
     # Use LOGNAME instead of USER so this works as a cron job.
     pass show redhat.com | head --lines 1 | kinit ${LOGNAME}@IPA.REDHAT.COM > /dev/null && klist
 else
-    echo "Cannot renew Red Hat Kerberos token: no active VPN connection" > /dev/stderr
+    echo "Cannot renew Red Hat Kerberos token: no active VPN connection" >&2
 fi
