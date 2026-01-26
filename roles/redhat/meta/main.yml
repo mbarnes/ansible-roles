@@ -5,5 +5,8 @@ dependencies:
     vars:
       mozilla_firefox_preferences:
         network.negotiate-auth.trusted-uris: .redhat.com
+        # https://kb.mozillazine.org/Network.proxy.autoconfig_url
+        network.proxy.autoconfig_url: "{{ redhat_proxy_autoconfig_url }}"
+        network.proxy.type: 2
   - role: secrets
   - role: tmux

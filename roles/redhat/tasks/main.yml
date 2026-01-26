@@ -92,6 +92,12 @@
     special_time: daily
     job: "{{ ansible_user_dir }}/.local/bin/kinit-redhat > /dev/null"
 
+- name: Add proxy.pac file for Mozilla Firefox
+  ansible.builtin.copy:
+    src: proxy.pac
+    dest: "{{ redhat_proxy_autoconfig_path }}"
+    mode: u=rw,g=rw,o=r
+
 - name: Add helpful shell aliases
   ansible.builtin.copy:
     src: "{{ item }}"

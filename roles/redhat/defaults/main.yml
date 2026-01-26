@@ -1,0 +1,3 @@
+---
+redhat_proxy_autoconfig_path: "{{ mozilla_firefox_config_dir }}/proxy.pac"
+redhat_proxy_autoconfig_url: "file://{{ redhat_proxy_autoconfig_path }}"
