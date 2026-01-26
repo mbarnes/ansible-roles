@@ -1,5 +1,6 @@
 ---
-mozilla_firefox_profiles_ini_path: "{{ ansible_user_dir }}/.mozilla/firefox/profiles.ini"
+mozilla_firefox_config_dir: "{{ ansible_user_dir }}/.mozilla/firefox"
+mozilla_firefox_profiles_ini_path: "{{ mozilla_firefox_config_dir }}/profiles.ini"
 
 # The install ID is a hex string obtained by converting the Firefox installation
 # path into an array of integers and digesting it with Google's 64-bit City hash

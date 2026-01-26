@@ -37,7 +37,7 @@
 
 - name: Create a firefox user directory
   ansible.builtin.file:
-    path: "{{ mozilla_firefox_profiles_ini_path | dirname }}"
+    path: "{{ mozilla_firefox_config_dir }}"
     state: directory
     mode: u=rwx,g=,o=
 
@@ -58,7 +58,7 @@
     - name: Create a profile directory
       ansible.builtin.tempfile:
         state: directory
-        path: "{{ mozilla_firefox_profiles_ini_path | dirname }}"
+        path: "{{ mozilla_firefox_config_dir }}"
         prefix: ""
         suffix: ".{{ mozilla_firefox_default_profile_name }}"
       register: mozilla_firefox_tempfile
@@ -91,7 +91,7 @@
       ansible.builtin.set_fact:
         mozilla_firefox_profiles: >
           {{ mozilla_firefox_profiles | default({}) | combine({
-            item.value['Name']: (mozilla_firefox_profiles_ini_path | dirname, item.value['Path']) | path_join
+            item.value['Name']: (mozilla_firefox_config_dir, item.value['Path']) | path_join
           }) }}
       when: item.key is match('Profile.*')
       loop: "{{ mozilla_firefox_profiles_ini_content | dict2items }}"
