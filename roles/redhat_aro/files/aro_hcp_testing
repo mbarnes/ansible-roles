@@ -106,6 +106,10 @@ function aro_hcp_pers_teardown {
   make cleanup-entrypoint/Region CLEANUP_DRY_RUN=false CLEANUP_WAIT=true
 }
 
+function aro_hcp_pers_rebuild {
+  aro_hcp_pers_teardown && aro_hcp_pers_standup
+ }
+
 export ARO_HCP_HOST="http://localhost:8443"
 
 # For interacting with AKS
@@ -127,7 +131,7 @@ alias aro_hcp_backend_scale="kubectl scale --replicas 1 --namespace aro-hcp depl
 
 # Follow Resource Provider pod logs
 alias aro_hcp_frontend_logs="kubectl logs --follow --namespace aro-hcp --selector app=aro-hcp-frontend | jq 'select(.request_path != \"/healthz\")'"
-alias aro_hcp_backend_logs="kubectl logs --follow --namespace aro-hcp --selector app=aro-hcp-backend | jq '.'"
+alias aro_hcp_backend_logs="kubectl logs --follow --namespace aro-hcp \$(kubectl get lease --namespace aro-hcp backend-leader --no-headers | awk '{ print \$2 }') | jq '.'"
 
 # Follow clusters-service pod logs
 alias clusters_service_logs="kubectl logs --follow --namespace clusters-service --selector app=clusters-service"
