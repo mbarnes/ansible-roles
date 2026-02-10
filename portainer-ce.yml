@@ -5,6 +5,10 @@
 # named "portainer_group", then upgrades the Portainer CE agent container
 # running on hosts in an inventory group named "portainer_agents".
 #
+# Portainer agents can be restarted by force with a command-line argument:
+#
+#   -e cli_bounce_agents=true
+#
 
 - name: Upgrade Portainer CE to the latest long-term support release
   hosts: portainer_group
@@ -20,6 +24,7 @@
       community.docker.docker_image:
         name: "{{ portainer_image_name }}"
         source: pull
+        force_source: true
       register: pull_portainer_image
 
     - name: Bounce the running portainer container
@@ -59,15 +64,16 @@
       community.docker.docker_image:
         name: "{{ portainer_agent_image_name }}"
         source: pull
+        force_source: true
       register: pull_portainer_agent_image
 
     - name: Bounce the running portainer_agent container
-      when: pull_portainer_agent_image.changed  # noqa: no-handler
+      when: pull_portainer_agent_image.changed or (cli_bounce_agents | default(false) | bool)  # noqa: no-handler
       block:
 
         - name: Stop and remove a running portainer_agent container
           community.docker.docker_container:
-            name: "{{ portainer_container_agent_name }}"
+            name: "{{ portainer_agent_container_name }}"
             state: absent
 
         - name: Start the new portainer/agent:lts image
