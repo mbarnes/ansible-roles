@@ -17,6 +17,9 @@
     github_release_deb_asset: "{{ item }}"
   when:
     - github_release_deb_asset is not defined
+    # This is a guess, but if we wanted arm64 then there
+    # likely would have been an arch-specific deb package.
+    - "'arm64' not in item.name"
     - item.name.endswith(".deb")
   loop: "{{ github_release_assets.json.assets }}"
   no_log: true  # Avoid spewing a bunch of JSON
