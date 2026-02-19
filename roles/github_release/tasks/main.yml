@@ -63,7 +63,7 @@
       ansible.builtin.get_url:
         url: "{{ github_release_deb_asset.browser_download_url }}"
         checksum: "{{ github_release_deb_asset.digest }}"
-        dest: "{{ github_relese_temp_dir.path }}"
+        dest: "{{ github_release_temp_dir.path }}"
         mode: u=rw,g=r,o=r
 
     - name: "{{ github_release_repo }} : Install deb package"
