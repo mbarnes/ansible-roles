@@ -3,19 +3,53 @@
   become: true
   block:
 
-    - name: Update 127.0.1.1 hosts entry (w/ FQDN)
+    # From the Debian Reference, section 5.1.1:
+    #
+    #   A typical workstation may be installed with its host name set to, e.g.
+    #   "host_name" and its optional domain name set to an empty string. Then,
+    #   "/etc/hosts" looks like the following.
+    #
+    #     127.0.0.1 localhost
+    #     127.0.1.1 host_name
+    #     ...
+    #
+    #   The IP address 127.0.1.1 in the second line of this example may not
+    #   be found on some other Unix-like systems. The Debian installer creates
+    #   this entry for a system without a permanent IP address as a workaround
+    #   for some software (e.g., GNOME) as documented in the bug #719621.
+    #
+    #   The host_name matches the hostname defined in the "/etc/hostname" (see
+    #   Section 3.8.1, "The hostname").
+    #
+    #   For a system with a permanent IP address, that permanent IP address
+    #   should be used here instead of 127.0.1.1.
+    #
+    #   For a system with a permanent IP address and a fully qualified domain
+    #   name (FQDN) provided by the Domain Name System (DNS), that canonical
+    #   host_name.domain_name should be used instead of just host_name.
+    #
+    # The last sentence should apply to any host using this role, but we set
+    # host_name.domain_name IN ADDITION TO host_name. This allows the commands
+    # "hostname" and "hostname --fqdn" to provide correct answers, and the local
+    # Mail Transfer Agent (MTA) to use a fully-qualified domain name when sending
+    # mail from a local user account.
+    - name: Remove hosts entry for 127.0.1.1
       ansible.builtin.lineinfile:
         path: /etc/hosts
-        regexp: '^127\.0\.1\.1'
-        line: "127.0.1.1\t{{ common_system_fqdn }} {{ ansible_hostname }}"
-      when: common_system_fqdn != ansible_hostname
+        regexp: "^{{ '127.0.1.1' | regex_escape() }}"
+        state: absent
 
-    - name: Update 127.0.1.1 hosts entry (w/o FQDN)
+    # To be idempotent after configuring /etc/hosts we need to handle a
+    # lookup result that looks like "host_name.domain_name.,host_name".
+    - name: Query DNS for host's fully-qualified domain name (FQDN)
+      set_fact:
+        common_system_fqdn: "{{ lookup('community.general.dig', ansible_default_ipv4.address + '/PTR') | split(',') | first | trim('.') }}"
+
+    - name: Add hosts entry for default IP address
       ansible.builtin.lineinfile:
         path: /etc/hosts
-        regexp: '^127\.0\.1\.1'
-        line: "127.0.1.1\t{{ common_system_fqdn }}"
-      when: common_system_fqdn == ansible_hostname
+        insertafter: "^{{ '127.0.0.1' | regex_escape() }}"
+        line: "{{ ansible_default_ipv4.address }}\t{{ common_system_fqdn }} {{ ansible_hostname }}"
 
     # Force the system time to synchronize with network time. When
     # rolling a VM back to a snapshot for testing, the system time
