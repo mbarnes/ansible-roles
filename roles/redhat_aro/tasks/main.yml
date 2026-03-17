@@ -71,10 +71,29 @@
           - jq
           - make
           - net-tools
-          - npm
           - podman
-          - promtool
           - virt-viewer
+
+    - name: Add packages for ARO development (Debian-only)
+      ansible.builtin.apt:
+        name:
+          - npm
+          - promtool
+      when: ansible_distribution == 'Debian'
+
+    - name: Add packages for ARO development (Ubuntu-only)
+      ansible.builtin.apt:
+        name:
+          # We are currently stuck on an old Ubuntu release (24.04) for Intune
+          # compliance and therefore have to employ some package workarounds:
+          #
+          # - npm package is too old for our purposes. I have instead installed
+          #   npm directly from https://github.com/nodesource and am not going
+          #   to bother trying to automate that with Ansible.
+          # - promtool is not available as a standalone package. Need to install
+          #   the full prometheus package instead.
+          - prometheus
+      when: ansible_distribution == 'Ubuntu'
 
 - name: Add bash aliases
   ansible.builtin.copy:
