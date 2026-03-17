@@ -43,15 +43,24 @@
         mode: u=rw,g=r,o=r
         force: true  # in case there's new keys
 
+    # azure-cli releases are notoriously slow and may not be available for the
+    # current distribution release ("ansible_distribution_release"). This fact
+    # provides a clean way to temporarily override.
+    - name: Set Debian release for Azure CLI
+      ansible.builtin.set_fact:
+        redhat_aro_azure_cli_distribution_release: "bookworm"
+      when: ansible_distribution == 'Debian'
+
+    - name: Set Ubuntu release for Azure CLI
+      ansible.builtin.set_fact:
+        redhat_aro_azure_cli_distribution_release: "noble"
+      when: ansible_distribution == 'Ubuntu'
+
     - name: Add apt repository for Azure CLI
       ansible.builtin.apt_repository:
-        # repo: >
-        #   deb [arch={{ dpkg_architecture }} signed-by={{ redhat_aro_microsoft_signing_key_path }}]
-        #   https://packages.microsoft.com/repos/azure-cli/ {{ ansible_distribution_release }} main
-        # FIXME Repository does not yet support Debian Trixie.
         repo: >
           deb [arch={{ dpkg_architecture }} signed-by={{ redhat_aro_microsoft_legacy_signing_key_path }}]
-          https://packages.microsoft.com/repos/azure-cli/ bookworm main
+          https://packages.microsoft.com/repos/azure-cli/ {{ redhat_aro_azure_cli_distribution_release }} main
         filename: azure-cli
 
     - name: Add packages for ARO development
