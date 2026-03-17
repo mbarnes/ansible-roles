@@ -3,12 +3,45 @@
   become: true
   block:
 
-    # See https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
-    - name: Add Microsoft's official GPG key
+    # From https://packages.microsoft.com/keys/README (edited for brevity)
+    #
+    # Starting in the Spring of 2025, packages.microsoft.com is introducing
+    # a new signing key for some repositories. The existing key (BE1229CF)
+    # includes SHA1 signatures. These were commonplace when that key was
+    # created, but support for SHA1 (and keys that use it) has been deprecated
+    # in recent Linux releases. The introduction of this new signing key
+    # represents our effort to keep pace with evolving security standards,
+    # and ensure users of these new Linux releases can continue to be
+    # supported by packages.microsoft.com.
+    #
+    # A brief description of the keys used on packages.microsoft.com:
+    #
+    # microsoft.asc (BC528686B50D79E339D3721CEB3E94ADBE1229CF):
+    # This key was Microsoft’s standard Linux-signing key until Spring 2025, as
+    # discussed above. This key will not be used for newly-created repositories.
+    #
+    # microsoft-2025.asc (AA86F75E427A19DD33346403EE4D7792F748182B):
+    # This is the current standard Linux-signing key that will be used in newly-
+    # created repositories. It will work properly in distributions that disallow
+    # SHA1 signatures.
+    #
+    # microsoft-rolling.asc:
+    # This is currently a copy of microsoft-2025.asc. The intention is that this
+    # file will be updated in the future to include new keys as they are created
+    # and begin being used.
+
+    - name: Add Microsoft's legacy GPG key
       ansible.builtin.get_url:
         url: https://packages.microsoft.com/keys/microsoft.asc
-        dest: "{{ redhat_aro_microsoft_signing_key_path }}"
+        dest: "{{ redhat_aro_microsoft_legacy_signing_key_path }}"
         mode: u=rw,g=r,o=r
+
+    - name: Add Microsoft's rolling GPG key
+      ansible.builtin.get_url:
+        url: https://packages.microsoft.com/keys/microsoft-rolling.asc
+        dest: "{{ redhat_aro_microsoft_rolling_signing_key_path }}"
+        mode: u=rw,g=r,o=r
+        force: true  # in case there's new keys
 
     - name: Add apt repository for Azure CLI
       ansible.builtin.apt_repository:
@@ -17,7 +50,7 @@
         #   https://packages.microsoft.com/repos/azure-cli/ {{ ansible_distribution_release }} main
         # FIXME Repository does not yet support Debian Trixie.
         repo: >
-          deb [arch={{ dpkg_architecture }} signed-by={{ redhat_aro_microsoft_signing_key_path }}]
+          deb [arch={{ dpkg_architecture }} signed-by={{ redhat_aro_microsoft_legacy_signing_key_path }}]
           https://packages.microsoft.com/repos/azure-cli/ bookworm main
         filename: azure-cli
 
