@@ -104,6 +104,7 @@ function aro_hcp_pers_teardown {
   pushd $(git rev-parse --show-toplevel)
   trap popd RETURN
   make cleanup-entrypoint/Region CLEANUP_DRY_RUN=false CLEANUP_WAIT=true
+  rm --force $HOME/.kube/hcp-underlay-pers-*.kubeconfig
 }
 
 function aro_hcp_pers_rebuild {
