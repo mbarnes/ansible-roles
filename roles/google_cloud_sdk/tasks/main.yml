@@ -1,0 +1,20 @@
+---
+- name: Begin Google Cloud SDK configuration
+  become: true
+  block:
+
+    - name: Add Google Cloud's official GPG key
+      ansible.builtin.get_url:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        dest: "{{ google_cloud_sdk_signing_key_path }}"
+        mode: u=rw,g=r,o=r
+
+    - name: Add apt repository for Google Cloud SDK
+      ansible.builtin.apt_repository:
+        repo: "deb [arch={{ dpkg_architecture }} signed-by={{ google_cloud_sdk_signing_key_path }}] https://packages.cloud.google.com/apt cloud-sdk main"
+        filename: google-cloud-sdk
+
+    - name: Add google-cloud-cli package
+      ansible.builtin.apt:
+        name:
+          - google-cloud-cli

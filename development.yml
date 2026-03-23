@@ -128,6 +128,7 @@
           Additional tasks out of scope for this playbook:
 
             [ ] Sign in to Firefox account
+            [ ] Configure Google Cloud CLI with "gcloud init"
 
         seconds: 1
       tags:

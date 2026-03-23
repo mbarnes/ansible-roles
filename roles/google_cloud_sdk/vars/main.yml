@@ -1,0 +1,2 @@
+---
+google_cloud_sdk_signing_key_path: /etc/apt/trusted.gpg.d/cloud.google.asc

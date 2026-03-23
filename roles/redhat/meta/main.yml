@@ -1,6 +1,7 @@
 ---
 dependencies:
   - role: common_user
+  - role: google_cloud_sdk
   - role: mozilla_firefox
     vars:
       mozilla_firefox_preferences:
