@@ -1,0 +1,15 @@
+[Unit]
+Description=USB/IP Binding device id %I
+After=network-online.target usbipd.service
+Wants=network-online.target
+Requires=usbipd.service
+
+[Service]
+Type=simple
+ExecStart=/bin/sh -c "/usr/sbin/usbip bind --$(/usr/sbin/usbip list -p -l | grep '#usbid=%i#' | cut '-d#' -f1)"
+RemainAfterExit=yes
+ExecStop=/bin/sh -c "/usr/sbin/usbip unbind --$(/usr/sbin/usbip list -p -l | grep '#usbid=%i#' | cut '-d#' -f1)"
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
