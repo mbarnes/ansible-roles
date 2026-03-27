@@ -4,3 +4,7 @@ dependencies:
   - role: dpkg_architecture
   - role: docker
   - role: golang
+  - role: usbip_client
+    when: usbip_client | default(False)
+  - role: usbip_server
+    when: usbip_server | default(False)

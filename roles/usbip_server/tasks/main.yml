@@ -1,0 +1,36 @@
+---
+- name: Begin usbip server configuration
+  become: true
+  block:
+
+    - name: Add usbip package
+      ansible.builtin.apt:
+        name:
+          - usbip
+      when: ansible_distribution == 'Debian'
+
+    - name: Add linux-tools-common package
+      ansible.builtin.apt:
+        name:
+          - linux-tools-common
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Load the usbip_core and usbip_host kernel modules
+      community.general.modprobe:
+        name: "{{ item }}"
+        state: present
+        persistent: present
+      loop:
+        - usbip_core
+        - usbip_host
+
+    - name: Copy systemd services for usbip
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /etc/systemd/system
+        mode: u=rw,g=r,o=r
+        owner: root
+        group: root
+      loop:
+        - usbipd.service
+        - usbip-bind@.service
