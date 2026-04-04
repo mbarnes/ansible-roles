@@ -134,3 +134,17 @@
 - name: Configure host for Microsoft Intune
   ansible.builtin.include_tasks: microsoft_intune.yml
   when: enable_microsoft_intune | default(False)
+
+- name: Add bash command for exporting Microsoft's YubiKey
+  ansible.builtin.template:
+    src: yubikey_export.j2
+    dest: "{{ common_user_bash_aliases_dir }}/yubikey_export"
+    mode: u=rw,g=rw,o=r
+  when: usbip_server | default(False)
+
+- name: Add bash command for remotely attaching Microsoft's YubiKey
+  ansible.builtin.template:
+    src: yubikey_attach.j2
+    dest: "{{ common_user_bash_aliases_dir }}/yubikey_attach"
+    mode: u=rw,g=rw,o=r
+  when: usbip_client | default(False)

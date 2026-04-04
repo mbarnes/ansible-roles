@@ -1,0 +1,25 @@
+function yubikey_attach {
+  if [ $# -ne 1 ]
+  then
+    echo "Usage: $FUNCNAME remote_host" >&2
+    return 2
+  fi
+
+  remote=$1
+  usbid={{ redhat_aro_microsoft_yubikey_usb_vendor_id }}:{{ redhat_aro_microsoft_yubikey_usb_product_id }}
+
+  if sudo usbip port | grep --quiet ${usbid}
+  then
+    echo "USB device ${usbid} is already attached" >&2
+    return 0
+  fi
+
+  # usbip list has a --parsable option but it does not work with --remote.
+  # Fortunately the human-readable output has everything we need on a single line:
+  #
+  #   <busid>: <vendor_name> : <product_name> (<vendor_id>:<product_id>)
+  #
+  busid=$(usbip list --remote ${remote} | grep ${usbid} | cut '-d:' -f1 | xargs)
+  sudo usbip attach --remote ${remote} --busid ${busid}
+  sudo usbip port
+}
