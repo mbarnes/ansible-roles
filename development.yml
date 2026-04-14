@@ -56,11 +56,10 @@
     #  Dropbox Configuration
     # -----------------------
 
-    # FIXME Package is obsolete; re-evaluate whether to keep.
-    # - role: dropbox
-    #   tags:
-    #     - dropbox
-    #     - system
+    - role: dropbox
+      tags:
+        - dropbox
+        - system
 
     # -----------------------
     #  Red Hat Configuration
