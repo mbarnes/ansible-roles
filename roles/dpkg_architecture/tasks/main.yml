@@ -1,4 +1,10 @@
 ---
+- name: Install dpkg-dev
+  ansible.builtin.apt:
+    name:
+      - dpkg-dev
+  become: true
+
 - name: Get architecture of packages dpkg installs
   ansible.builtin.command: dpkg --print-architecture
   register: dpkg_result
@@ -7,3 +13,12 @@
 - name: Set dpkg_architecture fact
   ansible.builtin.set_fact:
     dpkg_architecture: "{{ dpkg_result.stdout }}"
+
+- name: Get GNU system type of host machine
+  ansible.builtin.command: dpkg-architecture --query DEB_HOST_MULTIARCH
+  register: dpkg_result
+  changed_when: false
+
+- name: Set dpkg_host_multiarch fact
+  ansible.builtin.set_fact:
+    dpkg_host_multiarch: "{{ dpkg_result.stdout }}"
