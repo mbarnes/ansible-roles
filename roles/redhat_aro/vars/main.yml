@@ -6,3 +6,6 @@ redhat_aro_microsoft_rolling_signing_key_path: /etc/apt/trusted.gpg.d/microsoft-
 # corporate certificate for use on InTune-managed systems.
 redhat_aro_microsoft_yubikey_usb_vendor_id: "1050"
 redhat_aro_microsoft_yubikey_usb_product_id: "0406"
+
+redhat_aro_nssdb_user_dir: "{{ ansible_user_dir }}/.pki/nssdb"
+redhat_aro_nssdb_opensc_module_name: "SC Module"

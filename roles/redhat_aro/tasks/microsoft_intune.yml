@@ -25,13 +25,21 @@
           - ocredit=-1
         state: args_present
 
-    - name: Add Microsoft's apt repository for Ubuntu
+    - name: Add Microsoft's apt main repository for Ubuntu
       ansible.builtin.apt_repository:
         repo: >
           deb [arch={{ dpkg_architecture }} signed-by={{ redhat_aro_microsoft_legacy_signing_key_path }}]
           https://packages.microsoft.com/{{ ansible_distribution | lower }}/{{ ansible_distribution_version }}/prod
           {{ ansible_distribution_release }} main
         filename: "microsoft-{{ ansible_distribution | lower }}-{{ ansible_distribution_release }}-prod"
+
+    - name: Add Microsoft's "insiders fast" apt repository for Ubuntu
+      ansible.builtin.apt_repository:
+        repo: >
+          deb [arch={{ dpkg_architecture }} signed-by={{ redhat_aro_microsoft_legacy_signing_key_path }}]
+          https://packages.microsoft.com/{{ ansible_distribution | lower }}/{{ ansible_distribution_version }}/prod
+          insiders-fast main
+        filename: "microsoft-{{ ansible_distribution | lower }}-{{ ansible_distribution_release }}-insiders-fast"
 
     - name: Add Microsoft's apt repository for Edge browser
       ansible.builtin.apt_repository:
@@ -45,6 +53,16 @@
         name:
           - intune-portal
           - microsoft-edge-stable
+          - microsoft-identity-broker
+
+    - name: Installed required packages for YubiKey smart cards
+      ansible.builtin.apt:
+        name:
+          - libnss3-tools
+          - opensc
+          - openssl
+          - pcscd
+          - yubikey-manager
 
     - name: Add Red Hat Kerberos policy for Microsoft Edge
       ansible.builtin.copy:
@@ -57,3 +75,32 @@
     - name: Install git-credential-manager
       ansible.builtin.include_role:
         name: git_credential_manager
+
+- name: Add directory for user NSS database
+  ansible.builtin.file:
+    path: "{{ redhat_aro_nssdb_user_dir }}"
+    state: directory
+    mode: u=rwx,g=,o=
+
+- name: Create a user NSS database
+  ansible.builtin.command:
+    cmd: "modutil -force -dbdir sql:{{ redhat_aro_nssdb_user_dir }} -create"
+    creates: "{{ redhat_aro_nssdb_user_dir }}/*.db"
+
+- name: List smart card module in user NSS database
+  ansible.builtin.command:
+    cmd: "modutil -force -dbdir sql:{{ redhat_aro_nssdb_user_dir }} -list '{{ redhat_aro_nssdb_opensc_module_name }}'"
+  register: redhat_aro_nssdb_opensc_module
+  changed_when: false
+  failed_when:
+    - redhat_aro_nssdb_opensc_module.rc != 0
+    # 29 : Module not found in database
+    - redhat_aro_nssdb_opensc_module.rc != 29
+
+- name: Create smart card module in user NSS database  # noqa: no-changed-when
+  ansible.builtin.command:
+    cmd: >
+      modutil -force -dbdir sql:{{ redhat_aro_nssdb_user_dir }}
+      -add '{{ redhat_aro_nssdb_opensc_module_name }}'
+      -libfile /usr/lib/{{ dpkg_host_multiarch }}/pkcs11/opensc-pkcs11.so
+  when: redhat_aro_nssdb_opensc_module.rc != 0
