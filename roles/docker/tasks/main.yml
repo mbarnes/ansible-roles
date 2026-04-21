@@ -3,12 +3,6 @@
   become: true
   block:
 
-    - name: Add Docker's official GPG key
-      ansible.builtin.get_url:
-        url: https://download.docker.com/linux/debian/gpg
-        dest: /etc/apt/trusted.gpg.d/docker.asc
-        mode: u=rw,g=r,o=r
-
     - name: Set dpkg architecture for Docker
       ansible.builtin.set_fact:
         docker_dpkg_architecture: "{{ dpkg_architecture }}"
@@ -34,9 +28,23 @@
         - ansible_userspace_bits == "32"
 
     - name: Add apt repository for Docker
-      ansible.builtin.apt_repository:
-        repo: "deb [arch={{ docker_dpkg_architecture }}] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
-        filename: docker
+      ansible.builtin.deb822_repository:
+        name: docker
+        architectures: "{{ docker_dpkg_architecture }}"
+        uris: "https://download.docker.com/linux/{{ ansible_distribution | lower }}"
+        suites: "{{ ansible_distribution_release }}"
+        components: stable
+        signed_by: https://download.docker.com/linux/debian/gpg
+
+    - name: Remove old system-wide trusted GPG key for Docker
+      ansible.builtin.file:
+        path: /etc/apt/trusted.gpg.d/docker.asc
+        state: absent
+
+    - name: Remove old-style apt repository for Docker
+      ansible.builtin.file:
+        path: /etc/apt/sources.list.d/docker.list
+        state: absent
 
     # XXX Workaround for Docker on Debian Bullseye
     #     (Is this still needed on Debian Bookworm?)
@@ -59,6 +67,7 @@
           #     error "No package matching 'docker-ce' is available".
           - "docker-ce:{{ docker_dpkg_architecture }}"
           - "docker-ce-cli:{{ docker_dpkg_architecture }}"
+        update_cache: true
 
     - name: Add user to "docker" group
       ansible.builtin.user:

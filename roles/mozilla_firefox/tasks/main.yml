@@ -4,16 +4,24 @@
   block:
 
     # See https://support.mozilla.org/en-US/kb/install-firefox-linux
-    - name: Add Mozilla's official GPG key
-      ansible.builtin.get_url:
-        url: https://packages.mozilla.org/apt/repo-signing-key.gpg
-        dest: /etc/apt/trusted.gpg.d/mozilla.asc
-        mode: u=rw,g=r,o=r
-
     - name: Add apt repository for Mozilla Firefox
-      ansible.builtin.apt_repository:
-        repo: "deb [arch={{ dpkg_architecture }}] https://packages.mozilla.org/apt mozilla main"
-        filename: mozilla
+      ansible.builtin.deb822_repository:
+        name: mozilla
+        architectures: "{{ dpkg_architecture }}"
+        uris: https://packages.mozilla.org/apt
+        suites: mozilla
+        components: main
+        signed_by: https://packages.mozilla.org/apt/repo-signing-key.gpg
+
+    - name: Remove old system-wide trusted GPG key for Mozilla Firefox
+      ansible.builtin.file:
+        path: /etc/apt/trusted.gpg.d/mozilla.asc
+        state: absent
+
+    - name: Remove old-style apt repository for Mozilla Firefox
+      ansible.builtin.file:
+        path: /etc/apt/sources.list.d/mozilla.list
+        state: absent
 
     - name: Configure apt to prioritize Mozilla packages
       ansible.builtin.copy:
@@ -28,6 +36,7 @@
       ansible.builtin.apt:
         name:
           - firefox
+        update_cache: true
 
     - name: Remove firefox-esr package
       ansible.builtin.apt:

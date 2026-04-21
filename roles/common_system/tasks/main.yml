@@ -75,13 +75,22 @@
             backports_apt_repository_name: "{{ ansible_distribution_release }}-backports"
 
         - name: Add Debian backports repository
-          ansible.builtin.apt_repository:
-            repo: "deb http://deb.debian.org/debian {{ backports_apt_repository_name }} main"
-            filename: "{{ backports_apt_repository_name }}"
+          ansible.builtin.deb822_repository:
+            name: "{{ backports_apt_repository_name }}"
+            uris: http://deb.debian.org/debian
+            suites: "{{ backports_apt_repository_name }}"
+            components: main
+            signed_by: /usr/share/keyrings/debian-archive-keyring.gpg
+
+        - name: Remove old-style Debian backports repository
+          ansible.builtin.file:
+            path: "/etc/apt/sources.list.d/{{ backports_apt_repository_name }}.list"
+            state: absent
 
     - name: Add basic CLI tools
       ansible.builtin.apt:
         name: "{{ common_system_base_packages + common_system_extra_packages }}"
+        update_cache: true
 
     - name: Update the command-not-found cache
       ansible.builtin.command: /usr/sbin/update-command-not-found

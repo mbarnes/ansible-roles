@@ -3,18 +3,27 @@
   become: true
   block:
 
-    - name: Add Google Cloud's official GPG key
-      ansible.builtin.get_url:
-        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-        dest: "{{ google_cloud_sdk_signing_key_path }}"
-        mode: u=rw,g=r,o=r
-
     - name: Add apt repository for Google Cloud SDK
-      ansible.builtin.apt_repository:
-        repo: "deb [arch={{ dpkg_architecture }} signed-by={{ google_cloud_sdk_signing_key_path }}] https://packages.cloud.google.com/apt cloud-sdk main"
-        filename: google-cloud-sdk
+      ansible.builtin.deb822_repository:
+        name: google-cloud-sdk
+        architectures: "{{ dpkg_architecture }}"
+        uris: https://packages.cloud.google.com/apt
+        suites: cloud-sdk
+        components: main
+        signed_by: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+    - name: Remove old system-wide GPG key for Google Cloud SDK
+      ansible.builtin.file:
+        path: "{{ google_cloud_sdk_signing_key_path }}"
+        state: absent
+
+    - name: Remove old-style apt repository for Google Cloud SDK
+      ansible.builtin.file:
+        path: /etc/apt/sources.list.d/google-cloud-sdk.list
+        state: absent
 
     - name: Add google-cloud-cli package
       ansible.builtin.apt:
         name:
           - google-cloud-cli
+        update_cache: true

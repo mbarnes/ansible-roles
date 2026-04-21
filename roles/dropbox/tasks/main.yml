@@ -8,18 +8,27 @@
     # key for Debian and Fedora repositories but it's the same
     # key, and with apt-key(8) being deprecated it's easier to
     # just grab the Fedora one.
-    - name: Add Dropbox's official GPG key
-      ansible.builtin.get_url:
-        url: https://linux.dropbox.com/fedora/rpm-public-key.asc
-        dest: /etc/apt/trusted.gpg.d/dropbox.asc
-        mode: u=rw,g=r,o=r
-
     - name: Add apt repository for Dropbox
-      ansible.builtin.apt_repository:
-        repo: "deb [arch={{ dpkg_architecture }}] https://linux.dropbox.com/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} main"
-        filename: dropbox
+      ansible.builtin.deb822_repository:
+        name: dropbox
+        architectures: "{{ dpkg_architecture }}"
+        uris: "https://linux.dropbox.com/{{ ansible_distribution | lower }}"
+        suites: "{{ ansible_distribution_release }}"
+        components: main
+        signed_by: https://linux.dropbox.com/fedora/rpm-public-key.asc
+
+    - name: Remove old system-wide trusted GPG key for Dropbox
+      ansible.builtin.file:
+        path: /etc/apt/trusted.gpg.d/dropbox.asc
+        state: absent
+
+    - name: Remove old-style apt repository for Dropbox
+      ansible.builtin.file:
+        path: /etc/apt/sources.list.d/dropbox.list
+        state: absent
 
     - name: Add dropbox package
       ansible.builtin.apt:
         name:
           - dropbox
+        update_cache: true

@@ -57,11 +57,18 @@
       when: ansible_distribution == 'Ubuntu'
 
     - name: Add apt repository for Azure CLI
-      ansible.builtin.apt_repository:
-        repo: >
-          deb [arch={{ dpkg_architecture }} signed-by={{ redhat_aro_microsoft_legacy_signing_key_path }}]
-          https://packages.microsoft.com/repos/azure-cli/ {{ redhat_aro_azure_cli_distribution_release }} main
-        filename: azure-cli
+      ansible.builtin.deb822_repository:
+        name: azure-cli
+        architectures: "{{ dpkg_architecture }}"
+        uris: https://packages.microsoft.com/repos/azure-cli
+        suites: "{{ redhat_aro_azure_cli_distribution_release }}"
+        components: main
+        signed_by: "{{ redhat_aro_microsoft_legacy_signing_key_path }}"
+
+    - name: Remove old-style apt repository for Azure CLI
+      ansible.builtin.file:
+        path: /etc/apt/sources.list.d/azure-cli.list
+        state: absent
 
     - name: Add packages for ARO development
       ansible.builtin.apt:
@@ -73,6 +80,7 @@
           - net-tools
           - podman
           - virt-viewer
+        update_cache: true
 
     - name: Add packages for ARO development (Debian-only)
       ansible.builtin.apt:
