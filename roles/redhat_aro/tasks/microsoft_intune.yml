@@ -32,7 +32,7 @@
         uris: "https://packages.microsoft.com/{{ ansible_distribution | lower }}/{{ ansible_distribution_version }}/prod"
         suites: "{{ ansible_distribution_release }}"
         components: main
-        signed_by: "{{ redhat_aro_microsoft_legacy_signing_key_path }}"
+        signed_by: "{{ redhat_aro_microsoft_rolling_signing_key_path }}"
 
     - name: Remove old-style main apt repository for Ubuntu
       ansible.builtin.file:
@@ -46,7 +46,7 @@
         uris: "https://packages.microsoft.com/{{ ansible_distribution | lower }}/{{ ansible_distribution_version }}/prod"
         suites: insiders-fast
         components: main
-        signed_by: "{{ redhat_aro_microsoft_legacy_signing_key_path }}"
+        signed_by: "{{ redhat_aro_microsoft_rolling_signing_key_path }}"
 
     - name: Remove old-style "insiders fast" apt repository for Ubuntu
       ansible.builtin.file:
@@ -75,7 +75,21 @@
           - microsoft-identity-broker
         update_cache: true
 
-    - name: Installed required packages for YubiKey smart cards
+    - name: Install required packages for Azure VPN access
+      ansible.builtin.apt:
+        name:
+          - microsoft-azurevpnclient
+
+    # Bug is present in microsoft-azurevpnclient v3.0.0
+    - name: Override a bad polkit rule for the Azure VPN client
+      ansible.builtin.copy:
+        src: polkit-1/55-microsoft-azurevpnclient.rules
+        dest: /etc/polkit-1/rules.d/
+        mode: u=rw,g=r,o=r
+        owner: root
+        group: root
+
+    - name: Install required packages for YubiKey smart cards
       ansible.builtin.apt:
         name:
           - libnss3-tools
