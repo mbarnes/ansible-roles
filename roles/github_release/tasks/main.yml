@@ -1,3 +1,15 @@
+- name: "{{ github_release_repo }} : Reset deb asset value"
+  ansible.builtin.set_fact:
+    github_release_deb_asset: null
+
+- name: "{{ github_release_repo }} : Reset zip asset value"
+  ansible.builtin.set_fact:
+    github_release_zip_asset: null
+
+- name: "{{ github_release_repo }} : Reset zip asset value"
+  ansible.builtin.set_fact:
+    github_release_bin_asset: null
+
 - name: "{{ github_release_repo }} : Query latest release asset"
   ansible.builtin.uri:
     url: "https://api.github.com/repos/{{ github_release_owner }}/{{ github_release_repo }}/releases/latest"
@@ -16,7 +28,7 @@
   ansible.builtin.set_fact:
     github_release_deb_asset: "{{ item }}"
   when:
-    - github_release_deb_asset is not defined
+    - github_release_deb_asset == none
     # This is a guess, but if we wanted arm64 then there
     # likely would have been an arch-specific deb package.
     - "'arm64' not in item.name"
@@ -29,7 +41,7 @@
     github_release_zip_asset: "{{ item }}"
   when:
     # zip file is a fallback when there is no deb
-    - github_release_deb_asset is not defined
+    - github_release_deb_asset == none
     - item.name.endswith("linux-" + dpkg_architecture + ".zip")
   loop: "{{ github_release_assets.json.assets }}"
   no_log: true  # Avoid spewing a bunch of JSON
@@ -39,19 +51,19 @@
     github_release_bin_asset: "{{ item }}"
   when:
     # binary file is a fallback when there is no deb or zip file
-    - github_release_deb_asset is not defined
-    - github_release_zip_asset is not defined
+    - github_release_deb_asset == none
+    - github_release_zip_asset == none
     - item.name.endswith("linux-" + dpkg_architecture)
   loop: "{{ github_release_assets.json.assets }}"
   no_log: true  # Avoid spewing a bunch of JSON
 
 - name: "{{ github_release_repo }} : Ensure there is a usable asset"
   ansible.builtin.assert:
-    that: github_release_deb_asset is defined or github_release_zip_asset is defined or github_release_bin_asset is defined
+    that: github_release_deb_asset != none or github_release_zip_asset != none or github_release_bin_asset != none
     fail_msg: "No deb package or zip file or binary file available for {{ github_release_name | default(github_release_repo) }}"
 
 - name: "{{ github_release_repo }} : Download and install a deb package"
-  when: github_release_deb_asset is defined
+  when: github_release_deb_asset != none
   block:
 
     - name: "{{ github_release_repo }} : Create a temporary directory"
@@ -72,7 +84,7 @@
       become: true
 
 - name: "{{ github_release_repo }} : Download and install a zipped binary file"
-  when: github_release_zip_asset is defined
+  when: github_release_zip_asset != none
   block:
 
     - name: "{{ github_release_repo }} : Ensure github_release_zip_binary_path is defined"
@@ -111,4 +123,4 @@
     checksum: "{{ github_release_bin_asset.digest }}"
     dest: "{{ ansible_user_dir }}/.local/bin/{{ github_release_binary_name | default(github_release_repo) }}"
     mode: u=rwx,g=rx,o=rx
-  when: github_release_bin_asset is defined
+  when: github_release_bin_asset != none
