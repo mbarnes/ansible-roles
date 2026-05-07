@@ -111,12 +111,10 @@
         - desktop
         - user
 
-    # XXX Disabled until a package dependency bug is fixed:
-    #     https://github.com/balena-io/etcher/issues/4543
-    # - role: balena_etcher
-    #   tags:
-    #     - desktop
-    #     - user
+    - role: balena_etcher
+      tags:
+        - desktop
+        - user
 
     # -----------------------
     #  Transfer User Secrets
