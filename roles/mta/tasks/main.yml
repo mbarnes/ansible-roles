@@ -1,6 +1,6 @@
 ---
 - name: Begin MTA configuration
-  become: true
+  become: "{{ ansible_user_id != 'root' }}"
   block:
 
     - name: Add packages for handling local mail

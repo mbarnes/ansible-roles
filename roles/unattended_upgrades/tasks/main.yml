@@ -1,0 +1,56 @@
+---
+# Based on this guide:
+# How to Configure Unattended Upgrades on Debian 13, 12 and 11
+# https://linuxcapable.com/how-to-configure-unattended-upgrades-on-debian-linux/
+- name: Configure unattended upgrades
+  become: "{{ ansible_user_id != 'root' }}"
+  # OSMC masks the daily apt systemd timers,
+  # which effectively disables unattended upgrades.
+  when: ansible_distribution != "OSMC"
+  block:
+
+    - name: Install unattended-upgrades and helper packages
+      ansible.builtin.apt:
+        name:
+          - apt-listchanges
+          - unattended-upgrades
+        update_cache: true
+
+    # apt-config-auto-update is just apt configuration files.
+    # On Ubuntu hosts this configuration is present by default.
+    - name: Install apt-config-auto-update
+      ansible.builtin.apt:
+        name: apt-config-auto-update
+      when: ansible_distribution != 'Ubuntu'
+
+    - name: Install powermgmt-base on notebook form factors
+      ansible.builtin.apt:
+        name: powermgmt-base
+      when: ansible_form_factor == "Notebook"
+
+    - name: Add apt configuration
+      ansible.builtin.lineinfile:
+        path: /etc/apt/apt.conf.d/20auto-upgrades
+        search_string: "{{ item }}"
+        line: "{{ item }} \"1\";"
+        create: true
+        owner: root
+        mode: u=rw,g=r,o=r
+      loop:
+        - APT::Periodic::Update-Package-Lists
+        - APT::Periodic::Unattended-Upgrade
+
+    - name: Customize unattended upgrade policy
+      ansible.builtin.template:
+        src: 52unattended-upgrades-local.j2
+        dest: /etc/apt/apt.conf.d/52unattended-upgrades-local
+        owner: root
+        mode: u=rw,g=r,o=r
+
+    - name: Enable daily apt timers
+      ansible.builtin.systemd_service:
+        name: "{{ item }}"
+        enabled: true
+      loop:
+        - apt-daily.timer
+        - apt-daily-upgrade.timer

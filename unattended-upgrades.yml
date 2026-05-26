@@ -1,0 +1,25 @@
+#!/usr/bin/env -S ansible-playbook --ask-become-pass --ask-vault-pass
+---
+#
+# Installs and configures unattended upgrades on apt-based hosts.
+#
+
+- name: Configure a mail transfer agent and unattended upgrades
+  hosts: apt_group
+
+  roles:
+
+    - role: mta
+      vars:
+        mta_relay_user: mbarnes@fastmail.com
+        mta_relay_host: smtp.fastmail.com
+        mta_relay_pass: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          62343439393339356336616432366238326266616263306535333732346234656461653734306632
+          6630646635393239313437393136333136313534303165300a373161326236306234656137646366
+          65386338656161326134353666393062616230393362646266666263353135386161396134333038
+          3234313162666233320a383161626362623634623333326531353839656331326636383032653531
+          35326137313133383230336634643339636364313063313665376137663531666435
+        mta_user_forward: mbarnes@fastmail.com
+
+    - role: unattended_upgrades

@@ -1,0 +1,24 @@
+#clear Unattended-Upgrade::Origins-Pattern;
+Unattended-Upgrade::Origins-Pattern {
+    "origin=Debian,codename=${distro_codename},label=Debian";
+    "origin=Debian,codename=${distro_codename},label=Debian-Security";
+    "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
+    "origin=Debian,codename=${distro_codename}-updates,label=Debian";
+};
+Unattended-Upgrade::Mail "root";
+Unattended-Upgrade::MailReport "on-change";
+
+{% if ansible_form_factor | default("") == "Notebook" %}
+// These settings are only added for notebooks.
+Unattended-Upgrade::OnlyOnACPower "true";
+Unattended-Upgrade::Skip-Updates-On-Metered-Connections "true";
+{% endif %}
+{% if ansible_virtualization_role | default("") == "guest" %}
+// These settings are only added for virtualization guests.
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-Time "06:30";
+Unattended-Upgrade::Automatic-Reboot-WithUsers "false";
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
+Unattended-Upgrade::Remove-Unused-Dependencies "false";
+{% endif %}
