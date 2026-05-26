@@ -53,6 +53,7 @@
         regexp: '^#?\s+root:'
         line: "root:\t\t{{ ansible_user_id }}"
       notify: Restart opensmtpd
+      when: ansible_user_id != 'root'
 
 - name: Create a ~/.forward file
   ansible.builtin.copy:
