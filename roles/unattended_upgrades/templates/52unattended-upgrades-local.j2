@@ -1,9 +1,9 @@
 #clear Unattended-Upgrade::Origins-Pattern;
 Unattended-Upgrade::Origins-Pattern {
-    "origin=Debian,codename=${distro_codename},label=Debian";
-    "origin=Debian,codename=${distro_codename},label=Debian-Security";
-    "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
-    "origin=Debian,codename=${distro_codename}-updates,label=Debian";
+    "origin={{ ansible_lsb.id }},codename=${distro_codename},label={{ ansible_lsb.id }}";
+    "origin={{ ansible_lsb.id }},codename=${distro_codename},label={{ ansible_lsb.id }}-Security";
+    "origin={{ ansible_lsb.id }},codename=${distro_codename}-security,label={{ ansible_lsb.id }}-Security";
+    "origin={{ ansible_lsb.id }},codename=${distro_codename}-updates,label={{ ansible_lsb.id }}";
 };
 Unattended-Upgrade::Mail "root";
 Unattended-Upgrade::MailReport "on-change";
