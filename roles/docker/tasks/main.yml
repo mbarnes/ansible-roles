@@ -80,9 +80,3 @@
         name: docker.service
         enabled: true
         state: started
-
-- name: Add bash aliases
-  ansible.builtin.copy:
-    src: bash_aliases
-    dest: "{{ common_user_bash_aliases_dir }}/{{ role_name }}_aliases"
-    mode: u=rw,g=rw,o=r
