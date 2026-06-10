@@ -1,0 +1,11 @@
+---
+- name: Configure docker for the NVIDIA Container Runtime  # noqa: no-changed-when
+  ansible.builtin.command:
+    cmd: nvidia-ctk runtime configure --runtime=docker
+  become: true
+
+- name: Restart docker
+  ansible.builtin.systemd_service:
+    name: docker.service
+    state: restarted
+  become: true

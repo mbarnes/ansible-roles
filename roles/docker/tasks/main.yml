@@ -80,3 +80,7 @@
         name: docker.service
         enabled: true
         state: started
+
+    - name: Install NVIDIA Container Toolkit
+      ansible.builtin.include_tasks: nvidia_container_toolkit.yml
+      when: enable_nvidia_container_toolkit | default(False)

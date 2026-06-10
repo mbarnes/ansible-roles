@@ -1,0 +1,17 @@
+---
+- name: Add apt repository for NVIDIA Container Toolkit
+  ansible.builtin.deb822_repository:
+    name: nvidia-container-toolkit
+    architectures: "{{ dpkg_architecture }}"
+    uris: "https://nvidia.github.io/libnvidia-container/stable/deb/{{ dpkg_architecture }}"
+    suites: /
+    components:
+    signed_by: https://nvidia.github.io/libnvidia-container/gpgkey
+
+- name: Install nvidia-container-toolkit package
+  ansible.builtin.apt:
+    name: nvidia-container-toolkit
+    update_cache: true
+  notify:
+    - Configure docker for the NVIDIA Container Runtime
+    - Restart docker
