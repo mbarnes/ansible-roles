@@ -6,8 +6,13 @@
       - xfce4-whiskermenu-plugin
       - apt-config-icons-hidpi
       - dconf-cli
+      - evince
       - ffmpeg
+      - file-roller
       - fonts-hack
+      - gedit
+      - gnome-calculator
+      - gnome-characters
       - gnome-disk-utility
       - gnome-software
       - gnome-software-plugin-flatpak
@@ -15,10 +20,12 @@
       - gvfs-backends
       - krb5-auth-dialog
       - libglib2.0-bin  # for /usr/bin/gsettings
+      - meld
       - menulibre
       - mugshot
       - needrestart
       - network-manager-openvpn-gnome
+      - seahorse
       - yt-dlp
   become: true
 
@@ -37,9 +44,9 @@
 - name: Remove unwanted packages
   ansible.builtin.apt:
     name:
-      - atril      # replaced by org.gnome.Evince
+      - atril      # replaced by evince
       - parole     # replaced by org.videolan.VLC
-      - xarchiver  # replaced by org.gnome.FileRoller
+      - xarchiver  # replaced by file-roller
       - xsane
       - xterm      # replaced by xfce4-terminal
     autoremove: true
@@ -57,21 +64,29 @@
   community.general.flatpak:
     name:
       - io.github.nokse22.inspector
-      - org.gnome.Calculator
-      - org.gnome.Characters
-      - org.gnome.Evince
-      - org.gnome.FileRoller
       - org.gnome.Firmware
       - org.gnome.SimpleScan
       - org.gnome.gThumb
-      - org.gnome.gedit
-      - org.gnome.meld
-      - org.gnome.seahorse.Application
       - org.gnumeric.Gnumeric
       - org.mozilla.Thunderbird
       - org.musicbrainz.Picard
       - org.videolan.VLC
     method: user
+
+# Stick to apt packages for basic desktop accessories.
+# Desktop integration of these flatpaks is still poor.
+- name: Remove flatpak applications
+  community.general.flatpak:
+    name:
+      - org.gnome.Calculator
+      - org.gnome.Characters
+      - org.gnome.Evince
+      - org.gnome.FileRoller
+      - org.gnome.gedit
+      - org.gnome.meld
+      - org.gnome.seahorse.Application
+    method: user
+    state: absent
 
 # This allows device renaming in pavucontrol.
 - name: Load module-device-manager when starting PulseAudio
