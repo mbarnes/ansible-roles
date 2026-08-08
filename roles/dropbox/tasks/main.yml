@@ -22,13 +22,14 @@
         path: /etc/apt/trusted.gpg.d/dropbox.asc
         state: absent
 
-    - name: Remove old-style apt repository for Dropbox
-      ansible.builtin.file:
-        path: /etc/apt/sources.list.d/dropbox.list
-        state: absent
-
     - name: Add dropbox package
       ansible.builtin.apt:
         name:
           - dropbox
         update_cache: true
+
+    # The dropbox package creates this old-style list file.
+    - name: Remove old-style apt repository for Dropbox
+      ansible.builtin.file:
+        path: /etc/apt/sources.list.d/dropbox.list
+        state: absent
