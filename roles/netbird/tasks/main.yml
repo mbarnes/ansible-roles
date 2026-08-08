@@ -1,0 +1,37 @@
+---
+- name: Begin Netbird installation
+  become: true
+  block:
+
+    # The "debian" path applies to both Debian and Ubuntu.
+    # See https://docs.netbird.io/get-started/install/linux#ubuntu-debian-apt
+    - name: Add apt repository for Netbird
+      ansible.builtin.deb822_repository:
+        name: netbird
+        architectures: "{{ dpkg_architecture }}"
+        uris: https://pkgs.netbird.io/debian
+        suites: stable
+        components: main
+        signed_by: https://pkgs.netbird.io/debian/public.key
+
+    - name: Add netbird package
+      ansible.builtin.apt:
+        name:
+          - netbird
+        update_cache: true
+
+    - name: Generate bash completions  # noqa: no-changed-when
+      ansible.builtin.command: netbird completion bash
+      register: netbird_completion_bash
+
+    - name: Write bash completions
+      ansible.builtin.copy:
+        content: "{{ netbird_completion_bash.stdout }}"
+        dest: /etc/bash_completion.d/netbird
+        mode: u=rw,g=r,o=r
+
+    - name: Add netbird-ui package
+      ansible.builtin.apt:
+        name:
+          - netbird-ui
+      when: netbird_install_ui | default(true) | bool
