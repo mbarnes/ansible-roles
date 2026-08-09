@@ -41,16 +41,6 @@
         owner: root
         group: root
 
-    - name: Add Red Hat VPN system connections
-      ansible.builtin.copy:
-        src: "{{ item }}"
-        dest: /etc/NetworkManager/system-connections/
-        mode: u=rw,g=,o=
-        owner: root
-        group: root
-      with_fileglob: "openvpn/*"
-      notify: Reload NetworkManager connection files
-
     - name: Add directory for Kerberos configuration
       ansible.builtin.file:
         path: /etc/krb5.conf.d
@@ -106,6 +96,12 @@
   loop:
     - kerberos
     - tmux-sessions
+
+- name: Add more helpful shell aliases
+  ansible.builtin.template:
+    src: netbird.j2
+    dest: "{{ common_user_bash_aliases_dir }}/netbird_{{ redhat_netbird_interface_name }}"
+    mode: u=rwx,g=rwx,o=rx
 
 - name: Add helpful shell scripts
   ansible.builtin.copy:

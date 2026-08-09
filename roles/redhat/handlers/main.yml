@@ -1,5 +1,0 @@
----
-- name: Reload NetworkManager connection files
-  ansible.builtin.command: nmcli connection reload
-  changed_when: true
-  become: true
