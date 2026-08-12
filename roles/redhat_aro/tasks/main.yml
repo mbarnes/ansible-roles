@@ -78,7 +78,6 @@
           - jq
           - make
           - net-tools
-          - npm
           - podman
           - promtool
           - virt-viewer
