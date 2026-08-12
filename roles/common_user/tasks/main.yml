@@ -39,3 +39,8 @@
     dest: "{{ ansible_user_dir }}/.{{ item | basename | replace('.j2', '') }}"
     mode: u=rw,g=rw,o=r
   with_fileglob: "templates/dotfiles/*"
+
+- name: Clone vim-lastplace as a vim package  # noqa: latest
+  ansible.builtin.git:
+    repo: https://github.com/farmergreg/vim-lastplace.git
+    dest: "{{ ansible_user_dir }}/.vim/pack/plugins/start/vim-lastplace"
