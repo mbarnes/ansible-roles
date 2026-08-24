@@ -1,0 +1,30 @@
+---
+- name: Begin GitHub CLI installation
+  become: true
+  block:
+
+    # See https://github.com/cli/cli/blob/trunk/docs/install_linux.md#debian
+    - name: Add apt repository for GitHub CLI
+      ansible.builtin.deb822_repository:
+        name: githubcli
+        architectures: "{{ dpkg_architecture }}"
+        uris: https://cli.github.com/packages
+        suites: stable
+        components: main
+        signed_by: https://cli.github.com/packages/githubcli-archive-keyring.gpg
+
+    - name: Add gh package
+      ansible.builtin.apt:
+        name:
+          - gh
+        update_cache: true
+
+    - name: Generate bash completions  # noqa: no-changed-when
+      ansible.builtin.command: gh completion --shell bash
+      register: githubcli_completion_bash
+
+    - name: Write bash completions
+      ansible.builtin.copy:
+        content: "{{ githubcli_completion_bash.stdout }}"
+        dest: /etc/bash_completion.d/gh
+        mode: u=rw,g=r,o=r
