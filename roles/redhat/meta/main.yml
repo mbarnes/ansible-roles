@@ -1,6 +1,7 @@
 ---
 dependencies:
   - role: common_user
+  - role: git_dev
   - role: google_cloud_sdk
   - role: mozilla_firefox
     vars:

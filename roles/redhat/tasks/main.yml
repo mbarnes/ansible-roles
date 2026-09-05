@@ -111,3 +111,9 @@
   loop:
     - kinit-redhat
     - rhsso
+
+- name: Configure git proxy for gitlab.cee.redhat.com
+  community.general.git_config:
+    name: http.https://gitlab.cee.redhat.com.proxy
+    scope: global
+    value: "{{ redhat_csb_proxy }}"
