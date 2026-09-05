@@ -6,9 +6,14 @@ dependencies:
     vars:
       mozilla_firefox_preferences:
         network.negotiate-auth.trusted-uris: .redhat.com
+        # Deprecated; keep until Red Hat restricts VPN access.
         # https://kb.mozillazine.org/Network.proxy.autoconfig_url
         network.proxy.autoconfig_url: "{{ redhat_proxy_autoconfig_url }}"
-        network.proxy.type: 2
+        # Use Web Proxy Auto-Discovery Protocol (WPAD)
+        # https://kb.mozillazine.org/Network.proxy.type
+        # Note, Firefox only queries http://wpad/wpad.dat, so the
+        # local DNS resolver needs to know the host's domain name.
+        network.proxy.type: 4
   - role: netbird
   - role: secrets
   - role: tmux
