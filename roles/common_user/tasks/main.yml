@@ -3,6 +3,7 @@
   ansible.builtin.apt:
     name:
       - bash
+      - git
       - rsync
       - vim-nox
   become: true
