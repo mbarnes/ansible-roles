@@ -3,6 +3,7 @@ common_system_base_packages:
   - apt-file
   - bash-completion
   - bind9-dnsutils
+  - ca-certificates
   - command-not-found
   - htop
   - lsof

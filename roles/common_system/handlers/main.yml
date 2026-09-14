@@ -1,0 +1,4 @@
+---
+- name: Update CA certificates  # noqa: no-changed-when
+  ansible.builtin.command: /usr/sbin/update-ca-certificates
+  become: true
