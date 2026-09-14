@@ -1,4 +1,2 @@
 ---
 redhat_csb_proxy: http://csb.{{ local_domain_name }}:3128
-redhat_netbird_interface_name: redhatvpn
-redhat_netbird_management_url: https://wgvpn.redhat.com

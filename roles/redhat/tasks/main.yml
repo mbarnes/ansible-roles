@@ -78,7 +78,7 @@
 
 - name: Add daily Kerberos ticket cron job
   ansible.builtin.cron:
-    name: Acquire Kerberos ticket when a VPN connection is active
+    name: Acquire Kerberos ticket
     special_time: daily
     job: "{{ ansible_user_dir }}/.local/bin/kinit-redhat > /dev/null"
 
@@ -96,12 +96,6 @@
   loop:
     - kerberos
     - tmux-sessions
-
-- name: Add more helpful shell aliases
-  ansible.builtin.template:
-    src: netbird.j2
-    dest: "{{ common_user_bash_aliases_dir }}/netbird_{{ redhat_netbird_interface_name }}"
-    mode: u=rwx,g=rwx,o=rx
 
 - name: Add helpful shell scripts
   ansible.builtin.copy:

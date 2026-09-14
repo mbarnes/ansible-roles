@@ -1,13 +1,4 @@
 #!/usr/bin/bash
 
-if netbird status --check startup 2> /dev/null
-then
-    # Use LOGNAME instead of USER so this works as a cron job.
-    pass show redhat.com | head --lines 1 | kinit ${LOGNAME}@IPA.REDHAT.COM > /dev/null && klist
-else
-    # Keep quiet if there's no ticket cache file to avoid needless cron emails.
-    if [ -f /tmp/krb5cc_$(id --user) ]
-    then
-        echo "Cannot renew Red Hat Kerberos ticket: no active VPN connection" >&2
-    fi
-fi
+# Use LOGNAME instead of USER so this works as a cron job.
+pass show redhat.com | head --lines 1 | kinit ${LOGNAME}@IPA.REDHAT.COM > /dev/null && klist

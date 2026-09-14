@@ -13,6 +13,5 @@ dependencies:
         # Use Web Proxy Auto-Discovery Protocol (WPAD)
         # https://kb.mozillazine.org/Network.proxy.type
         network.proxy.type: 4
-  - role: netbird
   - role: secrets
   - role: tmux
