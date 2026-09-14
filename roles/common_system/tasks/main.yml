@@ -98,3 +98,12 @@
       changed_when: "'inputs unchanged' not in common_system_update_command_not_found.stderr"
       # Command is not present on Ubuntu distribution
       when: ansible_distribution in ["Debian", "OSMC"]
+
+    - name: Install a certificate authority for the local domain
+      ansible.builtin.copy:
+        src: ca.crt
+        dest: "/usr/local/share/ca-certificates/{{ local_domain_name }}.crt"
+        mode: u=rw,g=r,o=r
+        owner: root
+        group: root
+      notify: Update CA certificates
