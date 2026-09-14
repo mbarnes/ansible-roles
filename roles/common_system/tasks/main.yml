@@ -42,7 +42,7 @@
     # To be idempotent after configuring /etc/hosts we need to handle a
     # lookup result that looks like "host_name.domain_name.,host_name".
     - name: Query DNS for host's fully-qualified domain name (FQDN)
-      set_fact:
+      ansible.builtin.set_fact:
         common_system_fqdn: "{{ lookup('community.general.dig', ansible_default_ipv4.address + '/PTR') | split(',') | first | trim('.') }}"
 
     - name: Add hosts entry for default IP address
