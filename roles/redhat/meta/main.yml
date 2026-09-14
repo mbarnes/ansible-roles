@@ -15,6 +15,5 @@ dependencies:
         # Note, Firefox only queries http://wpad/wpad.dat, so the
         # local DNS resolver needs to know the host's domain name.
         network.proxy.type: 4
-  - role: netbird
   - role: secrets
   - role: tmux

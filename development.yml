@@ -128,7 +128,6 @@
 
             [ ] Sign in to Firefox account
             [ ] Configure Google Cloud CLI with "gcloud init"
-            [ ] Bootstrap Red Hat VPN with "netbird-up-{{ redhat_netbird_interface_name }}"
 
         seconds: 1
       tags:
