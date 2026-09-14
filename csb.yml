@@ -1,0 +1,140 @@
+#!/usr/bin/env -S ansible-playbook --ask-become-pass
+---
+#
+# Proxies access to services behind Red Hat's corporate VPN.
+#
+
+- name: Configure CSB host to proxy services
+  hosts: csb.home.arpa
+  become: true
+
+  vars:
+
+    install_packages:
+      - httpd
+      - mod_ssl
+      - python3-firewall
+      - python3-kdcproxy
+      - python3-mod_wsgi
+      - squid
+
+    firewalld_services:
+      - http
+      - https
+      - squid
+
+    firewalld_zone: home
+
+    proxy_server: "{{ inventory_hostname }}:3128"
+
+    proxy_wpad_dat: |
+      function FindProxyForURL(url, host) {
+        if (shExpMatch(url,"*.corp.redhat.com/*")) {
+          return "PROXY {{ proxy_server }}";
+        }
+        if (shExpMatch(url,"*.cee.redhat.com/*")) {
+          return "PROXY {{ proxy_server }}";
+        }
+        return "DIRECT";
+      }
+
+  handlers:
+
+    - name: Restart httpd.service
+      ansible.builtin.systemd_service:
+        name: httpd.service
+        state: restarted
+
+  tasks:
+
+    - name: Install needed packages
+      ansible.builtin.package:
+        name: "{{ install_packages }}"
+
+    - name: Add services to firewall
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        state: enabled
+        immediate: true
+        permanent: true
+        zone: "{{ firewalld_zone }}"
+      loop: "{{ firewalld_services }}"
+
+    - name: Create wpad.dat file
+      ansible.builtin.copy:
+        content: "{{ proxy_wpad_dat }}"
+        dest: /var/www/html/wpad.dat
+        mode: u=rw,g=r,o=r
+        owner: root
+        group: root
+
+    - name: Create wpad.conf for httpd
+      ansible.builtin.copy:
+        content: |
+          <IfModule mime_module>
+              <Files "wpad.dat">
+                  ForceType application/x-ns-proxy-autoconfig
+                  AddDefaultCharset UTF-8
+              </Files>
+          </IfModule>
+        dest: /etc/httpd/conf.d/wpad.conf
+        mode: u=rw,g=r,o=r
+        owner: root
+        group: root
+      notify: Restart httpd.service
+
+    - name: Query python3-kdcproxy module location
+      ansible.builtin.command: python3 -c 'import kdcproxy; print(kdcproxy.__file__)'
+      register: kdcproxy_module_location
+      changed_when: false
+
+    - name: Create kdcproxy.conf for httpd
+      ansible.builtin.copy:
+        content: |
+          WSGIDaemonProcess kdcproxy \
+              processes=2 \
+              threads=15 \
+              maximum-requests=1000 \
+              display-name=%{GROUP}
+
+          WSGIImportScript {{ kdcproxy_module_location.stdout }} \
+              process-group=kdcproxy \
+              application-group=kdcproxy
+
+          WSGIScriptAlias /kdc {{ kdcproxy_module_location.stdout }}
+
+          <Location "/kdc">
+              Require all granted
+              WSGIProcessGroup kdcproxy
+              WSGIApplicationGroup kdcproxy
+          </Location>
+        dest: /etc/httpd/conf.d/kdcproxy.conf
+        mode: u=rw,g=r,o=r
+        owner: root
+        group: root
+      notify: Restart httpd.service
+
+    # NOTE: It is out of scope of this playbook to install the
+    #       SSLCertificateFile and SSLCertificateKeyFile. The
+    #       certificate should be signed by the Certificate
+    #       Authority for this local domain.
+    - name: Create kdcproxy-ssl.conf for httpd
+      ansible.builtin.copy:
+        content: |
+          <VirtualHost *:443>
+              ServerName {{ inventory_hostname }}
+
+              SSLEngine on
+              SSLCertificateFile /etc/pki/tls/certs/{{ inventory_hostname }}.crt
+              SSLCertificateKeyFile /etc/pki/tls/certs/{{ inventory_hostname }}.key
+
+              SSLProtocol -all +TLSv1.2 +TLSv1.3
+
+              ErrorLog /var/log/httpd/kdcproxy-error.log
+              CustomLog /var/log/httpd/kdcproxy-access.log combined
+          </VirtualHost>
+        dest: /etc/httpd/conf.d/kdcproxy-ssl.conf
+        mode: u=rw,g=r,o=r
+        owner: root
+        group: root
+      notify: Restart httpd.service
