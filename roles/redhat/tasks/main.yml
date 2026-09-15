@@ -10,6 +10,7 @@
       ansible.builtin.apt:
         name:
           - ca-certificates
+          - krb5-k5tls
           - krb5-user
           - kstart
           - network-manager-openvpn
