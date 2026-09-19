@@ -37,7 +37,6 @@
   ansible.builtin.apt:
     name:
       - blueman
-      - pulseaudio-module-bluetooth
   become: true
   when: bluetooth_module_loaded
 
@@ -87,16 +86,6 @@
       - org.gnome.seahorse.Application
     method: user
     state: absent
-
-# This allows device renaming in pavucontrol.
-- name: Load module-device-manager when starting PulseAudio
-  ansible.builtin.copy:
-    content: "load-module module-device-manager"
-    dest: /etc/pulse/default.pa.d/module-device-manager.pa
-    mode: u=rw,g=r,o=r
-  notify:
-    - Restart pulseaudio
-  become: true
 
 - name: Add user to more groups
   ansible.builtin.user:
