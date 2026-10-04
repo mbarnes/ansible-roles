@@ -35,6 +35,9 @@
         if (shExpMatch(url,"*.cee.redhat.com/*")) {
           return "PROXY {{ proxy_server }}";
         }
+        if (dnsDomainIs(host,"token.redhat.com") {
+          return "PROXY {{ proxy_server }}";
+        }
         return "DIRECT";
       }
 
