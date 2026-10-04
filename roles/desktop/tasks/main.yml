@@ -18,6 +18,7 @@
       - gnome-software-plugin-flatpak
       - gnome-themes-extra-data  # for Adwaita-dark theme
       - gvfs-backends
+      - gvfs-fuse
       - krb5-auth-dialog
       - libglib2.0-bin  # for /usr/bin/gsettings
       - meld
