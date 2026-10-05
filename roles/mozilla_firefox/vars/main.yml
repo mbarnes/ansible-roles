@@ -2,6 +2,10 @@
 mozilla_firefox_config_dir: "{{ ansible_user_dir }}/.mozilla/firefox"
 mozilla_firefox_profiles_ini_path: "{{ mozilla_firefox_config_dir }}/profiles.ini"
 
+# /etc/firefox/policies not /etc/firefox-esr/policies per
+# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=979821
+mozilla_firefox_policies_json_path: /etc/firefox/policies/policies.json
+
 # The install ID is a hex string obtained by converting the Firefox installation
 # path into an array of integers and digesting it with Google's 64-bit City hash
 # function.

@@ -44,6 +44,20 @@
           - firefox-esr
         state: absent
 
+    - name: Create a policies directory
+      ansible.builtin.file:
+        path: "{{ mozilla_firefox_policies_json_path | dirname }}"
+        state: directory
+        owner: root
+        group: root
+        mode: u=rwx,g=rx,o=rx
+
+    - name: Install system-wide policies
+      ansible.builtin.template:
+        src: policies.json.j2
+        dest: "{{ mozilla_firefox_policies_json_path }}"
+        mode: u=rw,g=r,o=r
+
 - name: Create a firefox user directory
   ansible.builtin.file:
     path: "{{ mozilla_firefox_config_dir }}"
