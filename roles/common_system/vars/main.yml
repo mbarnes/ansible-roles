@@ -10,3 +10,5 @@ common_system_base_packages:
   - man-db
   - rsync
   - usbutils
+
+common_system_certificate_authority_file: "/usr/local/share/ca-certificates/{{ local_domain_name }}.crt"
