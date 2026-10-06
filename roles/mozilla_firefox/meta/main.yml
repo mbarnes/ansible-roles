@@ -1,4 +1,4 @@
 ---
 dependencies:
-  - role: common_system
+  - role: custom_ca
   - role: dpkg_architecture

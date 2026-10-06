@@ -1,0 +1,5 @@
+---
+- name: Update CA certificates
+  ansible.builtin.command: /usr/sbin/update-ca-certificates
+  changed_when: true
+  become: "{{ ansible_user_id != 'root' }}"

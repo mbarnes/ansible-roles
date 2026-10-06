@@ -1,0 +1,16 @@
+- name: Begin custom CA installation
+  become: "{{ ansible_user_id != 'root' }}"
+  block:
+
+    - name: Install ca-certificates
+      ansible.builtin.apt:
+        name: ca-certificates
+
+    - name: Install a certificate authority for the local domain
+      ansible.builtin.copy:
+        src: ca.crt
+        dest: "{{ custom_ca_file }}"
+        mode: u=rw,g=r,o=r
+        owner: root
+        group: root
+      notify: Update CA certificates

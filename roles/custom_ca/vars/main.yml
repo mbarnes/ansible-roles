@@ -1,0 +1,1 @@
+custom_ca_file: "/usr/local/share/ca-certificates/{{ local_domain_name | default('custom') }}.crt"
