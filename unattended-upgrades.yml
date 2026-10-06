@@ -22,4 +22,5 @@
           35326137313133383230336634643339636364313063313665376137663531666435
         mta_user_forward: mbarnes@fastmail.com
 
+    - role: custom_ca
     - role: unattended_upgrades
