@@ -1,0 +1,6 @@
+---
+- name: Restart httpd.service
+  ansible.builtin.systemd_service:
+    name: httpd.service
+    state: restarted
+  become: true

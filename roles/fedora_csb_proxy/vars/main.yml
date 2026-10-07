@@ -1,0 +1,17 @@
+---
+fedora_csb_proxy_install_packages:
+  - httpd
+  - mod_ssl
+  - python3-firewall
+  - python3-kdcproxy
+  - python3-mod_wsgi
+  - squid
+
+fedora_csb_proxy_firewalld_services:
+  - http
+  - https
+  - squid
+
+fedora_csb_proxy_firewalld_zone: home
+
+fedora_csb_proxy_server: "{{ inventory_hostname }}:3128"

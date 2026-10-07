@@ -1,0 +1,60 @@
+- name: Configure CSB host to proxy services
+  become: true
+  block:
+
+    - name: Install needed packages
+      ansible.builtin.package:
+        name: "{{ fedora_csb_proxy_install_packages }}"
+
+    - name: Add services to firewall
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        state: enabled
+        immediate: true
+        permanent: true
+        zone: "{{ fedora_csb_proxy_firewalld_zone }}"
+      loop: "{{ fedora_csb_proxy_firewalld_services }}"
+
+    - name: Create wpad.dat file
+      ansible.builtin.template:
+        src: wpad.dat.j2
+        dest: /var/www/html/wpad.dat
+        mode: u=rw,g=r,o=r
+        owner: root
+        group: root
+
+    - name: Create wpad.conf for httpd
+      ansible.builtin.copy:
+        src: wpad.conf
+        dest: /etc/httpd/conf.d/wpad.conf
+        mode: u=rw,g=r,o=r
+        owner: root
+        group: root
+      notify: Restart httpd.service
+
+    - name: Query python3-kdcproxy module location
+      ansible.builtin.command: python3 -c 'import kdcproxy; print(kdcproxy.__file__)'
+      register: fedora_csb_proxy_kdcproxy_python_module_location
+      changed_when: false
+
+    - name: Create kdcproxy.conf for httpd
+      ansible.builtin.template:
+        src: kdcproxy.conf.j2
+        dest: /etc/httpd/conf.d/kdcproxy.conf
+        mode: u=rw,g=r,o=r
+        owner: root
+        group: root
+      notify: Restart httpd.service
+
+    # NOTE: It is out of scope of this role to install the
+    #       SSLCertificateFile and SSLCertificateKeyFile. The
+    #       certificate should be signed by the Certificate
+    #       Authority for this local domain.
+    - name: Create kdcproxy-ssl.conf for httpd
+      ansible.builtin.template:
+        src: kdcproxy-ssl.conf.j2
+        dest: /etc/httpd/conf.d/kdcproxy-ssl.conf
+        mode: u=rw,g=r,o=r
+        owner: root
+        group: root
+      notify: Restart httpd.service

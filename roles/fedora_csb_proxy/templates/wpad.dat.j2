@@ -1,0 +1,12 @@
+function FindProxyForURL(url, host) {
+  if (shExpMatch(url,"*.corp.redhat.com/*")) {
+    return "PROXY {{ fedora_csb_proxy_server }}";
+  }
+  if (shExpMatch(url,"*.cee.redhat.com/*")) {
+    return "PROXY {{ fedora_csb_proxy_server }}";
+  }
+  if (dnsDomainIs(host,"token.redhat.com") {
+    return "PROXY {{ fedora_csb_proxy_server }}";
+  }
+  return "DIRECT";
+}

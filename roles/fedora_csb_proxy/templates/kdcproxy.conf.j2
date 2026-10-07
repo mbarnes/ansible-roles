@@ -1,0 +1,17 @@
+WSGIDaemonProcess kdcproxy \
+    processes=2 \
+    threads=15 \
+    maximum-requests=1000 \
+    display-name=%{GROUP}
+
+WSGIImportScript {{ fedora_csb_proxy_kdcproxy_python_module_location.stdout }} \
+    process-group=kdcproxy \
+    application-group=kdcproxy
+
+WSGIScriptAlias /kdc {{ fedora_csb_proxy_kdcproxy_python_module_location.stdout }}
+
+<Location "/kdc">
+    Require all granted
+    WSGIProcessGroup kdcproxy
+    WSGIApplicationGroup kdcproxy
+</Location>
