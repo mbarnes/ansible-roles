@@ -1,0 +1,12 @@
+<VirtualHost *:443>
+    ServerName {{ inventory_hostname }}
+
+    SSLEngine on
+    SSLCertificateFile /etc/pki/tls/certs/{{ inventory_hostname }}.crt
+    SSLCertificateKeyFile /etc/pki/tls/private/{{ inventory_hostname }}.key
+
+    SSLProtocol -all +TLSv1.2 +TLSv1.3
+
+    ErrorLog /var/log/httpd/kdcproxy-error.log
+    CustomLog /var/log/httpd/kdcproxy-access.log combined
+</VirtualHost>
