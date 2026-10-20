@@ -115,10 +115,30 @@
     force_array: "{{ item.force_array | default(false) }}"
     state: "{{ item.state | default('present') }}"
   loop:
+    - channel: thunar-volman
+      property: /automount-drives/enabled
+      value: true
+      value_type: bool
+    - channel: thunar-volman
+      property: /automount-media/enabled
+      value: true
+      value_type: bool
     - channel: xfce4-power-manager
       property: /xfce4-power-manager/show-tray-icon
       value: true
       value_type: bool
+    - channel: xfwm4
+      property: /general/activate_action
+      value: none
+      value_type: string
+    - channel: xfwm4
+      property: /general/button_layout
+      value: "|HMC"
+      value_type: string
+    - channel: xfwm4
+      property: /general/vblank_mode
+      value: off
+      value_type: string
     - channel: xfwm4
       property: /general/workspace_count
       value: "{{ desktop_workspace_names | length }}"
@@ -128,6 +148,14 @@
       value: "{{ desktop_workspace_names }}"
       value_type: string
       force_array: true
+    - channel: xsettings
+      property: /Gtk/DecorationLayout
+      value: :minimize,maximize,close
+      value_type: string
+    - channel: xsettings
+      property: /Net/IconThemeName
+      value: gnome
+      value_type: string
     - channel: xsettings
       property: /Net/ThemeName
       value: Adwaita-dark
