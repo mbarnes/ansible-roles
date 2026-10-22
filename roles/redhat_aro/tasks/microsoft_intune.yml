@@ -98,6 +98,15 @@
           - pcscd
           - yubikey-manager
 
+    # The only practical browser in this context is Microsoft Edge.
+    # Remove other browsers installed by default to free disk space.
+    - name: Remove unwanted snaps
+      community.general.snap:
+        name:
+          - chromium
+          - firefox
+        state: absent
+
     - name: Add Red Hat Kerberos policy for Microsoft Edge
       ansible.builtin.copy:
         src: edge/redhat-corp.json
