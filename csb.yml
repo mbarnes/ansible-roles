@@ -9,4 +9,7 @@
 
   roles:
 
+    - role: usbip_client
+      when: usbip_client | default(False)
+
     - role: fedora_csb_proxy
