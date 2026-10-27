@@ -1,0 +1,33 @@
+if [ $# -ne 2 ]
+then
+  echo "Usage: $(basename $0) usb_id target_host" >&2
+  exit 2
+fi
+
+usbid=$1
+target=$2
+
+yubico_usb_vendor_id="1050"
+
+case "${usbid}" in
+  "${yubico_usb_vendor_id}:"*)
+    ;;
+  *)
+    echo "USB ID '${usbid}' is not a Yubico device." >&2
+    echo "Try: lsusb -d ${yubico_usb_vendor_id}:" >&2
+    exit 1
+    ;;
+esac
+
+busid=$(/sbin/usbip list --parsable --local | grep "#usbid=${usbid}#" | cut '-d#' -f1)
+localfqdn="$(hostname).$(dnsdomainname)"
+
+if [ x"${busid}" == "x" ]
+then
+  echo "Yubico device '${usbid}' not found." >&2
+  echo "Try: lsusb -d ${yubico_usb_vendor_id}:" >&2
+  exit 1
+fi
+
+systemctl restart usbip-bind@${usbid}.service
+ssh ${target} sudo usbip attach --remote ${localfqdn} --${busid}

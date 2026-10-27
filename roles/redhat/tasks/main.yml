@@ -112,3 +112,22 @@
     name: http.https://gitlab.cee.redhat.com.proxy
     scope: global
     value: "{{ redhat_csb_proxy }}"
+
+- name: Install yubikey_export bash script
+  ansible.builtin.copy:
+    src: yubikey_export
+    dest: "{{ ansible_user_dir }}/.local/bin/yubikey_export"
+    mode: u=rwx,g=rwx,o=rx
+  when: usbip_server | default(False)
+
+- name: Install a bash alias for exporting a YubiKey
+  ansible.builtin.copy:
+    content: |
+      alias yubikey_export_{{ item.split('.') | first }}="yubikey_export {{ hostvars[item]['yubikey_usb_id'] }} {{ item }}"
+    dest: "{{ common_user_bash_aliases_dir }}/yubikey_export_{{ item.split('.') | first }}"
+    mode: u=rw,g=rw,o=r
+  loop: "{{ groups['all'] }}"
+  when:
+    - usbip_server | default(False)
+    - "'usbip_client' in hostvars[item]"
+    - "'yubikey_usb_id' in hostvars[item]"

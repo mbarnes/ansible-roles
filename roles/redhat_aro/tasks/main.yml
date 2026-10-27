@@ -123,9 +123,7 @@
   ansible.builtin.include_tasks: microsoft_intune.yml
   when: enable_microsoft_intune | default(False)
 
-- name: Add bash command for exporting Microsoft's YubiKey
-  ansible.builtin.template:
-    src: yubikey_export.j2
-    dest: "{{ common_user_bash_aliases_dir }}/yubikey_export"
-    mode: u=rwx,g=rwx,o=rx
-  when: usbip_server | default(False)
+- name: Remove old yubikey_export bash function
+  ansible.builtin.file:
+    path: "{{ common_user_bash_aliases_dir }}/yubikey_export"
+    state: absent
