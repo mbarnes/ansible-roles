@@ -3,13 +3,19 @@
   become: true
   block:
 
-    - name: Add usbip package
+    - name: Add usbip package for Debian
       ansible.builtin.apt:
         name:
           - usbip
       when: ansible_distribution == 'Debian'
 
-    - name: Add linux-tools-common package
+    - name: Add usbip package for Fedora
+      ansible.builtin.dnf:
+        name:
+          - usbip
+      when: ansible_distribution == 'Fedora'
+
+    - name: Add linux-tools-common package for Ubuntu
       ansible.builtin.apt:
         name:
           - linux-tools-common
