@@ -1,0 +1,15 @@
+mta_packages_by_os_family:
+  Debian:
+    - mailutils
+    - opensmtpd
+  RedHat:
+    - s-nail
+    - opensmtpd
+
+mta_config_dir_by_os_family:
+  Debian: /etc
+  RedHat: /etc/opensmtpd
+
+mta_user_id_by_os_family:
+  Debian: opensmtpd
+  RedHat: smtpd

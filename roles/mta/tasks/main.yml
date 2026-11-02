@@ -4,10 +4,14 @@
   block:
 
     - name: Add packages for handling local mail
-      ansible.builtin.apt:
-        name:
-          - mailutils
-          - opensmtpd
+      ansible.builtin.package:
+        name: "{{ mta_packages_by_os_family[ansible_os_family] }}"
+        state: present
+
+    - name: Enable opensmtpd.service
+      ansible.builtin.systemd_service:
+        name: opensmtpd.service
+        enabled: true
 
     - name: Create a directory for tables
       ansible.builtin.file:
@@ -15,7 +19,7 @@
         state: directory
         mode: u=rwx,g=rx,o=rx
         owner: root
-        group: opensmtpd
+        group: "{{ mta_user_id_by_os_family[ansible_os_family] }}"
 
     - name: Create a credentials table
       ansible.builtin.template:
@@ -23,13 +27,13 @@
         dest: "{{ mta_secrets_file }}"
         mode: u=rw,g=r,o=
         owner: root
-        group: opensmtpd
+        group: "{{ mta_user_id_by_os_family[ansible_os_family] }}"
       notify: Restart opensmtpd
       no_log: true
 
     - name: Tweak smtpd.conf
       ansible.builtin.lineinfile:
-        path: /etc/smtpd.conf
+        path: "{{ mta_config_dir_by_os_family[ansible_os_family] }}/smtpd.conf"
         insertafter: "{{ item.insertafter | default(omit) }}"
         regexp: "{{ item.regexp }}"
         line: "{{ item.line }}"
@@ -49,7 +53,7 @@
 
     - name: Redirect mail for root account
       ansible.builtin.lineinfile:
-        path: /etc/aliases
+        path: "{{ mta_config_dir_by_os_family[ansible_os_family] }}/aliases"
         regexp: '^#?\s+root:'
         line: "root:\t\t{{ ansible_user_id }}"
       notify: Restart opensmtpd
