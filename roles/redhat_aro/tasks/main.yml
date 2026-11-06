@@ -85,12 +85,15 @@
 
 - name: Add bash aliases
   ansible.builtin.copy:
-    src: "{{ item }}"
+    src: aro_hcp
     dest: "{{ common_user_bash_aliases_dir }}/"
     mode: u=rw,g=rw,o=r
-  loop:
-    - aro_hcp
-    - aro_hcp_testing
+
+- name: Download bash aliases for ARO-HCP development
+  ansible.builtin.get_url:
+    url: "{{ redhat_aro_hcp_testing_gist_url }}"
+    dest: "{{ common_user_bash_aliases_dir }}/"
+    mode: u=rw,g=rw,o=r
 
 - name: Install Azure Bicep CLI
   ansible.builtin.command:

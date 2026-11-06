@@ -1,4 +1,7 @@
 ---
+redhat_aro_hcp_testing_gist_url: >
+  https://gist.githubusercontent.com/mbarnes/fda6047c9b236473f07f310250ce9bc3/raw/aro_hcp_testing
+
 redhat_aro_microsoft_legacy_signing_key_path: /etc/apt/trusted.gpg.d/microsoft.asc
 redhat_aro_microsoft_rolling_signing_key_path: /etc/apt/trusted.gpg.d/microsoft-rolling.asc
 
