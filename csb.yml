@@ -26,3 +26,5 @@
       when: usbip_client | default(False)
 
     - role: fedora_csb_proxy
+
+    - role: fedora_csb_netbird_extend
