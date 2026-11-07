@@ -1,0 +1,30 @@
+---
+- name: Install needed packages
+  ansible.builtin.package:
+    name:
+      - python3-requests
+      - python3-requests-gssapi
+  become: true
+
+- name: Install netbird-extend.py
+  ansible.builtin.copy:
+    src: netbird-extend.py
+    dest: "{{ ansible_user_dir }}/.local/bin/"
+    mode: u=rwx,g=rx,o=rx
+
+- name: Install systemd user units
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ xdg_config_home }}/systemd/user/"
+    mode: u=rw,g=r,o=r
+  loop:
+    - netbird-extend.service
+    - netbird-extend.timer
+
+- name: Enable and start netbird-extend.timer
+  ansible.builtin.systemd_service:
+    name: netbird-extend.timer
+    daemon_reload: true
+    enabled: true
+    state: started
+    scope: user

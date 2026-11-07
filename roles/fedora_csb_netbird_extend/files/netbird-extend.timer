@@ -1,0 +1,11 @@
+[Unit]
+Description=Extend NetBird session
+
+[Timer]
+Unit=netbird-extend.service
+Persistent=true
+OnBootSec=300
+OnUnitActiveSec=3h
+
+[Install]
+WantedBy=default.target

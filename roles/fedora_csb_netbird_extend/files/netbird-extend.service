@@ -1,0 +1,8 @@
+[Unit]
+Description=Extend NetBird session
+
+[Service]
+ExecStart=/usr/bin/netbird login --extend
+RemainAfterExit=false
+Type=exec
+Environment=BROWSER=%h/.local/bin/netbird-extend.py
