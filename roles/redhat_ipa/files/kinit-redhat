@@ -1,0 +1,8 @@
+#!/usr/bin/bash
+
+set -euo pipefail
+
+# Use LOGNAME instead of USER so this works as a cron job.
+secret-tool lookup redhat ipa | kinit ${LOGNAME}@IPA.REDHAT.COM > /dev/null
+systemctl --user start krenew.service
+klist

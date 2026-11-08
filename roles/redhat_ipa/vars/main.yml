@@ -1,0 +1,12 @@
+# These packages collectively provide kinit, klist, krenew,
+# secret-tool, and (on Debian only) the k5tls.so plugin.
+redhat_ipa_packages_by_os_family:
+  Debian:
+    - krb5-k5tls
+    - krb5-user
+    - kstart
+    - libsecret-tools
+  RedHat:
+    - krb5-workstation
+    - kstart
+    - libsecret
