@@ -71,9 +71,20 @@
       ansible.builtin.apt:
         name:
           - intune-portal
+          - mdatp
           - microsoft-edge-stable
           - microsoft-identity-broker
         update_cache: true
+
+    # This file can be obtained from the Microsoft Defender
+    # onboarding script. See https://aka.ms/onboardlinuxmde.
+    - name: Copy Microsoft Defender onboarding data
+      ansible.builtin.copy:
+        src: mdatp_onboard.json
+        dest: /etc/opt/microsoft/mdatp/
+        mode: u=rw,g=r,o=r
+        owner: root
+        group: root
 
     - name: Install required packages for Azure VPN access
       ansible.builtin.apt:
