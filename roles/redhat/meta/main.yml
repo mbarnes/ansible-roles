@@ -4,6 +4,7 @@ dependencies:
   - role: git_dev
   - role: google_cloud_sdk
   - role: mozilla_firefox
+    when: ansible_distribution == 'Debian'
     vars:
       mozilla_firefox_preferences:
         network.negotiate-auth.trusted-uris: .redhat.com

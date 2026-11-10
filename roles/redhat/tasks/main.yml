@@ -42,6 +42,7 @@
     src: proxy.pac
     dest: "{{ redhat_proxy_autoconfig_path }}"
     mode: u=rw,g=rw,o=r
+  when: ansible_distribution == 'Debian'
 
 - name: Add helpful shell aliases
   ansible.builtin.copy:

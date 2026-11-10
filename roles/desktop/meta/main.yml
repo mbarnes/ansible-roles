@@ -5,4 +5,5 @@ dependencies:
   # Broken libgdk-pixbuf2.0-0 dependency
   # - role: minecraft
   - role: mozilla_firefox
+    when: ansible_distribution == 'Debian'
   - role: powerline
