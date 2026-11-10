@@ -11,3 +11,4 @@
     src: gitconfig.j2
     dest: "{{ ansible_user_dir }}/.gitconfig"
     mode: u=rw,g=rw,o=r
+    force: false
