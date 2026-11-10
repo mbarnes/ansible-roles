@@ -126,9 +126,9 @@
         owner: root
         group: root
 
-    - name: Install git-credential-manager
-      ansible.builtin.include_role:
-        name: git_credential_manager
+- name: Install git-credential-manager
+  ansible.builtin.include_role:
+    name: git_credential_manager
 
 - name: Add directory for user NSS database
   ansible.builtin.file:
