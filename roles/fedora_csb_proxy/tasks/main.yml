@@ -32,6 +32,35 @@
         group: root
       notify: Restart httpd.service
 
+    - name: Create squid configuration directory
+      ansible.builtin.file:
+        path: "{{ fedora_csb_proxy_squid_conf_dir }}"
+        state: directory
+        mode: u=rwx,g=rx,o=rx
+
+    - name: Allow squid access from the local network
+      ansible.builtin.lineinfile:
+        path: /etc/squid/squid.conf
+        regexp: '^#?\s*http_access\s+allow\s+localnet'
+        line: "http_access allow localnet"
+      notify: Restart squid.service
+
+    - name: Include files in squid configuration directory
+      ansible.builtin.lineinfile:
+        path: /etc/squid/squid.conf
+        regexp: '^include '
+        line: "include {{ fedora_csb_proxy_squid_conf_dir }}/*.conf"
+      notify: Restart squid.service
+
+    - name: Install configuration for Red Hat's squid server
+      ansible.builtin.template:
+        src: redhat.conf.j2
+        dest: "{{ fedora_csb_proxy_squid_conf_dir }}/redhat.conf"
+        mode: u=rw,g=r,o=
+        owner: root
+        group: squid
+      notify: Restart squid.service
+
     - name: Query python3-kdcproxy module location
       ansible.builtin.command: python3 -c 'import kdcproxy; print(kdcproxy.__file__)'
       register: fedora_csb_proxy_kdcproxy_python_module_location

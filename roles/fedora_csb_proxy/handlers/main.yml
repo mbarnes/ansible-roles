@@ -4,3 +4,9 @@
     name: httpd.service
     state: restarted
   become: true
+
+- name: Restart squid.service
+  ansible.builtin.systemd_service:
+    name: squid.service
+    state: restarted
+  become: true

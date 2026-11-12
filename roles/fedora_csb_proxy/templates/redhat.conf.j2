@@ -1,0 +1,9 @@
+# Forward lwn.net requests to Red Hat's squid server.
+
+acl via_upstream dstdomain .lwn.net
+
+cache_peer {{ fedora_csb_proxy_server_parent_host }} parent {{ fedora_csb_proxy_server_parent_port }} 0 no-query name=corp-squid
+cache_peer_access corp-squid allow via_upstream
+cache_peer_access corp-squid deny all
+
+never_direct allow via_upstream

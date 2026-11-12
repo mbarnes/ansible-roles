@@ -15,3 +15,8 @@ fedora_csb_proxy_firewalld_services:
 fedora_csb_proxy_firewalld_zone: home
 
 fedora_csb_proxy_server: "{{ inventory_hostname }}:3128"
+
+fedora_csb_proxy_server_parent_host: squid.corp.redhat.com
+fedora_csb_proxy_server_parent_port: 3128
+
+fedora_csb_proxy_squid_conf_dir: /etc/squid/squid.conf.d

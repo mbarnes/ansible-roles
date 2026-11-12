@@ -11,5 +11,8 @@ function FindProxyForURL(url, host) {
   if (dnsDomainIs(host,"token.redhat.com")) {
     return "PROXY {{ fedora_csb_proxy_server }}";
   }
+  if (dnsDomainIs(host,"lwn.net")) {
+    return "PROXY {{ fedora_csb_proxy_server }}";
+  }
   return "DIRECT";
 }
