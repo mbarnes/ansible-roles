@@ -1,0 +1,7 @@
+---
+redhat_csb_firewall_user_defined_services:
+  - http
+  - https
+  - squid
+redhat_csb_chrome_install: false
+no_csb_printing: true

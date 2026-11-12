@@ -1,0 +1,6 @@
+---
+- name: Install Fedora CSB customizations
+  ansible.builtin.copy:
+    src: csb-fedora.yml
+    dest: "{{ xdg_config_home }}/"
+    mode: u=rw,g=r,o=r
