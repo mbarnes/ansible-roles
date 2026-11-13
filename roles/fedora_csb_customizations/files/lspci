@@ -1,0 +1,2 @@
+#!/bin/sh
+/usr/bin/lspci $@ | grep --extended-regexp --ignore-case --invert-match 'QEMU|Virtio'
