@@ -17,5 +17,6 @@ dependencies:
         # local DNS resolver needs to know the host's domain name.
         network.proxy.type: 4
   - role: redhat_ipa
+    when: ansible_distribution == 'Debian'
   - role: secrets
   - role: tmux
