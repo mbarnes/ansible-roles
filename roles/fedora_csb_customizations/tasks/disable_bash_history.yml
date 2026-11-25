@@ -1,0 +1,25 @@
+---
+- name: "Create {{ user.dir }}/.bashrc.d directory"
+  ansible.builtin.file:
+    path: "{{ user.dir }}/.bashrc.d"
+    state: directory
+    mode: u=rwx,g=rx,o=rx
+    owner: "{{ user.owner }}"
+    group: "{{ user.group }}"
+  become: true
+
+- name: "Create {{ user.dir }}/.bashrc.d/no_history"
+  ansible.builtin.copy:
+    content: |
+      unset HISTFILE
+    dest: "{{ user.dir }}/.bashrc.d/no_history"
+    mode: u=rw,g=r,o=r
+    owner: "{{ user.owner }}"
+    group: "{{ user.group }}"
+  become: true
+
+- name: "Delete {{ user.dir }}/.bash_history"
+  ansible.builtin.file:
+    path: "{{ user.dir }}/.bash_history"
+    state: absent
+  become: true

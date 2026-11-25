@@ -13,3 +13,17 @@
     mode: u=rwx,g=rx,o=rx
     owner: root
     group: root
+
+# In-memory command history is fine, but on-disk command history is
+# monitored (especially for root). Disable on-disk command history.
+- name: Disable on-disk bash command history
+  ansible.builtin.include_tasks: disable_bash_history.yml
+  loop:
+    - dir: "{{ ansible_user_dir }}"
+      owner: "{{ ansible_user_uid }}"
+      group: "{{ ansible_user_gid }}"
+    - dir: /root
+      owner: root
+      group: root
+  loop_control:
+    loop_var: user
